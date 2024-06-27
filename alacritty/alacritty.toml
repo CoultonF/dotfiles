@@ -1,0 +1,14 @@
+working_directory = "./Code"
+[shell]
+program = "/opt/homebrew/bin/zellij"
+args = ["--config-dir", "dotfiles/zellij"]
+
+[window]
+padding={x=4,y=4}
+startup_mode = "Maximized"
+
+[font]
+size=15
+
+[terminal]
+osc52="CopyPaste"
