@@ -1,4 +1,5 @@
 working_directory = "./Code"
+import = ["dotfiles/alacritty/tokyonight_night.toml"]
 [shell]
 program = "/opt/homebrew/bin/zellij"
 args = ["--config-dir", "dotfiles/zellij"]
@@ -9,6 +10,7 @@ startup_mode = "Maximized"
 
 [font]
 size=15
+normal = { family = "Hack Nerd Font", style = "Regular" }
 
 [terminal]
 osc52="CopyPaste"
