@@ -41,3 +41,8 @@ export ORACLE_HOME=/opt/oracle/instantclient_21_8
 export LD_LIBRARY_PATH=$ORACLE_HOME:$LD_LIBRARY_PATH
 export PATH=$PATH:$ORACLE_HOME
 ```
+Move alacritty.toml into %APPDATA%/alacritty
+Have terminal point to WSL.exe
+```
+program = "C:/Windows/System32/wsl.exe"
+```
