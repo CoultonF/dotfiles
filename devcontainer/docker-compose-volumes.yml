@@ -1,0 +1,10 @@
+# Add these volumes to your docker-compose.dev.yml rcom service
+# Under services.rcom.volumes:
+
+# volumes:
+#   # ... existing volumes ...
+#   # Neovim config and data
+#   - ${HOME}/.config-docker/nvim:/root/.config/nvim:cached
+#   - ${HOME}/.local-docker/share/nvim:/root/.local/share/nvim:cached
+#   # Nix config
+#   - ${HOME}/.config-docker/nix:/root/.config/nixpkgs:cached

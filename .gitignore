@@ -1,0 +1,15 @@
+# Neovim
+nvim/plugin/
+nvim/lazy-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor backups
+*.swp
+*.swo
+*~
+
+# Local overrides (optional)
+*.local
