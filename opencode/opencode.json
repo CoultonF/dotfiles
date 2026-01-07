@@ -5,12 +5,13 @@
   },
   "mcp": {
     "mcp-postgres": {
-      "type": "http",
+      "type": "remote",
       "url": "http://mcp-postgres:5005/mcp"
     },
     "playwright": {
-      "command": "docker",
-      "args": [
+      "type": "local",
+      "command": [
+        "docker",
         "exec",
         "-i",
         "playwright-mcp",
@@ -30,8 +31,9 @@
       ]
     },
     "context7": {
-      "command": "npx",
-      "args": [
+      "type": "local",
+      "command": [
+        "npx",
         "-y",
         "@upstash/context7-mcp",
         "--api-key",
@@ -39,8 +41,9 @@
       ]
     },
     "shadcn": {
-      "command": "npx",
-      "args": [
+      "type": "local",
+      "command": [
+        "npx",
         "shadcn@latest",
         "mcp"
       ]
