@@ -1,5 +1,49 @@
 {
+  "$schema": "https://opencode.ai/config.json",
   "keybinds": {
     "command_list": "super+p"
+  },
+  "mcp": {
+    "mcp-postgres": {
+      "type": "http",
+      "url": "http://mcp-postgres:5005/mcp"
+    },
+    "playwright": {
+      "command": "docker",
+      "args": [
+        "exec",
+        "-i",
+        "playwright-mcp",
+        "npx",
+        "@playwright/mcp",
+        "--headless",
+        "--browser",
+        "chromium",
+        "--no-sandbox",
+        "--ignore-https-errors",
+        "--user-agent",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/131.0.0.0 Safari/537.36 Playwright-Test",
+        "--storage-state",
+        "/auth/state.json",
+        "--save-session",
+        "--isolated"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "ctx7sk-3771a1ab-74ad-445d-9ab1-23c00b94d9c3"
+      ]
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    }
   }
 }

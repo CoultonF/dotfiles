@@ -134,6 +134,28 @@ else
 fi
 
 echo ""
+echo "Setting up shell environment..."
+
+# Add EDITOR=nvim to shell config
+SHELL_CONFIG=""
+if [ -f "$HOME/.zshrc" ]; then
+    SHELL_CONFIG="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+    SHELL_CONFIG="$HOME/.bashrc"
+fi
+
+if [ -n "$SHELL_CONFIG" ]; then
+    if ! grep -q 'export EDITOR=nvim' "$SHELL_CONFIG" 2>/dev/null; then
+        echo 'export EDITOR=nvim' >> "$SHELL_CONFIG"
+        success "Added 'export EDITOR=nvim' to $SHELL_CONFIG"
+    else
+        success "EDITOR=nvim already set in $SHELL_CONFIG"
+    fi
+else
+    warn "No .zshrc or .bashrc found. Add 'export EDITOR=nvim' to your shell config manually."
+fi
+
+echo ""
 echo "=========================================="
 echo "  Installation Complete!"
 echo "=========================================="
