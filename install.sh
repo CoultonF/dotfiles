@@ -86,6 +86,16 @@ cp -r "$DOTFILES_DIR/nvim/"* "$CONFIG_DIR/nvim/"
 success "Copied Neovim config to $CONFIG_DIR/nvim (local)"
 
 echo ""
+echo "Setting up OpenCode..."
+
+# OpenCode config
+mkdir -p "$CONFIG_DIR/opencode"
+if [ -f "$DOTFILES_DIR/opencode/opencode.json" ]; then
+    ln -sf "$DOTFILES_DIR/opencode/opencode.json" "$CONFIG_DIR/opencode/opencode.json"
+    success "Linked OpenCode config"
+fi
+
+echo ""
 echo "Setting up Nix config..."
 
 # Nix config for devcontainer
