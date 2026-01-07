@@ -46,6 +46,8 @@
         wget
         unzip
         jq           # JSON processor
+        xclip        # Clipboard (requires DISPLAY)
+        xvfb-run     # Virtual framebuffer for headless clipboard
       ];
     };
   };

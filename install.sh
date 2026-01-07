@@ -151,6 +151,23 @@ if [ -n "$SHELL_CONFIG" ]; then
     else
         success "EDITOR=nvim already set in $SHELL_CONFIG"
     fi
+
+    # Add Xvfb setup for headless clipboard (containers without X11)
+    if ! grep -q 'DISPLAY=:99' "$SHELL_CONFIG" 2>/dev/null; then
+        cat >> "$SHELL_CONFIG" << 'XVFB_EOF'
+
+# Headless clipboard support (for containers without X11)
+if [ -z "$DISPLAY" ] && command -v Xvfb &> /dev/null; then
+    if ! pgrep -x Xvfb > /dev/null; then
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+    fi
+    export DISPLAY=:99
+fi
+XVFB_EOF
+        success "Added Xvfb/DISPLAY setup for headless clipboard"
+    else
+        success "Xvfb/DISPLAY already configured"
+    fi
 else
     warn "No .zshrc or .bashrc found. Add 'export EDITOR=nvim' to your shell config manually."
 fi

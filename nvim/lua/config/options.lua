@@ -33,8 +33,24 @@ opt.signcolumn = "yes"
 -- Backspace
 opt.backspace = "indent,eol,start"
 
--- Clipboard (system clipboard)
+-- Clipboard (system clipboard with OSC 52 support for containers/SSH)
 opt.clipboard = "unnamedplus"
+
+-- Use OSC 52 for clipboard in containers/SSH (works with most modern terminals)
+if os.getenv("SSH_TTY") or os.getenv("container") or vim.fn.has("wsl") == 1 then
+  local osc52 = require("vim.ui.clipboard.osc52")
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = {
+      ["+"] = osc52.copy("+"),
+      ["*"] = osc52.copy("*"),
+    },
+    paste = {
+      ["+"] = osc52.paste("+"),
+      ["*"] = osc52.paste("*"),
+    },
+  }
+end
 
 -- Split windows
 opt.splitright = true
