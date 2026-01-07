@@ -4,7 +4,17 @@
 
 set -e
 
-DOTFILES_DIR="$HOME/.dotfiles"
+# Determine dotfiles directory - use script location if not in ~/.dotfiles
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -d "$HOME/.dotfiles" ] && [ -f "$HOME/.dotfiles/install.sh" ]; then
+    DOTFILES_DIR="$HOME/.dotfiles"
+elif [ -f "$SCRIPT_DIR/install.sh" ]; then
+    DOTFILES_DIR="$SCRIPT_DIR"
+else
+    echo "Could not determine dotfiles directory"
+    exit 1
+fi
+
 CONFIG_DIR="$HOME/.config"
 DOCKER_CONFIG_DIR="$HOME/.config-docker"
 DOCKER_LOCAL_DIR="$HOME/.local-docker"
@@ -23,12 +33,7 @@ success() { echo -e "${GREEN}✓${NC} $1"; }
 warn() { echo -e "${YELLOW}!${NC} $1"; }
 error() { echo -e "${RED}✗${NC} $1"; }
 
-# Check if running from dotfiles directory
-if [ ! -f "$DOTFILES_DIR/install.sh" ]; then
-    error "Please clone dotfiles to ~/.dotfiles first:"
-    echo "  git clone <your-repo> ~/.dotfiles"
-    exit 1
-fi
+echo "Using dotfiles from: $DOTFILES_DIR"
 
 echo ""
 echo "Creating directories..."
