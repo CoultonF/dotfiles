@@ -47,13 +47,12 @@ return {
         desc = "OpenCode Prompt",
       },
     },
-    opts = {
-      -- Auto-connect to opencode running in cwd
-      auto_connect = true,
-      -- Terminal provider (toggleterm, native, etc.)
-      provider = "auto",
-      -- Auto-approve permissions
-      auto_approve = false,
-    },
+    config = function()
+      -- Plugin may not have setup(), just load it
+      local ok, opencode = pcall(require, "opencode")
+      if not ok then
+        vim.notify("opencode.nvim failed to load", vim.log.levels.WARN)
+      end
+    end,
   },
 }
