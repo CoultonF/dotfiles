@@ -63,14 +63,23 @@ echo "Setting up Neovim (for devcontainer)..."
 cp -r "$DOTFILES_DIR/nvim/"* "$DOCKER_CONFIG_DIR/nvim/"
 success "Copied Neovim config to $DOCKER_CONFIG_DIR/nvim"
 
-# Also create a symlink for local nvim usage
+# Also set up local nvim config
 mkdir -p "$CONFIG_DIR/nvim"
 if [ -d "$CONFIG_DIR/nvim" ] && [ ! -L "$CONFIG_DIR/nvim" ]; then
-    # Backup existing config
-    if [ "$(ls -A $CONFIG_DIR/nvim)" ]; then
-        warn "Backing up existing nvim config to $CONFIG_DIR/nvim.backup"
-        mv "$CONFIG_DIR/nvim" "$CONFIG_DIR/nvim.backup"
-        mkdir -p "$CONFIG_DIR/nvim"
+    # Check if directory is a mount point (common in containers)
+    if mountpoint -q "$CONFIG_DIR/nvim" 2>/dev/null; then
+        # It's a mount point, just clear contents and copy
+        rm -rf "$CONFIG_DIR/nvim/"* 2>/dev/null || true
+    elif [ "$(ls -A $CONFIG_DIR/nvim 2>/dev/null)" ]; then
+        # Has content, try to backup (may fail if busy)
+        if mv "$CONFIG_DIR/nvim" "$CONFIG_DIR/nvim.backup" 2>/dev/null; then
+            warn "Backed up existing nvim config to $CONFIG_DIR/nvim.backup"
+            mkdir -p "$CONFIG_DIR/nvim"
+        else
+            # Backup failed (device busy), just clear contents
+            warn "Could not backup nvim config (directory busy), replacing contents"
+            rm -rf "$CONFIG_DIR/nvim/"* 2>/dev/null || true
+        fi
     fi
 fi
 cp -r "$DOTFILES_DIR/nvim/"* "$CONFIG_DIR/nvim/"
