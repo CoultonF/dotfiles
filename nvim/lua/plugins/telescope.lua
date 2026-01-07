@@ -50,57 +50,58 @@ return {
       { "<leader>sd", "<cmd>Telescope diagnostics bufnr=0<CR>", desc = "Buffer diagnostics" },
       { "<leader>sD", "<cmd>Telescope diagnostics<CR>", desc = "Workspace diagnostics" },
     },
-    opts = {
-      defaults = {
-        prompt_prefix = " ",
-        selection_caret = " ",
-        path_display = { "truncate" },
-        sorting_strategy = "ascending",
-        layout_config = {
-          horizontal = {
-            prompt_position = "top",
-            preview_width = 0.55,
+    config = function()
+      local telescope = require("telescope")
+      local themes = require("telescope.themes")
+
+      telescope.setup({
+        defaults = {
+          prompt_prefix = " ",
+          selection_caret = " ",
+          path_display = { "truncate" },
+          sorting_strategy = "ascending",
+          layout_config = {
+            horizontal = {
+              prompt_position = "top",
+              preview_width = 0.55,
+            },
+            vertical = {
+              mirror = false,
+            },
+            width = 0.87,
+            height = 0.80,
+            preview_cutoff = 120,
           },
-          vertical = {
-            mirror = false,
-          },
-          width = 0.87,
-          height = 0.80,
-          preview_cutoff = 120,
-        },
-        mappings = {
-          i = {
-            ["<C-j>"] = "move_selection_next",
-            ["<C-k>"] = "move_selection_previous",
-            ["<C-q>"] = "close",
-            ["<Esc>"] = "close",
-          },
-          n = {
-            ["q"] = "close",
+          mappings = {
+            i = {
+              ["<C-j>"] = "move_selection_next",
+              ["<C-k>"] = "move_selection_previous",
+              ["<C-q>"] = "close",
+              ["<Esc>"] = "close",
+            },
+            n = {
+              ["q"] = "close",
+            },
           },
         },
-      },
-      pickers = {
-        find_files = {
-          hidden = true,
-          file_ignore_patterns = { ".git/", "node_modules/", ".venv/", "__pycache__/" },
+        pickers = {
+          find_files = {
+            hidden = true,
+            file_ignore_patterns = { ".git/", "node_modules/", ".venv/", "__pycache__/" },
+          },
+          live_grep = {
+            additional_args = function()
+              return { "--hidden" }
+            end,
+          },
         },
-        live_grep = {
-          additional_args = function()
-            return { "--hidden" }
-          end,
+        extensions = {
+          ["ui-select"] = themes.get_dropdown(),
         },
-      },
-      extensions = {
-        ["ui-select"] = {
-          require("telescope.themes").get_dropdown(),
-        },
-      },
-    },
-    config = function(_, opts)
-      require("telescope").setup(opts)
-      pcall(require("telescope").load_extension, "fzf")
-      pcall(require("telescope").load_extension, "ui-select")
+      })
+
+      pcall(telescope.load_extension, "fzf")
+      pcall(telescope.load_extension, "ui-select")
     end,
   },
 }
