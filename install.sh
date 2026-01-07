@@ -136,25 +136,21 @@ fi
 echo ""
 echo "Setting up shell environment..."
 
-# Add EDITOR=nvim to shell config
-SHELL_CONFIG=""
-if [ -f "$HOME/.zshrc" ]; then
-    SHELL_CONFIG="$HOME/.zshrc"
-elif [ -f "$HOME/.bashrc" ]; then
-    SHELL_CONFIG="$HOME/.bashrc"
-fi
+# Function to configure a shell rc file
+configure_shell_rc() {
+    local rc_file="$1"
+    local rc_name="$2"
 
-if [ -n "$SHELL_CONFIG" ]; then
-    if ! grep -q 'export EDITOR=nvim' "$SHELL_CONFIG" 2>/dev/null; then
-        echo 'export EDITOR=nvim' >> "$SHELL_CONFIG"
-        success "Added 'export EDITOR=nvim' to $SHELL_CONFIG"
+    if ! grep -q 'export EDITOR=nvim' "$rc_file" 2>/dev/null; then
+        echo 'export EDITOR=nvim' >> "$rc_file"
+        success "Added 'export EDITOR=nvim' to $rc_name"
     else
-        success "EDITOR=nvim already set in $SHELL_CONFIG"
+        success "EDITOR=nvim already set in $rc_name"
     fi
 
     # Add Xvfb setup for headless clipboard (containers without X11)
-    if ! grep -q 'DISPLAY=:99' "$SHELL_CONFIG" 2>/dev/null; then
-        cat >> "$SHELL_CONFIG" << 'XVFB_EOF'
+    if ! grep -q 'DISPLAY=:99' "$rc_file" 2>/dev/null; then
+        cat >> "$rc_file" << 'XVFB_EOF'
 
 # Headless clipboard support (for containers without X11)
 if [ -z "$DISPLAY" ] && command -v Xvfb &> /dev/null; then
@@ -164,11 +160,24 @@ if [ -z "$DISPLAY" ] && command -v Xvfb &> /dev/null; then
     export DISPLAY=:99
 fi
 XVFB_EOF
-        success "Added Xvfb/DISPLAY setup for headless clipboard"
+        success "Added Xvfb/DISPLAY setup to $rc_name"
     else
-        success "Xvfb/DISPLAY already configured"
+        success "Xvfb/DISPLAY already configured in $rc_name"
     fi
-else
+}
+
+# Configure both .bashrc and .zshrc if they exist
+CONFIGURED=false
+if [ -f "$HOME/.bashrc" ]; then
+    configure_shell_rc "$HOME/.bashrc" ".bashrc"
+    CONFIGURED=true
+fi
+if [ -f "$HOME/.zshrc" ]; then
+    configure_shell_rc "$HOME/.zshrc" ".zshrc"
+    CONFIGURED=true
+fi
+
+if [ "$CONFIGURED" = false ]; then
     warn "No .zshrc or .bashrc found. Add 'export EDITOR=nvim' to your shell config manually."
 fi
 
