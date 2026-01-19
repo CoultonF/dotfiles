@@ -17,10 +17,6 @@ window-theme = ghostty
 window-save-state = always
 window-inherit-working-directory = true
 window-inherit-font-size = true
-macos-titlebar-style = native
-
-# Start maximized (not fullscreen)
-macos-window-size = maximized
 
 # Cursor
 cursor-style = block
