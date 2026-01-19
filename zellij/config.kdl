@@ -1,0 +1,138 @@
+// Zellij Configuration
+// https://zellij.dev/documentation/
+
+// Default keybindings (commented out to use Zellij defaults)
+// keybinds clear-defaults=false {
+//     normal {
+//         // Pane management
+//         bind "Ctrl a" { SwitchToMode "tmux"; }
+//     }
+//
+//     tmux {
+//         // Switch back to normal mode
+//         bind "Ctrl a" { SwitchToMode "normal"; }
+//         bind "Esc" { SwitchToMode "normal"; }
+//
+//         // Pane navigation (vim-style)
+//         bind "h" { MoveFocus "Left"; }
+//         bind "j" { MoveFocus "Down"; }
+//         bind "k" { MoveFocus "Up"; }
+//         bind "l" { MoveFocus "Right"; }
+//
+//         // Splits
+//         bind "|" { NewPane "Right"; SwitchToMode "normal"; }
+//         bind "-" { NewPane "Down"; SwitchToMode "normal"; }
+//
+//         // Close pane
+//         bind "x" { CloseFocus; SwitchToMode "normal"; }
+//
+//         // Resize mode
+//         bind "r" { SwitchToMode "resize"; }
+//
+//         // Scroll/Search mode (VIM MODE!)
+//         bind "[" { SwitchToMode "scroll"; }
+//
+//         // Tabs
+//         bind "c" { NewTab; SwitchToMode "normal"; }
+//         bind "n" { GoToNextTab; }
+//         bind "p" { GoToPreviousTab; }
+//         bind "1" { GoToTab 1; SwitchToMode "normal"; }
+//         bind "2" { GoToTab 2; SwitchToMode "normal"; }
+//         bind "3" { GoToTab 3; SwitchToMode "normal"; }
+//         bind "4" { GoToTab 4; SwitchToMode "normal"; }
+//         bind "5" { GoToTab 5; SwitchToMode "normal"; }
+//         bind "6" { GoToTab 6; SwitchToMode "normal"; }
+//         bind "7" { GoToTab 7; SwitchToMode "normal"; }
+//         bind "8" { GoToTab 8; SwitchToMode "normal"; }
+//         bind "9" { GoToTab 9; SwitchToMode "normal"; }
+//
+//         // Detach
+//         bind "d" { Detach; }
+//     }
+//
+//     scroll {
+//         // Exit scroll mode
+//         bind "q" { SwitchToMode "normal"; }
+//         bind "Esc" { SwitchToMode "normal"; }
+//
+//         // Vim navigation
+//         bind "j" { ScrollDown; }
+//         bind "k" { ScrollUp; }
+//         bind "Ctrl d" { HalfPageScrollDown; }
+//         bind "Ctrl u" { HalfPageScrollUp; }
+//         bind "Ctrl f" { PageScrollDown; }
+//         bind "Ctrl b" { PageScrollUp; }
+//         bind "g" { ScrollToTop; }
+//         bind "G" { ScrollToBottom; }
+//
+//         // Search
+//         bind "/" { SwitchToMode "entersearch"; SearchInput 0; }
+//         bind "n" { Search "down"; }
+//         bind "N" { Search "up"; }
+//
+//         // Copy mode
+//         bind "Space" { SwitchToMode "search"; }
+//     }
+//
+//     search {
+//         // Exit search/copy mode
+//         bind "Esc" { ScrollToBottom; SwitchToMode "normal"; }
+//         bind "q" { ScrollToBottom; SwitchToMode "normal"; }
+//
+//         // Vim navigation
+//         bind "j" { ScrollDown; }
+//         bind "k" { ScrollUp; }
+//         bind "Ctrl d" { HalfPageScrollDown; }
+//         bind "Ctrl u" { HalfPageScrollUp; }
+//         bind "Ctrl f" { PageScrollDown; }
+//         bind "Ctrl b" { PageScrollUp; }
+//         bind "g" { ScrollToTop; }
+//         bind "G" { ScrollToBottom; }
+//
+//         // Copy
+//         bind "y" { Copy; }
+//         bind "Enter" { Copy; }
+//
+//         // Search
+//         bind "/" { SwitchToMode "entersearch"; SearchInput 0; }
+//         bind "n" { Search "down"; }
+//         bind "N" { Search "up"; }
+//     }
+//
+//     entersearch {
+//         // Exit search input
+//         bind "Esc" { SwitchToMode "scroll"; }
+//         bind "Enter" { SwitchToMode "search"; }
+//     }
+//
+//     resize {
+//         bind "Esc" { SwitchToMode "normal"; }
+//         bind "h" { Resize "Increase Left"; }
+//         bind "j" { Resize "Increase Down"; }
+//         bind "k" { Resize "Increase Up"; }
+//         bind "l" { Resize "Increase Right"; }
+//         bind "H" { Resize "Decrease Left"; }
+//         bind "J" { Resize "Decrease Down"; }
+//         bind "K" { Resize "Decrease Up"; }
+//         bind "L" { Resize "Decrease Right"; }
+//         bind "=" { Resize "Increase"; }
+//         bind "-" { Resize "Decrease"; }
+//     }
+// }
+
+// Theme
+theme "catppuccin-mocha"
+
+// UI
+pane_frames false
+simplified_ui false
+
+// Scrollback
+scroll_buffer_size 10000
+
+// Copy to clipboard
+copy_command "pbcopy"  // macOS
+
+// Mouse
+mouse_mode true
+copy_on_select true

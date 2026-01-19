@@ -2,7 +2,7 @@
 # https://ghostty.org/docs/config
 
 # Theme - Catppuccin Mocha (matches VS Code theme)
-theme = catppuccin-mocha
+theme = Catppuccin Mocha
 
 # Font
 font-family = JetBrainsMono Nerd Font
@@ -22,9 +22,6 @@ cursor-style-blink = false
 # Shell integration
 shell-integration = detect
 
-# Performance
-vsync = true
-
 # Keybindings
 keybind = cmd+shift+t=new_tab
 keybind = cmd+shift+n=new_window
@@ -34,6 +31,8 @@ keybind = cmd+shift+,=reload_config
 # Copy/Paste
 clipboard-read = allow
 clipboard-write = allow
+clipboard-paste-protection = false
+clipboard-paste-bracketed-safe = false
 copy-on-select = clipboard
 
 # Scrollback

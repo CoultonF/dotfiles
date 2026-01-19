@@ -41,6 +41,9 @@
         gcc          # C compiler (treesitter needs this)
         gnumake
 
+        # Terminal Multiplexer
+        zellij       # Modern tmux alternative with vim mode
+
         # Utilities
         curl
         wget

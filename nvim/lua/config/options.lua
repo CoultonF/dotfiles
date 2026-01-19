@@ -37,7 +37,16 @@ opt.backspace = "indent,eol,start"
 opt.clipboard = "unnamedplus"
 
 -- Use OSC 52 for clipboard in containers/SSH (works with most modern terminals)
-if os.getenv("SSH_TTY") or os.getenv("container") or vim.fn.has("wsl") == 1 then
+-- Detect container environments: DevPod, Docker, K8s, Codespaces, SSH, WSL
+local in_container = os.getenv("SSH_TTY")
+  or os.getenv("container")
+  or os.getenv("DEVPOD_WORKSPACE_ID")
+  or os.getenv("CODESPACES")
+  or os.getenv("REMOTE_CONTAINERS")
+  or vim.fn.filereadable("/.dockerenv") == 1
+  or vim.fn.has("wsl") == 1
+
+if in_container then
   local osc52 = require("vim.ui.clipboard.osc52")
   vim.g.clipboard = {
     name = "OSC 52",

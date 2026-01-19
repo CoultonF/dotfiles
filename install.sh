@@ -59,6 +59,17 @@ ln -sf "$DOTFILES_DIR/ghostty/config" "$CONFIG_DIR/ghostty/config"
 success "Linked Ghostty config"
 
 echo ""
+echo "Setting up Zellij..."
+
+# Zellij config (both local and container)
+mkdir -p "$CONFIG_DIR/zellij"
+if [ -L "$CONFIG_DIR/zellij/config.kdl" ] || [ -f "$CONFIG_DIR/zellij/config.kdl" ]; then
+    rm -f "$CONFIG_DIR/zellij/config.kdl"
+fi
+ln -sf "$DOTFILES_DIR/zellij/config.kdl" "$CONFIG_DIR/zellij/config.kdl"
+success "Linked Zellij config"
+
+echo ""
 echo "Setting up Neovim (for devcontainer)..."
 
 # Copy nvim config to docker config directory (this gets mounted into containers)
@@ -275,9 +286,16 @@ echo ""
 if [ "$IN_CONTAINER" = true ]; then
     echo "Container setup complete! You can now use:"
     echo ""
+    echo "  zellij           # Start Zellij (terminal multiplexer with vim mode)"
     echo "  nvim .           # Open Neovim"
     echo "  opencode         # Start OpenCode AI assistant"
     echo "  lazygit          # Git TUI"
+    echo ""
+    echo "In Zellij:"
+    echo "  Ctrl+a [         # Enter scroll/copy mode (vim keybindings)"
+    echo "  j/k              # Navigate (in scroll mode)"
+    echo "  Space            # Start selection"
+    echo "  y                # Copy selection"
     echo ""
     echo "In Neovim:"
     echo "  <leader>oa       # Ask OpenCode"
