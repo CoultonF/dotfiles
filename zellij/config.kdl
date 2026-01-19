@@ -70,6 +70,9 @@ keybinds clear-defaults=true {
         bind "n" { Search "down"; }
         bind "N" { Search "up"; }
 
+        // Open in editor
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+
         // Copy mode
         bind "Space" { SwitchToMode "search"; }
     }
