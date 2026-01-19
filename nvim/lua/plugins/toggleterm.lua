@@ -30,7 +30,7 @@ return {
       persist_mode = true,
       direction = "float",
       close_on_exit = true,
-      shell = vim.o.shell .. " -l",  -- Start as login shell to load dotfiles
+      shell = "bash -i",  -- Interactive mode to load .bashrc
       float_opts = {
         border = "curved",
         winblend = 0,
