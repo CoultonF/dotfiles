@@ -43,6 +43,7 @@ local function get_project_commands()
   table.insert(commands, { name = '🔄 Restart Dev Servers', cmd = 'bash ' .. root .. '/scripts/dev-servers.sh restart' })
   table.insert(commands, { name = '📊 Dev Servers Status', cmd = 'bash ' .. root .. '/scripts/dev-servers.sh status' })
   table.insert(commands, { name = '📝 Dev Servers Logs', cmd = 'bash ' .. root .. '/scripts/dev-servers.sh logs' })
+  table.insert(commands, { name = '🔑 Set Redis Session', cmd = 'cd ' .. root .. '/flask_app && .venv/bin/python ' .. root .. '/scripts/set_redis_session.py' })
   table.insert(commands, { name = '🧪 Run All Tests', cmd = 'bash ' .. root .. '/scripts/run_all_tests_comprehensive.sh' })
   
   -- Context-specific commands based on subdirectory
