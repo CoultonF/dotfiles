@@ -87,6 +87,9 @@ return {
       -- Diagnostics
       { "<leader>sd", "<cmd>Telescope diagnostics bufnr=0<CR>", desc = "Buffer diagnostics" },
       { "<leader>sD", "<cmd>Telescope diagnostics<CR>", desc = "Workspace diagnostics" },
+      
+      -- Commands (like ff, fd pattern)
+      { "fc", function() require("plugins.telescope-commands").show_commands() end, desc = "Find command" },
     },
     config = function()
       local telescope = require("telescope")

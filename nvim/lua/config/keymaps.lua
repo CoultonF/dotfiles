@@ -57,9 +57,13 @@ map("n", "<leader>cD", "<cmd>%bd<CR>", { desc = "Close all buffers" })
 map("n", "<leader>cL", "<cmd>vsplit<CR>", { desc = "Split right" })
 map("n", "<leader>cJ", "<cmd>split<CR>", { desc = "Split down" })
 
--- Move editor to group (like VS Code)
-map("n", "<leader>l", "<cmd>wincmd L<CR>", { desc = "Move to right group" })
-map("n", "<leader>h", "<cmd>wincmd H<CR>", { desc = "Move to left group" })
+-- Open file in split to left/right
+map("n", "<leader>h", "<cmd>leftabove vsplit<CR>", { desc = "Open split to left" })
+map("n", "<leader>l", "<cmd>rightbelow vsplit<CR>", { desc = "Open split to right" })
+
+-- Move current buffer to left/right group
+map("n", "<leader>H", "<cmd>wincmd H<CR>", { desc = "Move buffer to left group" })
+map("n", "<leader>L", "<cmd>wincmd L<CR>", { desc = "Move buffer to right group" })
 
 -- Resize windows
 map("n", "<C-Up>", "<cmd>resize +2<CR>", { desc = "Increase window height" })
