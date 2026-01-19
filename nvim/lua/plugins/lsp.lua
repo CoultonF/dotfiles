@@ -52,23 +52,7 @@ return {
       { "folke/neodev.nvim", opts = {} }, -- Neovim Lua API completion
     },
     config = function()
-      -- Note: lspconfig shows deprecation warning in nvim 0.11+
-      -- Will migrate to vim.lsp.config when mason-lspconfig supports it
-
-      -- Suppress lspconfig deprecation notification
-      local notify = vim.notify
-      vim.notify = function(msg, ...)
-        if msg:match("lspconfig.*deprecated") then
-          return
-        end
-        notify(msg, ...)
-      end
-
-      local lspconfig = require("lspconfig")
       local cmp_nvim_lsp = require("cmp_nvim_lsp")
-
-      -- Restore original notify
-      vim.notify = notify
 
       -- LSP capabilities with completion
       local capabilities = cmp_nvim_lsp.default_capabilities()
@@ -146,11 +130,13 @@ return {
         ruff = {},
       }
 
-      -- Setup each server
+      -- Setup each server using new vim.lsp.config API (nvim 0.11+)
       for server, config in pairs(servers) do
         config.capabilities = capabilities
         config.on_attach = config.on_attach or on_attach
-        lspconfig[server].setup(config)
+
+        -- Use new vim.lsp.config API
+        vim.lsp.config(server, config)
       end
 
       -- Diagnostic configuration
