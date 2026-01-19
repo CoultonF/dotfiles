@@ -22,7 +22,43 @@ return {
       -- File finding (like VS Code ff, leader leader)
       { "ff", "<cmd>Telescope find_files<CR>", desc = "Find files" },
       { "<leader><leader>", "<cmd>Telescope find_files<CR>", desc = "Find files" },
-      { "fp", function() require("telescope.builtin").find_files({ prompt_title = "Find in Project", cwd = vim.fn.getcwd() }) end, desc = "Find in project folder" },
+      { "fd", function()
+        local telescope = require("telescope")
+        local builtin = require("telescope.builtin")
+        local actions = require("telescope.actions")
+        local action_state = require("telescope.actions.state")
+        local scan = require("plenary.scandir")
+        local Path = require("plenary.path")
+        
+        local cwd = vim.fn.getcwd()
+        local dirs = {}
+        
+        for _, entry in ipairs(scan.scan_dir(cwd, { depth = 1, only_dirs = true })) do
+          local path = Path:new(entry)
+          if not path:make_relative(cwd):match("^%.") then
+            table.insert(dirs, path:make_relative(cwd))
+          end
+        end
+        
+        require("telescope.pickers").new({}, {
+          prompt_title = "Select Project Folder",
+          finder = require("telescope.finders").new_table({ results = dirs }),
+          sorter = require("telescope.config").values.generic_sorter({}),
+          attach_mappings = function(prompt_bufnr, map)
+            actions.select_default:replace(function()
+              local selection = action_state.get_selected_entry()
+              actions.close(prompt_bufnr)
+              if selection then
+                builtin.find_files({
+                  prompt_title = "Find Files in " .. selection.value,
+                  cwd = cwd .. "/" .. selection.value,
+                })
+              end
+            end)
+            return true
+          end,
+        }):find()
+      end, desc = "Find in directory (project folder)" },
 
       -- Buffer switching (like VS Code leader ,)
       { "<leader>,", "<cmd>Telescope buffers<CR>", desc = "Switch buffer" },
@@ -58,48 +94,6 @@ return {
       local builtin = require("telescope.builtin")
       local actions = require("telescope.actions")
       local action_state = require("telescope.actions.state")
-
-      -- Custom function to pick a project folder then search within it
-      local function find_in_project_folder()
-        local scan = require("plenary.scandir")
-        local Path = require("plenary.path")
-        
-        -- Get top-level directories
-        local cwd = vim.fn.getcwd()
-        local dirs = {}
-        
-        for _, entry in ipairs(scan.scan_dir(cwd, { depth = 1, only_dirs = true })) do
-          local path = Path:new(entry)
-          if not path:make_relative(cwd):match("^%.") then -- Skip hidden directories
-            table.insert(dirs, path:make_relative(cwd))
-          end
-        end
-        
-        -- Show directory picker
-        require("telescope.pickers").new({}, {
-          prompt_title = "Select Project Folder",
-          finder = require("telescope.finders").new_table({
-            results = dirs,
-          }),
-          sorter = require("telescope.config").values.generic_sorter({}),
-          attach_mappings = function(prompt_bufnr, map)
-            actions.select_default:replace(function()
-              local selection = action_state.get_selected_entry()
-              actions.close(prompt_bufnr)
-              if selection then
-                builtin.find_files({
-                  prompt_title = "Find Files in " .. selection.value,
-                  cwd = cwd .. "/" .. selection.value,
-                })
-              end
-            end)
-            return true
-          end,
-        }):find()
-      end
-
-      -- Make it available globally
-      vim.keymap.set("n", "fd", find_in_project_folder, { desc = "Find in directory (project folder)" })
 
       telescope.setup({
         defaults = {
