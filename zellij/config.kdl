@@ -135,6 +135,7 @@ simplified_ui false
 
 // Scrollback
 scroll_buffer_size 10000
+scrollback_editor "nvim"  // Use nvim for editing scrollback
 
 // Copy to clipboard
 copy_command "pbcopy"  // macOS
