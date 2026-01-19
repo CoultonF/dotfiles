@@ -99,7 +99,7 @@ return {
       end
 
       -- Make it available globally
-      vim.keymap.set("n", "<leader>sp", find_in_project_folder, { desc = "Search in project folder" })
+      vim.keymap.set("n", "fd", find_in_project_folder, { desc = "Find in directory (project folder)" })
 
       telescope.setup({
         defaults = {
