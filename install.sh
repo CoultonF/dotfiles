@@ -227,6 +227,36 @@ if [ "$IN_CONTAINER" = true ]; then
     echo "=========================================="
     echo ""
 
+    # Fix locale warnings
+    echo "Configuring locale..."
+    if command -v locale-gen &> /dev/null; then
+        # Generate en_US.UTF-8 locale (most commonly available)
+        echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen 2>/dev/null || true
+        locale-gen en_US.UTF-8 2>/dev/null || true
+    fi
+
+    # Set locale environment variables
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+    export LANGUAGE=en_US.UTF-8
+
+    # Add to shell configs
+    for rc_file in "$HOME/.bashrc" "$HOME/.zshrc"; do
+        if [ -f "$rc_file" ]; then
+            if ! grep -q 'export LANG=en_US.UTF-8' "$rc_file" 2>/dev/null; then
+                cat >> "$rc_file" << 'LOCALE_EOF'
+
+# Locale settings
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+LOCALE_EOF
+            fi
+        fi
+    done
+    success "Locale configured"
+    echo ""
+
     # Check if Nix is available
     if ! command -v nix-env &> /dev/null; then
         echo "Installing Nix package manager..."
