@@ -186,9 +186,24 @@ echo "Detecting environment..."
 
 # Check if running in a container (and not on macOS)
 IN_CONTAINER=false
-if [ -f /.dockerenv ] || grep -q docker /proc/1/cgroup 2>/dev/null; then
+
+# Debug output
+echo "DEBUG: Checking container environment..."
+echo "DEBUG: OSTYPE=$OSTYPE"
+echo "DEBUG: /.dockerenv exists: $([ -f /.dockerenv ] && echo 'yes' || echo 'no')"
+echo "DEBUG: /proc/1/cgroup check: $(grep -q docker /proc/1/cgroup 2>/dev/null && echo 'docker found' || echo 'docker not found')"
+
+# DevPod/container detection - check multiple signals
+if [ -f /.dockerenv ] || \
+   grep -q docker /proc/1/cgroup 2>/dev/null || \
+   grep -q kubepods /proc/1/cgroup 2>/dev/null || \
+   [ -n "$DEVPOD_WORKSPACE_ID" ] || \
+   [ -n "$CODESPACES" ] || \
+   [ "$REMOTE_CONTAINERS" = "true" ]; then
     IN_CONTAINER=true
     success "Container environment detected"
+else
+    echo "DEBUG: Not in container (will skip Nix installation)"
 fi
 
 # Install tools in container environments
