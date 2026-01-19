@@ -35,8 +35,5 @@ clipboard-paste-protection = false
 clipboard-paste-bracketed-safe = false
 copy-on-select = clipboard
 
-# OSC 52 clipboard support (for remote/container clipboard sync)
-clipboard-osc52 = true
-
 # Scrollback
 scrollback-limit = 10000
