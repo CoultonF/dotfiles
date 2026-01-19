@@ -40,20 +40,20 @@ map({ "n", "v" }, "<leader>P", [["+P]], { desc = "Paste before from system clipb
 -- Delete to void register
 map({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete to void register" })
 
--- Buffer navigation (like VS Code Ctrl+H/L)
-map("n", "<C-h>", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
-map("n", "<C-l>", "<cmd>bnext<CR>", { desc = "Next buffer" })
+-- Window navigation with Ctrl+hjkl (navigate visible splits)
+map("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
+map("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
+map("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+
+-- Buffer navigation (cycle through buffer list)
+map("n", "<leader>bn", "<cmd>bnext<CR>", { desc = "Next buffer" })
+map("n", "<leader>bp", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
 
 -- Close buffer
 map("n", "<C-q>", "<cmd>bd<CR>", { desc = "Close buffer" })
 map("n", "<leader>cc", "<cmd>bd<CR>", { desc = "Close buffer" })
 map("n", "<leader>cD", "<cmd>%bd<CR>", { desc = "Close all buffers" })
-
--- Window navigation
-map("n", "<leader>wh", "<C-w>h", { desc = "Go to left window" })
-map("n", "<leader>wj", "<C-w>j", { desc = "Go to lower window" })
-map("n", "<leader>wk", "<C-w>k", { desc = "Go to upper window" })
-map("n", "<leader>wl", "<C-w>l", { desc = "Go to right window" })
 
 -- Window splits (like VS Code)
 map("n", "<leader>cL", "<cmd>vsplit<CR>", { desc = "Split right" })
