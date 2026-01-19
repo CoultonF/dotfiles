@@ -63,11 +63,94 @@ echo "Setting up Zellij..."
 
 # Zellij config (both local and container)
 mkdir -p "$CONFIG_DIR/zellij"
+mkdir -p "$CONFIG_DIR/zellij/plugins"
+mkdir -p "$CONFIG_DIR/zellij/layouts"
 if [ -L "$CONFIG_DIR/zellij/config.kdl" ] || [ -f "$CONFIG_DIR/zellij/config.kdl" ]; then
     rm -f "$CONFIG_DIR/zellij/config.kdl"
 fi
 ln -sf "$DOTFILES_DIR/zellij/config.kdl" "$CONFIG_DIR/zellij/config.kdl"
 success "Linked Zellij config"
+
+# Zellij layouts
+if [ -d "$DOTFILES_DIR/zellij/layouts" ]; then
+    for layout in "$DOTFILES_DIR/zellij/layouts"/*.kdl; do
+        if [ -f "$layout" ]; then
+            layout_name=$(basename "$layout")
+            rm -f "$CONFIG_DIR/zellij/layouts/$layout_name"
+            ln -sf "$layout" "$CONFIG_DIR/zellij/layouts/$layout_name"
+        fi
+    done
+    success "Linked Zellij layouts"
+fi
+
+# Install zellij-sessionizer plugin
+SESSIONIZER_WASM="$CONFIG_DIR/zellij/plugins/zellij-sessionizer.wasm"
+# Use -r to check if file exists AND is readable (follows symlinks to check target exists)
+if [ ! -r "$SESSIONIZER_WASM" ]; then
+    # Remove broken symlink if exists
+    [ -L "$SESSIONIZER_WASM" ] && rm -f "$SESSIONIZER_WASM"
+    echo "Downloading zellij-sessionizer plugin..."
+    if command -v curl &> /dev/null; then
+        curl -sL https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm -o "$SESSIONIZER_WASM"
+    elif command -v wget &> /dev/null; then
+        wget -q https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm -O "$SESSIONIZER_WASM"
+    else
+        warn "Neither curl nor wget found, skipping zellij-sessionizer plugin"
+    fi
+    if [ -r "$SESSIONIZER_WASM" ]; then
+        success "Installed zellij-sessionizer plugin"
+    else
+        error "Failed to download zellij-sessionizer plugin"
+    fi
+else
+    success "zellij-sessionizer plugin already installed"
+fi
+
+# Install zjstatus plugin (configurable status bar)
+ZJSTATUS_WASM="$CONFIG_DIR/zellij/plugins/zjstatus.wasm"
+# Use -r to check if file exists AND is readable (follows symlinks to check target exists)
+if [ ! -r "$ZJSTATUS_WASM" ]; then
+    # Remove broken symlink if exists
+    [ -L "$ZJSTATUS_WASM" ] && rm -f "$ZJSTATUS_WASM"
+    echo "Downloading zjstatus plugin..."
+    if command -v curl &> /dev/null; then
+        curl -sL https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm -o "$ZJSTATUS_WASM"
+    elif command -v wget &> /dev/null; then
+        wget -q https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm -O "$ZJSTATUS_WASM"
+    else
+        warn "Neither curl nor wget found, skipping zjstatus plugin"
+    fi
+    if [ -r "$ZJSTATUS_WASM" ]; then
+        success "Installed zjstatus plugin"
+    else
+        error "Failed to download zjstatus plugin"
+    fi
+else
+    success "zjstatus plugin already installed"
+fi
+
+# Install zjstatus-hints plugin (keybinding hints for zjstatus)
+ZJSTATUS_HINTS_WASM="$CONFIG_DIR/zellij/plugins/zjstatus-hints.wasm"
+# Use -r to check if file exists AND is readable (follows symlinks to check target exists)
+if [ ! -r "$ZJSTATUS_HINTS_WASM" ]; then
+    # Remove broken symlink if exists
+    [ -L "$ZJSTATUS_HINTS_WASM" ] && rm -f "$ZJSTATUS_HINTS_WASM"
+    echo "Downloading zjstatus-hints plugin..."
+    if command -v curl &> /dev/null; then
+        curl -sL https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm -o "$ZJSTATUS_HINTS_WASM"
+    elif command -v wget &> /dev/null; then
+        wget -q https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm -O "$ZJSTATUS_HINTS_WASM"
+    else
+        warn "Neither curl nor wget found, skipping zjstatus-hints plugin"
+    fi
+    if [ -r "$ZJSTATUS_HINTS_WASM" ]; then
+        success "Installed zjstatus-hints plugin"
+    else
+        error "Failed to download zjstatus-hints plugin"
+    fi
+else
+    success "zjstatus-hints plugin already installed"
+fi
 
 echo ""
 echo "Setting up Neovim (for devcontainer)..."

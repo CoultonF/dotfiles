@@ -4,6 +4,8 @@ Personal development environment configuration for Neovim + OpenCode + Ghostty.
 
 Designed to work both locally on macOS and inside Docker devcontainers via Nix.
 
+Features a **global nix-shell environment** that automatically loads all development tools when you start any terminal or Ghostty.
+
 ## Quick Start
 
 ```bash
@@ -12,16 +14,23 @@ git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/.dotfiles
 
 # Run the installer
 cd ~/.dotfiles && ./install.sh
+
+# Restart your terminal or source the config
+source ~/.zshrc
 ```
+
+The nix-shell environment will automatically load with all dev tools available globally.
 
 ## What's Included
 
 | Component | Description |
 |-----------|-------------|
+| **Nix Shell** | Global development environment that auto-loads on terminal startup |
 | **Ghostty** | GPU-accelerated terminal with Catppuccin theme |
+| **Zellij** | Modern terminal multiplexer with vim keybindings |
 | **Neovim** | Full IDE setup with LSP, completion, debugging |
 | **OpenCode** | AI coding assistant integration |
-| **Nix** | Declarative package management for devcontainers |
+| **Nix** | Declarative package management for reproducible environments |
 
 ## Directory Structure
 
@@ -29,8 +38,13 @@ cd ~/.dotfiles && ./install.sh
 ~/.dotfiles/
 ├── README.md              # This file
 ├── install.sh             # Bootstrap script
+├── shell.nix              # Global nix-shell environment (auto-loads)
+├── zsh/
+│   └── .zshrc             # Zsh config with nix-shell auto-entry
 ├── ghostty/
 │   └── config             # Ghostty terminal config
+├── zellij/
+│   └── config.kdl         # Zellij terminal multiplexer config
 ├── nvim/
 │   ├── init.lua           # Neovim entry point
 │   └── lua/
@@ -47,12 +61,62 @@ cd ~/.dotfiles && ./install.sh
 │           ├── debug.lua
 │           └── ...
 ├── nix/
-│   └── config.nix         # Nix packages
+│   └── config.nix         # Nix packages (legacy, for containers)
+├── opencode/
+│   └── opencode.json      # OpenCode MCP configuration
 └── devcontainer/
     ├── mounts.json        # Devcontainer mount config
     ├── docker-compose-volumes.yml
     └── post-install.sh    # Container setup script
 ```
+
+## Global Nix Shell Environment
+
+This setup automatically loads a nix-shell environment every time you start a terminal (Ghostty, iTerm, etc.).
+
+### How It Works
+
+1. **shell.nix** - Defines all development tools (Neovim, OpenCode, ripgrep, etc.)
+2. **zsh/.zshrc** - Auto-enters the nix-shell on terminal startup
+3. **Automatic Loading** - No manual commands needed, everything just works
+
+### Tools Available
+
+All these tools are automatically available in every terminal:
+
+- **Editor**: Neovim
+- **AI Assistant**: OpenCode
+- **Search**: ripgrep (rg), fd, fzf, tree
+- **Git**: lazygit, git, delta
+- **Languages**: Node.js 22, Python 3.12, Lua 5.1
+- **LSP Servers**: TypeScript, HTML/CSS/JSON, Python, Lua
+- **Terminal**: Zellij (modern tmux alternative)
+- **Build Tools**: gcc, gnumake
+- **Utilities**: curl, wget, unzip, jq
+
+### Setting Up on a New Machine
+
+```bash
+# 1. Install Nix (if not already installed)
+curl -L https://nixos.org/nix/install | sh
+
+# 2. Clone and run installer
+git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles && ./install.sh
+
+# 3. Restart terminal or source config
+source ~/.zshrc
+```
+
+The nix-shell environment will auto-load with the welcome message:
+```
+🚀 Nix development environment loaded
+📦 Tools available: nvim, opencode, lazygit, rg, fd, fzf, zellij, and more
+```
+
+### Customizing the Environment
+
+Edit `shell.nix` to add/remove tools, then restart your terminal.
 
 ## Keybindings Reference
 
@@ -197,11 +261,14 @@ nix-env -iA nixpkgs.neovim nixpkgs.opencode nixpkgs.lazygit nixpkgs.ripgrep nixp
 
 ### Local Development (Mac)
 
-1. Open Ghostty
-2. Navigate to project: `cd ~/Projects/myproject`
-3. Start OpenCode: `opencode &`
-4. Edit with Neovim: `nvim .`
-5. Use `<leader>oa` to ask OpenCode questions
+1. Open Ghostty (nix-shell auto-loads with all dev tools)
+2. Zellij starts automatically (terminal multiplexer)
+3. Navigate to project: `cd ~/Projects/myproject`
+4. Start OpenCode: `opencode &`
+5. Edit with Neovim: `nvim .`
+6. Use `<leader>oa` to ask OpenCode questions
+
+All tools (nvim, opencode, lazygit, rg, fd, fzf, etc.) are automatically available.
 
 ### Devcontainer Development
 
@@ -210,6 +277,8 @@ nix-env -iA nixpkgs.neovim nixpkgs.opencode nixpkgs.lazygit nixpkgs.ripgrep nixp
 3. Start OpenCode: `opencode &`
 4. Edit with Neovim: `nvim .`
 5. Use `<leader>oa` to ask OpenCode questions
+
+In containers, tools are installed via `nix-env -iA nixpkgs.devTools` during setup.
 
 ## Plugins Included
 

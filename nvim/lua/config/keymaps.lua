@@ -24,9 +24,7 @@ map("n", "n", "nzzzv", { desc = "Next search result centered" })
 map("n", "N", "Nzzzv", { desc = "Prev search result centered" })
 map("n", "*", "*zzzv", { desc = "Search word under cursor centered" })
 
--- Select all with Ctrl+A
-map("n", "<C-a>", "ggVG", { desc = "Select all" })
-map("v", "<C-a>", "VggVG", { desc = "Select all" })
+
 
 -- Better paste (don't yank replaced text)
 map("x", "p", [["_dP]], { desc = "Paste without yanking" })

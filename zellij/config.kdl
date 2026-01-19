@@ -1,35 +1,78 @@
 // Zellij Configuration
-// https://zellij.dev/documentation/
+// Tmux-style keybindings with Ctrl+a prefix
 
-// Tmux-style keybindings (Ctrl+a prefix)
+// Plugins configuration
+plugins {
+    zjstatus-hints location="file:~/.config/zellij/plugins/zjstatus-hints.wasm" {
+        max_length 0
+        overflow_str "..."
+        pipe_name "zjstatus_hints"
+        hide_in_base_mode false
+        _allow {
+            ReadApplicationState
+            ChangeApplicationState
+            RunCommands
+        }
+    }
+}
+
+// Load plugins at startup
+load_plugins {
+    zjstatus-hints
+}
+
 keybinds clear-defaults=true {
     normal {
-        // Pane management
         bind "Ctrl a" { SwitchToMode "tmux"; }
+        bind "Ctrl g" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-sessionizer.wasm" {
+                floating true
+                move_to_focused_tab true
+                cwd "/"
+                root_dirs "/Users/cfraser/Repos"
+            }
+        }
     }
 
     tmux {
-        // Switch back to normal mode
         bind "Ctrl a" { SwitchToMode "normal"; }
         bind "Esc" { SwitchToMode "normal"; }
 
-        // Pane navigation (vim-style)
-        bind "h" { MoveFocus "Left"; }
-        bind "j" { MoveFocus "Down"; }
-        bind "k" { MoveFocus "Up"; }
-        bind "l" { MoveFocus "Right"; }
+        // Sessionizer
+        bind "f" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-sessionizer.wasm" {
+                floating true
+                move_to_focused_tab true
+                cwd "/"
+                root_dirs "/Users/cfraser/Repos"
+            }
+            SwitchToMode "normal"
+        }
 
-        // Splits
+        // Pane navigation (vim-style)
+        bind "h" { MoveFocus "Left"; SwitchToMode "normal"; }
+        bind "j" { MoveFocus "Down"; SwitchToMode "normal"; }
+        bind "k" { MoveFocus "Up"; SwitchToMode "normal"; }
+        bind "l" { MoveFocus "Right"; SwitchToMode "normal"; }
+
+        // Splits (tmux style)
+        bind "\"" { NewPane "Down"; SwitchToMode "normal"; }
+        bind "%" { NewPane "Right"; SwitchToMode "normal"; }
         bind "|" { NewPane "Right"; SwitchToMode "normal"; }
         bind "-" { NewPane "Down"; SwitchToMode "normal"; }
 
-        // Close pane
+        // Pane management
         bind "x" { CloseFocus; SwitchToMode "normal"; }
+        bind "z" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "Space" { NextSwapLayout; SwitchToMode "normal"; }
 
         // Resize mode
-        bind "r" { SwitchToMode "resize"; }
+        bind "H" { Resize "Left"; }
+        bind "J" { Resize "Down"; }
+        bind "K" { Resize "Up"; }
+        bind "L" { Resize "Right"; }
 
-        // Scroll/Search mode (VIM MODE!)
+        // Scroll/copy mode
         bind "[" { SwitchToMode "scroll"; }
 
         // Open scrollback in editor
@@ -37,8 +80,9 @@ keybinds clear-defaults=true {
 
         // Tabs
         bind "c" { NewTab; SwitchToMode "normal"; }
-        bind "n" { GoToNextTab; }
-        bind "p" { GoToPreviousTab; }
+        bind "," { SwitchToMode "RenameTab"; TabNameInput 0; }
+        bind "n" { GoToNextTab; SwitchToMode "normal"; }
+        bind "p" { GoToPreviousTab; SwitchToMode "normal"; }
         bind "1" { GoToTab 1; SwitchToMode "normal"; }
         bind "2" { GoToTab 2; SwitchToMode "normal"; }
         bind "3" { GoToTab 3; SwitchToMode "normal"; }
@@ -49,14 +93,20 @@ keybinds clear-defaults=true {
         bind "8" { GoToTab 8; SwitchToMode "normal"; }
         bind "9" { GoToTab 9; SwitchToMode "normal"; }
 
-        // Detach
+        // Session
         bind "d" { Detach; }
+        bind "w" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "normal"
+        }
     }
 
     scroll {
-        // Exit scroll mode
-        bind "q" { SwitchToMode "normal"; }
         bind "Esc" { SwitchToMode "normal"; }
+        bind "q" { SwitchToMode "normal"; }
 
         // Vim navigation
         bind "j" { ScrollDown; }
@@ -69,19 +119,19 @@ keybinds clear-defaults=true {
         bind "G" { ScrollToBottom; }
 
         // Search
-        bind "/" { SwitchToMode "entersearch"; SearchInput 0; }
+        bind "/" { SwitchToMode "EnterSearch"; SearchInput 0; }
         bind "n" { Search "down"; }
         bind "N" { Search "up"; }
 
+        // Copy mode
+        bind "v" { SwitchToMode "search"; }
+        bind "Space" { SwitchToMode "search"; }
+
         // Open in editor
         bind "e" { EditScrollback; SwitchToMode "normal"; }
-
-        // Copy mode
-        bind "Space" { SwitchToMode "search"; }
     }
 
     search {
-        // Exit search/copy mode
         bind "Esc" { ScrollToBottom; SwitchToMode "normal"; }
         bind "q" { ScrollToBottom; SwitchToMode "normal"; }
 
@@ -95,34 +145,24 @@ keybinds clear-defaults=true {
         bind "g" { ScrollToTop; }
         bind "G" { ScrollToBottom; }
 
+        // Search
+        bind "/" { SwitchToMode "EnterSearch"; SearchInput 0; }
+        bind "n" { Search "down"; }
+        bind "N" { Search "up"; }
+
         // Copy
         bind "y" { Copy; }
         bind "Enter" { Copy; }
-
-        // Search
-        bind "/" { SwitchToMode "entersearch"; SearchInput 0; }
-        bind "n" { Search "down"; }
-        bind "N" { Search "up"; }
     }
 
     entersearch {
-        // Exit search input
         bind "Esc" { SwitchToMode "scroll"; }
         bind "Enter" { SwitchToMode "search"; }
     }
 
-    resize {
-        bind "Esc" { SwitchToMode "normal"; }
-        bind "h" { Resize "Increase Left"; }
-        bind "j" { Resize "Increase Down"; }
-        bind "k" { Resize "Increase Up"; }
-        bind "l" { Resize "Increase Right"; }
-        bind "H" { Resize "Decrease Left"; }
-        bind "J" { Resize "Decrease Down"; }
-        bind "K" { Resize "Decrease Up"; }
-        bind "L" { Resize "Decrease Right"; }
-        bind "=" { Resize "Increase"; }
-        bind "-" { Resize "Decrease"; }
+    renametab {
+        bind "Esc" { UndoRenameTab; SwitchToMode "tmux"; }
+        bind "Enter" { SwitchToMode "normal"; }
     }
 }
 
@@ -135,11 +175,17 @@ simplified_ui false
 
 // Scrollback
 scroll_buffer_size 10000
-scrollback_editor "/nix/var/nix/profiles/default/bin/nvim"  // Use nvim for editing scrollback (full path for container)
+scrollback_editor "/nix/var/nix/profiles/default/bin/nvim"
 
-// Copy to clipboard
-copy_command "pbcopy"  // macOS
+// Copy to clipboard (macOS)
+copy_command "pbcopy"
 
 // Mouse
 mouse_mode true
 copy_on_select true
+
+// Disable startup tips
+show_startup_tips false
+
+// Default layout with status bar
+default_layout "default"

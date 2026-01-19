@@ -1,0 +1,41 @@
+// Default layout with zjstatus and keybinding hints
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="file:~/.config/zellij/plugins/zjstatus.wasm" {
+                format_left   "{mode} #[fg=#89B4FA,bold]{session}"
+                format_center "{tabs}"
+                format_right  "{pipe_zjstatus_hints}"
+                format_space  ""
+
+                border_enabled  "false"
+                border_char     "-"
+                border_format   "#[fg=#6C7086]{char}"
+                border_position "top"
+
+                hide_frame_for_single_pane "true"
+
+                // Mode indicators
+                mode_normal        "#[bg=#89B4FA,fg=#1e1e2e,bold] NORMAL "
+                mode_tmux          "#[bg=#fab387,fg=#1e1e2e,bold] TMUX "
+                mode_locked        "#[bg=#f38ba8,fg=#1e1e2e,bold] LOCKED "
+                mode_scroll        "#[bg=#a6e3a1,fg=#1e1e2e,bold] SCROLL "
+                mode_search        "#[bg=#f9e2af,fg=#1e1e2e,bold] SEARCH "
+                mode_enter_search  "#[bg=#f9e2af,fg=#1e1e2e,bold] SEARCH "
+                mode_rename_tab    "#[bg=#cba6f7,fg=#1e1e2e,bold] RENAME "
+
+                // Tab styling
+                tab_normal              "#[fg=#6C7086] {name} "
+                tab_normal_fullscreen   "#[fg=#6C7086] {name} [] "
+                tab_normal_sync         "#[fg=#6C7086] {name} <> "
+                tab_active              "#[fg=#89B4FA,bold,italic] {name} "
+                tab_active_fullscreen   "#[fg=#89B4FA,bold,italic] {name} [] "
+                tab_active_sync         "#[fg=#89B4FA,bold,italic] {name} <> "
+
+                // zjstatus-hints pipe
+                pipe_zjstatus_hints_format "#[fg=#6C7086]{output}"
+            }
+        }
+    }
+}
