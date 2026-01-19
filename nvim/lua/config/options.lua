@@ -76,10 +76,3 @@ opt.backup = false
 
 -- Session options
 opt.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
-
--- Fix vim.ui.open for macOS (uses 'open' instead of 'xdg-open')
-if vim.fn.has("mac") == 1 then
-  vim.ui.open = function(url)
-    vim.fn.jobstart({ "open", url }, { detach = true })
-  end
-end

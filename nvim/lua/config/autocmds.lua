@@ -77,3 +77,34 @@ autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "*.mdx" },
   command = "setfiletype markdown",
 })
+
+-- Fix vim.ui.open based on environment
+local function in_container()
+  return os.getenv("SSH_TTY")
+    or os.getenv("container")
+    or os.getenv("DEVPOD_WORKSPACE_ID")
+    or os.getenv("CODESPACES")
+    or os.getenv("REMOTE_CONTAINERS")
+    or vim.fn.filereadable("/.dockerenv") == 1
+    or vim.fn.has("wsl") == 1
+end
+
+augroup("FixUiOpen", { clear = true })
+autocmd("VimEnter", {
+  group = "FixUiOpen",
+  callback = function()
+    if in_container() then
+      -- In container: copy URL to clipboard via OSC52 since we can't open browser
+      vim.ui.open = function(url)
+        local osc52 = require("vim.ui.clipboard.osc52")
+        osc52.copy("+")({ url })
+        vim.notify("URL copied to clipboard: " .. url, vim.log.levels.INFO)
+      end
+    elseif vim.fn.has("mac") == 1 then
+      -- On macOS: use 'open' instead of 'xdg-open'
+      vim.ui.open = function(url)
+        vim.fn.jobstart({ "open", url }, { detach = true })
+      end
+    end
+  end,
+})
