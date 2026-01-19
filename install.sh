@@ -111,7 +111,10 @@ fi
 echo ""
 echo "Setting up Nix config..."
 
-# Nix config for devcontainer
+# Nix config for devcontainer - remove old symlink if exists
+if [ -L "$DOCKER_CONFIG_DIR/nix/config.nix" ] || [ -f "$DOCKER_CONFIG_DIR/nix/config.nix" ]; then
+    rm -f "$DOCKER_CONFIG_DIR/nix/config.nix"
+fi
 cp "$DOTFILES_DIR/nix/config.nix" "$DOCKER_CONFIG_DIR/nix/config.nix"
 success "Copied Nix config to $DOCKER_CONFIG_DIR/nix"
 
