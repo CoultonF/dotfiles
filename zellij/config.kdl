@@ -32,6 +32,9 @@ keybinds clear-defaults=true {
         // Scroll/Search mode (VIM MODE!)
         bind "[" { SwitchToMode "scroll"; }
 
+        // Open scrollback in editor
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+
         // Tabs
         bind "c" { NewTab; SwitchToMode "normal"; }
         bind "n" { GoToNextTab; }
