@@ -43,7 +43,12 @@ local function get_project_commands()
   table.insert(commands, { name = '🔄 Restart Dev Servers', cmd = 'bash ' .. root .. '/scripts/dev-servers.sh restart' })
   table.insert(commands, { name = '📊 Dev Servers Status', cmd = 'bash ' .. root .. '/scripts/dev-servers.sh status' })
   table.insert(commands, { name = '📝 Dev Servers Logs', cmd = 'bash ' .. root .. '/scripts/dev-servers.sh logs' })
-  table.insert(commands, { name = '🔑 Set Redis Session', cmd = 'cd ' .. root .. '/flask_app && .venv/bin/python ' .. root .. '/scripts/set_redis_session.py' })
+  table.insert(commands, { 
+    name = '🔑 Set Redis Session', 
+    cmd = 'cd ' .. root .. '/flask_app && .venv/bin/python ' .. root .. '/scripts/set_redis_session.py',
+    needs_params = true,
+    params = {'user_id', 'session_id'}
+  })
   table.insert(commands, { name = '🧪 Run All Tests', cmd = 'bash ' .. root .. '/scripts/run_all_tests_comprehensive.sh' })
   
   -- Context-specific commands based on subdirectory
@@ -101,8 +106,25 @@ function M.show_commands()
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
+        local cmd = selection.value.cmd
+        
+        -- Check if command needs parameters
+        if selection.value.needs_params then
+          local params = {}
+          for _, param_name in ipairs(selection.value.params) do
+            local value = vim.fn.input(param_name .. ': ')
+            if value == '' then
+              vim.notify('Cancelled: ' .. param_name .. ' is required', vim.log.levels.WARN)
+              return
+            end
+            table.insert(params, value)
+          end
+          -- Append parameters to command
+          cmd = cmd .. ' ' .. table.concat(params, ' ')
+        end
+        
         -- Open in terminal split
-        vim.cmd('split | terminal ' .. selection.value.cmd)
+        vim.cmd('split | terminal ' .. cmd)
       end)
       return true
     end,
