@@ -182,30 +182,108 @@ if [ "$CONFIGURED" = false ]; then
 fi
 
 echo ""
+echo "Detecting environment..."
+
+# Check if running in a container (and not on macOS)
+IN_CONTAINER=false
+if [ -f /.dockerenv ] || grep -q docker /proc/1/cgroup 2>/dev/null; then
+    IN_CONTAINER=true
+    success "Container environment detected"
+fi
+
+# Install tools in container environments
+if [ "$IN_CONTAINER" = true ]; then
+    echo ""
+    echo "=========================================="
+    echo "  Installing Dev Tools (Container)"
+    echo "=========================================="
+    echo ""
+
+    # Check if Nix is available
+    if ! command -v nix-env &> /dev/null; then
+        echo "Installing Nix package manager..."
+        curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+
+        # Source nix for this session
+        if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+            . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+        fi
+
+        # Add to bashrc and zshrc for future sessions
+        NIX_SOURCE='if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi'
+
+        if [ -f "$HOME/.bashrc" ]; then
+            if ! grep -q 'nix-profile/etc/profile.d/nix.sh' "$HOME/.bashrc" 2>/dev/null; then
+                echo "$NIX_SOURCE" >> "$HOME/.bashrc"
+            fi
+        fi
+
+        if [ -f "$HOME/.zshrc" ]; then
+            if ! grep -q 'nix-profile/etc/profile.d/nix.sh' "$HOME/.zshrc" 2>/dev/null; then
+                echo "$NIX_SOURCE" >> "$HOME/.zshrc"
+            fi
+        fi
+
+        success "Nix installed"
+    else
+        success "Nix already installed"
+    fi
+
+    # Install packages from config.nix
+    if [ -f "$CONFIG_DIR/nixpkgs/config.nix" ]; then
+        echo "Installing dev tools from config.nix..."
+        nix-env -iA nixpkgs.devTools
+        success "Dev tools installed"
+
+        echo ""
+        echo "Verifying installations..."
+        for cmd in nvim opencode lazygit rg fd fzf; do
+            if command -v "$cmd" &> /dev/null; then
+                success "$cmd: $(command -v $cmd)"
+            else
+                warn "$cmd: not found"
+            fi
+        done
+    else
+        warn "No config.nix found, skipping package installation"
+    fi
+fi
+
+echo ""
 echo "=========================================="
 echo "  Installation Complete!"
 echo "=========================================="
 echo ""
-echo "Next steps:"
-echo ""
-echo "1. Install Ghostty (if not installed):"
-echo "   brew install --cask ghostty"
-echo ""
-echo "2. Install a Nerd Font (for icons):"
-echo "   brew install --cask font-jetbrains-mono-nerd-font"
-echo ""
-echo "3. For devcontainers, add these mounts to your devcontainer.json:"
-echo '   "mounts": ['
-echo '     "source=${localEnv:HOME}/.config-docker/nvim,target=/root/.config/nvim,type=bind",'
-echo '     "source=${localEnv:HOME}/.local-docker/share/nvim,target=/root/.local/share/nvim,type=bind",'
-echo '     "source=${localEnv:HOME}/.config-docker/nix,target=/root/.config/nixpkgs,type=bind"'
-echo '   ]'
-echo ""
-echo "4. Add Nix to your Dockerfile.dev:"
-echo '   RUN curl -L https://nixos.org/nix/install | sh -s -- --no-daemon'
-echo '   ENV PATH="/root/.nix-profile/bin:$PATH"'
-echo ""
-echo "5. Install Nix packages in container:"
-echo "   nix-env -iA nixpkgs.devTools"
-echo ""
-echo "See README.md for full documentation."
+
+if [ "$IN_CONTAINER" = true ]; then
+    echo "Container setup complete! You can now use:"
+    echo ""
+    echo "  nvim .           # Open Neovim"
+    echo "  opencode         # Start OpenCode AI assistant"
+    echo "  lazygit          # Git TUI"
+    echo ""
+    echo "In Neovim:"
+    echo "  <leader>oa       # Ask OpenCode"
+    echo "  <leader>gg       # LazyGit"
+    echo "  ff               # Find files"
+    echo "  gf               # Grep in files"
+    echo ""
+    echo "See README.md for full keybindings."
+else
+    echo "Next steps:"
+    echo ""
+    echo "1. Install Ghostty (if not installed):"
+    echo "   brew install --cask ghostty"
+    echo ""
+    echo "2. Install a Nerd Font (for icons):"
+    echo "   brew install --cask font-jetbrains-mono-nerd-font"
+    echo ""
+    echo "3. For devcontainers, add these mounts to your devcontainer.json:"
+    echo '   "mounts": ['
+    echo '     "source=${localEnv:HOME}/.config-docker/nvim,target=/root/.config/nvim,type=bind",'
+    echo '     "source=${localEnv:HOME}/.local-docker/share/nvim,target=/root/.local/share/nvim,type=bind",'
+    echo '     "source=${localEnv:HOME}/.config-docker/nix,target=/root/.config/nixpkgs,type=bind"'
+    echo '   ]'
+    echo ""
+    echo "See README.md for full documentation."
+fi
