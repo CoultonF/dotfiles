@@ -253,6 +253,16 @@ echo ""
 if ! command -v nix-env &> /dev/null; then
     echo "Installing Nix package manager..."
 
+    # Clean up backup files from failed previous installations (macOS only)
+    if [ "$IS_MACOS" = true ]; then
+        echo "Checking for artifacts from previous installation attempts..."
+        if [ -f "/etc/bashrc.backup-before-nix" ] || [ -f "/etc/zshrc.backup-before-nix" ]; then
+            warn "Found backup files from previous installation attempt, cleaning up..."
+            sudo rm -f /etc/bashrc.backup-before-nix /etc/zshrc.backup-before-nix
+            success "Cleaned up old backup files"
+        fi
+    fi
+
     if [ "$IS_MACOS" = true ]; then
         # Use daemon installer on macOS (recommended)
         echo "Using Nix daemon installer for macOS..."
