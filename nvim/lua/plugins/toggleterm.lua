@@ -30,7 +30,12 @@ return {
       persist_mode = true,
       direction = "float",
       close_on_exit = true,
-      shell = "bash -i",  -- Interactive mode to load .bashrc
+      shell = vim.fn.executable('bash') == 1 and 'bash -i' or vim.o.shell,
+      on_open = function(term)
+        -- Ensure bashrc is sourced when terminal opens
+        vim.api.nvim_chan_send(term.job_id, "source ~/.bashrc 2>/dev/null || true\n")
+        vim.api.nvim_chan_send(term.job_id, "clear\n")
+      end,
       float_opts = {
         border = "curved",
         winblend = 0,
