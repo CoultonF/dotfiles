@@ -14,6 +14,13 @@ window-padding-x = 10
 window-padding-y = 10
 window-decoration = true
 window-theme = ghostty
+window-save-state = always
+window-inherit-working-directory = true
+window-inherit-font-size = true
+macos-titlebar-style = native
+
+# Start maximized (not fullscreen)
+macos-window-size = maximized
 
 # Cursor
 cursor-style = block
