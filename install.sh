@@ -227,34 +227,23 @@ if [ "$IN_CONTAINER" = true ]; then
     echo "=========================================="
     echo ""
 
-    # Fix locale warnings
+    # Fix locale warnings by setting locale environment variables
     echo "Configuring locale..."
-    if command -v locale-gen &> /dev/null; then
-        # Generate en_US.UTF-8 locale (most commonly available)
-        echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen 2>/dev/null || true
-        locale-gen en_US.UTF-8 2>/dev/null || true
-    fi
 
-    # Set locale environment variables
-    export LANG=en_US.UTF-8
-    export LC_ALL=en_US.UTF-8
-    export LANGUAGE=en_US.UTF-8
-
-    # Add to shell configs
+    # Add to shell configs to override any locale sent by SSH client
     for rc_file in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$rc_file" ]; then
-            if ! grep -q 'export LANG=en_US.UTF-8' "$rc_file" 2>/dev/null; then
+            if ! grep -q 'export LC_ALL=C.UTF-8' "$rc_file" 2>/dev/null; then
                 cat >> "$rc_file" << 'LOCALE_EOF'
 
-# Locale settings
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export LANGUAGE=en_US.UTF-8
+# Locale settings (prevent SSH client locale warnings)
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
 LOCALE_EOF
             fi
         fi
     done
-    success "Locale configured"
+    success "Locale configured (using C.UTF-8)"
     echo ""
 
     # Check if Nix is available
