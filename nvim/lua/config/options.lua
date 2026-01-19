@@ -33,33 +33,8 @@ opt.signcolumn = "yes"
 -- Backspace
 opt.backspace = "indent,eol,start"
 
--- Clipboard (system clipboard with OSC 52 support for containers/SSH)
+-- Clipboard (OSC 52 plugin handles remote clipboard, see plugins/osc52.lua)
 opt.clipboard = "unnamedplus"
-
--- Use OSC 52 for clipboard in containers/SSH (works with most modern terminals)
--- Detect container environments: DevPod, Docker, K8s, Codespaces, SSH, WSL
-local in_container = os.getenv("SSH_TTY")
-  or os.getenv("container")
-  or os.getenv("DEVPOD_WORKSPACE_ID")
-  or os.getenv("CODESPACES")
-  or os.getenv("REMOTE_CONTAINERS")
-  or vim.fn.filereadable("/.dockerenv") == 1
-  or vim.fn.has("wsl") == 1
-
-if in_container then
-  local osc52 = require("vim.ui.clipboard.osc52")
-  vim.g.clipboard = {
-    name = "OSC 52",
-    copy = {
-      ["+"] = osc52.copy("+"),
-      ["*"] = osc52.copy("*"),
-    },
-    paste = {
-      ["+"] = osc52.paste("+"),
-      ["*"] = osc52.paste("*"),
-    },
-  }
-end
 
 -- Split windows
 opt.splitright = true
