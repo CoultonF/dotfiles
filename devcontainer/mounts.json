@@ -3,6 +3,7 @@
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config-docker/nvim,target=/root/.config/nvim,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.local-docker/share/nvim,target=/root/.local/share/nvim,type=bind",
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config-docker/nix,target=/root/.config/nixpkgs,type=bind"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config-docker/nix,target=/root/.config/nixpkgs,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.nix-docker,target=/nix,type=bind"
   ]
 }

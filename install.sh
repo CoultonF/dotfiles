@@ -18,6 +18,7 @@ fi
 CONFIG_DIR="$HOME/.config"
 DOCKER_CONFIG_DIR="$HOME/.config-docker"
 DOCKER_LOCAL_DIR="$HOME/.local-docker"
+DOCKER_NIX_DIR="$HOME/.nix-docker"
 
 echo "=========================================="
 echo "  Dotfiles Installation"
@@ -43,6 +44,7 @@ mkdir -p "$CONFIG_DIR"
 mkdir -p "$DOCKER_CONFIG_DIR/nvim"
 mkdir -p "$DOCKER_CONFIG_DIR/nix"
 mkdir -p "$DOCKER_LOCAL_DIR/share/nvim"
+mkdir -p "$DOCKER_NIX_DIR"
 success "Created config directories"
 
 echo ""
