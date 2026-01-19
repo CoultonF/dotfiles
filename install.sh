@@ -146,10 +146,36 @@ else
     warn "Docker not found. Required for devcontainers."
 fi
 
+# Check for Nix (required for nix-shell environment)
+if command -v nix-shell &> /dev/null; then
+    success "Nix is installed"
+else
+    warn "Nix not found. Install from: https://nixos.org/download.html"
+    warn "Without Nix, the global nix-shell environment won't work"
+fi
+
 echo ""
 echo "Setting up shell environment..."
 
-# Function to configure a shell rc file
+# Set up zsh with nix-shell auto-entry
+if [ -f "$DOTFILES_DIR/zsh/.zshrc" ]; then
+    # Backup existing .zshrc if it exists and is not a symlink
+    if [ -f "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
+        mv "$HOME/.zshrc" "$HOME/.zshrc.backup"
+        warn "Backed up existing .zshrc to $HOME/.zshrc.backup"
+    fi
+
+    # Remove old symlink/file if exists
+    rm -f "$HOME/.zshrc"
+
+    # Symlink the dotfiles .zshrc
+    ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+    success "Linked .zshrc with nix-shell auto-entry"
+else
+    warn ".zshrc template not found in dotfiles"
+fi
+
+# Function to configure a shell rc file (for bash)
 configure_shell_rc() {
     local rc_file="$1"
     local rc_name="$2"
@@ -179,19 +205,9 @@ XVFB_EOF
     fi
 }
 
-# Configure both .bashrc and .zshrc if they exist
-CONFIGURED=false
+# Configure .bashrc if it exists (containers might use bash)
 if [ -f "$HOME/.bashrc" ]; then
     configure_shell_rc "$HOME/.bashrc" ".bashrc"
-    CONFIGURED=true
-fi
-if [ -f "$HOME/.zshrc" ]; then
-    configure_shell_rc "$HOME/.zshrc" ".zshrc"
-    CONFIGURED=true
-fi
-
-if [ "$CONFIGURED" = false ]; then
-    warn "No .zshrc or .bashrc found. Add 'export EDITOR=nvim' to your shell config manually."
 fi
 
 echo ""
@@ -199,6 +215,13 @@ echo "Detecting environment..."
 
 # Check if running in a container (and not on macOS)
 IN_CONTAINER=false
+IS_MACOS=false
+
+# Detect macOS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    IS_MACOS=true
+    success "macOS environment detected"
+fi
 
 # Debug output
 echo "DEBUG: Checking container environment..."
@@ -215,17 +238,82 @@ if [ -f /.dockerenv ] || \
    [ "$REMOTE_CONTAINERS" = "true" ]; then
     IN_CONTAINER=true
     success "Container environment detected"
-else
-    echo "DEBUG: Not in container (will skip Nix installation)"
 fi
 
-# Install tools in container environments
+echo ""
+echo "=========================================="
+echo "  Installing Dev Tools"
+echo "=========================================="
+echo ""
+
+# Install Nix package manager
+if ! command -v nix-env &> /dev/null; then
+    echo "Installing Nix package manager..."
+
+    if [ "$IS_MACOS" = true ]; then
+        # Use daemon installer on macOS (recommended)
+        echo "Using Nix daemon installer for macOS..."
+        sh <(curl -L https://nixos.org/nix/install)
+    else
+        # Use single-user installer in containers
+        echo "Using Nix single-user installer for container..."
+        curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+    fi
+
+    # Source nix for this session
+    if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    elif [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+    fi
+
+    # Add to shell configs for future sessions
+    if [ "$IS_MACOS" = true ]; then
+        NIX_SOURCE='if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"; fi'
+    else
+        NIX_SOURCE='if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi'
+    fi
+
+    if [ -f "$HOME/.bashrc" ]; then
+        if ! grep -q 'nix-profile/etc/profile.d/nix' "$HOME/.bashrc" 2>/dev/null && ! grep -q 'nix-daemon.sh' "$HOME/.bashrc" 2>/dev/null; then
+            echo "$NIX_SOURCE" >> "$HOME/.bashrc"
+        fi
+    fi
+
+    if [ -f "$HOME/.zshrc" ]; then
+        if ! grep -q 'nix-profile/etc/profile.d/nix' "$HOME/.zshrc" 2>/dev/null && ! grep -q 'nix-daemon.sh' "$HOME/.zshrc" 2>/dev/null; then
+            echo "$NIX_SOURCE" >> "$HOME/.zshrc"
+        fi
+    fi
+
+    success "Nix installed"
+else
+    success "Nix already installed"
+fi
+
+# Install packages from config.nix
+if [ -f "$CONFIG_DIR/nixpkgs/config.nix" ]; then
+    echo "Installing dev tools from config.nix..."
+    nix-env -iA nixpkgs.devTools
+    success "Dev tools installed"
+
+    echo ""
+    echo "Verifying installations..."
+    for cmd in nvim opencode lazygit rg fd fzf zellij; do
+        if command -v "$cmd" &> /dev/null; then
+            success "$cmd: $(command -v $cmd)"
+        else
+            warn "$cmd: not found"
+        fi
+    done
+else
+    warn "No config.nix found, skipping package installation"
+fi
+
+# Container-specific setup
 if [ "$IN_CONTAINER" = true ]; then
     echo ""
-    echo "=========================================="
-    echo "  Installing Dev Tools (Container)"
-    echo "=========================================="
-    echo ""
+    echo "Container-specific configuration..."
 
     # Fix locale warnings by setting locale environment variables
     echo "Configuring locale..."
@@ -245,55 +333,6 @@ LOCALE_EOF
     done
     success "Locale configured (using C.UTF-8)"
     echo ""
-
-    # Check if Nix is available
-    if ! command -v nix-env &> /dev/null; then
-        echo "Installing Nix package manager..."
-        curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-
-        # Source nix for this session
-        if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-            . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-        fi
-
-        # Add to bashrc and zshrc for future sessions
-        NIX_SOURCE='if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi'
-
-        if [ -f "$HOME/.bashrc" ]; then
-            if ! grep -q 'nix-profile/etc/profile.d/nix.sh' "$HOME/.bashrc" 2>/dev/null; then
-                echo "$NIX_SOURCE" >> "$HOME/.bashrc"
-            fi
-        fi
-
-        if [ -f "$HOME/.zshrc" ]; then
-            if ! grep -q 'nix-profile/etc/profile.d/nix.sh' "$HOME/.zshrc" 2>/dev/null; then
-                echo "$NIX_SOURCE" >> "$HOME/.zshrc"
-            fi
-        fi
-
-        success "Nix installed"
-    else
-        success "Nix already installed"
-    fi
-
-    # Install packages from config.nix
-    if [ -f "$CONFIG_DIR/nixpkgs/config.nix" ]; then
-        echo "Installing dev tools from config.nix..."
-        nix-env -iA nixpkgs.devTools
-        success "Dev tools installed"
-
-        echo ""
-        echo "Verifying installations..."
-        for cmd in nvim opencode lazygit rg fd fzf; do
-            if command -v "$cmd" &> /dev/null; then
-                success "$cmd: $(command -v $cmd)"
-            else
-                warn "$cmd: not found"
-            fi
-        done
-    else
-        warn "No config.nix found, skipping package installation"
-    fi
 fi
 
 echo ""
@@ -322,22 +361,20 @@ if [ "$IN_CONTAINER" = true ]; then
     echo "  ff               # Find files"
     echo "  gf               # Grep in files"
     echo ""
-    echo "See README.md for full keybindings."
-else
-    echo "Next steps:"
+fi
+
+if [ "$IS_MACOS" = true ]; then
+    echo "macOS next steps:"
     echo ""
-    echo "1. Install Ghostty (if not installed):"
+    echo "1. RESTART your terminal to load Nix in PATH"
+    echo "   All dev tools (nvim, lazygit, zellij, etc.) will then be available globally"
+    echo ""
+    echo "2. Install Ghostty (if not installed):"
     echo "   brew install --cask ghostty"
     echo ""
-    echo "2. Install a Nerd Font (for icons):"
+    echo "3. Install a Nerd Font (for icons):"
     echo "   brew install --cask font-jetbrains-mono-nerd-font"
     echo ""
-    echo "3. For devcontainers, add these mounts to your devcontainer.json:"
-    echo '   "mounts": ['
-    echo '     "source=${localEnv:HOME}/.config-docker/nvim,target=/root/.config/nvim,type=bind",'
-    echo '     "source=${localEnv:HOME}/.local-docker/share/nvim,target=/root/.local/share/nvim,type=bind",'
-    echo '     "source=${localEnv:HOME}/.config-docker/nix,target=/root/.config/nixpkgs,type=bind"'
-    echo '   ]'
-    echo ""
-    echo "See README.md for full documentation."
 fi
+
+echo "See README.md for full documentation."
