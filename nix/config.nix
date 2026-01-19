@@ -49,6 +49,8 @@
         wget
         unzip
         jq           # JSON processor
+      ] ++ lib.optionals stdenv.isLinux [
+        # Linux-only packages (for headless clipboard in containers)
         xclip        # Clipboard (requires DISPLAY)
         xvfb-run     # Virtual framebuffer for headless clipboard
       ];
