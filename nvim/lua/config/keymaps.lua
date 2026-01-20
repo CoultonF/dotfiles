@@ -32,6 +32,13 @@ map("x", "p", [["_dP]], { desc = "Paste without yanking" })
 -- System clipboard with leader
 map({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to system clipboard" })
 map("n", "<leader>Y", [["+Y]], { desc = "Yank line to system clipboard" })
+map("v", "<leader>Y", function()
+  vim.cmd('normal! y')
+  local text = vim.fn.getreg('"')
+  local stripped = text:gsub('%s+', '')
+  vim.fn.setreg('+', stripped)
+  vim.notify('Yanked (stripped): ' .. stripped:sub(1, 50) .. (stripped:len() > 50 and '...' or ''))
+end, { desc = "Yank stripped to system clipboard" })
 map({ "n", "v" }, "<leader>p", [["+p]], { desc = "Paste from system clipboard" })
 map({ "n", "v" }, "<leader>P", [["+P]], { desc = "Paste before from system clipboard" })
 
