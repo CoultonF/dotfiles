@@ -73,19 +73,6 @@ else
     success "Nix is available"
 fi
 
-# Ensure /etc/profile.d/nix.sh exists for login shells
-# This runs regardless of whether Nix was just installed or already available (volume mount)
-if [ -d /etc/profile.d ] && [ ! -e /etc/profile.d/nix.sh ]; then
-    info "Creating /etc/profile.d/nix.sh..."
-    sudo tee /etc/profile.d/nix.sh > /dev/null << 'EOF'
-# Nix package manager
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
-EOF
-    sudo chmod +x /etc/profile.d/nix.sh
-fi
-
 # Enable flakes if not already enabled
 if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
     info "Enabling Nix flakes..."
@@ -106,16 +93,28 @@ nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 
 success "Home Manager configuration applied!"
 
-# Set zsh as default shell (if not already)
-if [ "$SHELL" != "/bin/zsh" ] && [ -x /bin/zsh ]; then
-    info "Setting zsh as default shell..."
+# Set Nix zsh as default shell
+# The zsh installed by Nix is at ~/.nix-profile/bin/zsh
+NIX_ZSH="$HOME/.nix-profile/bin/zsh"
+if [ -x "$NIX_ZSH" ]; then
+    info "Setting Nix zsh as default shell..."
+    
+    # Add Nix zsh to /etc/shells if not already there
+    if ! grep -q "$NIX_ZSH" /etc/shells 2>/dev/null; then
+        echo "$NIX_ZSH" | sudo tee -a /etc/shells > /dev/null
+    fi
+    
+    # Change default shell
     if command -v chsh &>/dev/null; then
-        chsh -s /bin/zsh "$USER" 2>/dev/null || sudo chsh -s /bin/zsh "$USER" 2>/dev/null || true
+        sudo chsh -s "$NIX_ZSH" "$USER" 2>/dev/null || chsh -s "$NIX_ZSH" 2>/dev/null || true
     fi
-    # Also update /etc/passwd directly if we're root (common in containers)
-    if [ "$(id -u)" = "0" ] && [ -w /etc/passwd ]; then
-        sed -i "s|^root:.*:/bin/bash|root:x:0:0:root:/root:/bin/zsh|" /etc/passwd 2>/dev/null || true
+    
+    # Also update /etc/passwd directly (works in containers where chsh might fail)
+    if [ -w /etc/passwd ] || [ "$(id -u)" = "0" ]; then
+        sudo sed -i "s|$USER:.*:/bin/bash|$USER:x:$(id -u):$(id -g)::/home/$USER:$NIX_ZSH|" /etc/passwd 2>/dev/null || true
     fi
+    
+    success "Default shell set to $NIX_ZSH"
 fi
 
 echo ""

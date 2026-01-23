@@ -132,14 +132,13 @@ in
       # SSH wrapper for DevPod - auto-attach to tmux session
       # Usage: ssh rcom.devpod → automatically attaches to DevPod's tmux
       # Use Ctrl+A Ctrl+A <key> to send commands to nested DevPod tmux
+      # Note: Requires zsh as default shell in DevPod (set by bootstrap.sh)
+      #       and .zshenv sourcing Nix (set by home-manager)
       ssh() {
         if [[ "$1" == *".devpod" && "$#" -eq 1 ]]; then
-          # DevPod SSH: auto-attach to tmux session named after the devpod
-          # Use bash login shell (-l) to source /etc/profile.d/nix.sh (which adds Nix to PATH)
           local session_name="$1"
-          command ssh -t "$1" "bash -lc \"tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'\""
+          command ssh -t "$1" "tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'"
         else
-          # Normal SSH passthrough
           command ssh "$@"
         fi
       }
