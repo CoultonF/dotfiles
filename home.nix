@@ -113,9 +113,12 @@ in
 
     # Source nix profile early (in .zshenv) so it works for non-interactive shells too
     envExtra = ''
-      # Source nix profile (zsh doesn't read /etc/profile.d/ by default)
-      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      # Add nix profile to PATH directly (guard may already be set by container setup)
+      if [ -e "$HOME/.nix-profile/bin" ] && [[ ":$PATH:" != *":$HOME/.nix-profile/bin:"* ]]; then
+        export PATH="$HOME/.nix-profile/bin:$PATH"
+      fi
+      if [ -e "/nix/var/nix/profiles/default/bin" ] && [[ ":$PATH:" != *":/nix/var/nix/profiles/default/bin:"* ]]; then
+        export PATH="/nix/var/nix/profiles/default/bin:$PATH"
       fi
     '';
 
