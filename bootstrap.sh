@@ -25,6 +25,11 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$SCRIPT_DIR"
 
+# Ensure ~/.dotfiles symlink exists (devpod clones to ~/dotfiles, not ~/.dotfiles)
+if [ "$DOTFILES_DIR" != "$HOME/.dotfiles" ] && [ ! -e "$HOME/.dotfiles" ]; then
+    ln -s "$DOTFILES_DIR" "$HOME/.dotfiles"
+fi
+
 echo ""
 echo "=========================================="
 echo "  Dotfiles Bootstrap (Home Manager)"
