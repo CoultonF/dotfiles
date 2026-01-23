@@ -1,6 +1,7 @@
 #!/bin/bash
 # Bootstrap script for dotfiles with Home Manager
 # Installs Nix (single-user mode) and applies Home Manager configuration
+# No sudo required - everything installs to user's home directory
 
 set -e
 
@@ -47,7 +48,7 @@ case "$(uname -s)-$(uname -m)" in
 esac
 info "Detected system: $SYSTEM"
 
-# Install Nix if not present
+# Install Nix if not present (single-user mode, no sudo required)
 if ! command -v nix &> /dev/null; then
     info "Installing Nix (single-user mode)..."
     curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --yes
@@ -64,23 +65,6 @@ if ! command -v nix &> /dev/null; then
     error "Nix installation failed - 'nix' command not found. Try restarting your shell and running bootstrap.sh again."
 fi
 
-# Ensure Nix is in PATH for all zsh shells (system-wide)
-# This ensures SSH commands have Nix available
-NIX_ZSHENV_SNIPPET='
-# Nix single-user
-if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-fi'
-
-for zshenv_path in /etc/zshenv /etc/zsh/zshenv; do
-    if [ -e "$zshenv_path" ] || [ -d "$(dirname "$zshenv_path")" ]; then
-        if ! grep -q "nix-profile" "$zshenv_path" 2>/dev/null; then
-            info "Adding Nix to $zshenv_path..."
-            echo "$NIX_ZSHENV_SNIPPET" | sudo tee -a "$zshenv_path" > /dev/null
-        fi
-    fi
-done
-
 # Enable flakes
 if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
     info "Enabling Nix flakes..."
@@ -93,27 +77,6 @@ info "Applying Home Manager configuration..."
 cd "$DOTFILES_DIR"
 nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 success "Home Manager configuration applied!"
-
-# Set Nix zsh as default shell
-NIX_ZSH="$HOME/.nix-profile/bin/zsh"
-if [ -x "$NIX_ZSH" ]; then
-    info "Setting Nix zsh as default shell..."
-    
-    # Add to /etc/shells
-    if ! grep -q "$NIX_ZSH" /etc/shells 2>/dev/null; then
-        echo "$NIX_ZSH" | sudo tee -a /etc/shells > /dev/null
-    fi
-    
-    # Change default shell
-    sudo chsh -s "$NIX_ZSH" "$USER" 2>/dev/null || chsh -s "$NIX_ZSH" 2>/dev/null || true
-    
-    # Fallback: update /etc/passwd directly (containers)
-    if [ "$(id -u)" = "0" ]; then
-        sed -i "s|$USER:.*:/bin/bash|$USER:x:$(id -u):$(id -g)::/home/$USER:$NIX_ZSH|" /etc/passwd 2>/dev/null || true
-    fi
-    
-    success "Default shell set to $NIX_ZSH"
-fi
 
 echo ""
 echo "=========================================="
