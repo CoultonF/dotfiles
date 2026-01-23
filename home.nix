@@ -145,7 +145,7 @@ in
     enable = true;
     
     # Basic settings
-    prefix = "C-b";
+    prefix = "C-a";
     keyMode = "vi";
     baseIndex = 1;
     escapeTime = 0;
