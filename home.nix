@@ -100,13 +100,16 @@ in
       EDITOR = "nvim";
     };
 
-    # Add to PATH
-    initContent = ''
+    # Source nix profile early (in .zshenv) so it works for non-interactive shells too
+    envExtra = ''
       # Source nix profile (zsh doesn't read /etc/profile.d/ by default)
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
-      
+    '';
+
+    # Add to PATH (runs in .zshrc for interactive shells)
+    initContent = ''
       # Add dotfiles bin to PATH
       export PATH="$HOME/.dotfiles/bin:$PATH"
       
