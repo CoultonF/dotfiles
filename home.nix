@@ -19,10 +19,9 @@ in
   programs.home-manager.enable = true;
 
   # ============================================================================
-  # Packages
+  # Packages (same for macOS and Linux, except GUI apps)
   # ============================================================================
-  # Full packages for macOS, minimal for Linux containers (they have their own packages)
-  home.packages = with pkgs; lib.optionals isDarwin [
+  home.packages = with pkgs; [
     # Editor
     neovim
 
@@ -55,39 +54,24 @@ in
     gcc          # C compiler (treesitter needs this)
     gnumake
 
-    # Terminal Multiplexer
+    # Terminal
     tmux
+    starship
 
-    # Docker Tools (OrbStack provides the docker daemon on macOS)
-    docker-client # Docker CLI
+    # Docker CLI Tools
     lazydocker   # Docker TUI
     ctop         # Container metrics
-    devpod       # Dev environment manager (CLI)
-    devpod-desktop # Dev environment manager (GUI)
 
     # Utilities
     curl
     wget
     unzip
     jq           # JSON processor
-  ] ++ lib.optionals (!isDarwin) [
-    # Linux containers: essential CLI tools (skip heavy GUI/docker packages to avoid OOM)
-    neovim
-    opencode
-    
-    # Search & Navigation  
-    ripgrep
-    fd
-    fzf
-    tree
-    
-    # Git
-    lazygit
-    delta
-    
-    # Terminal
-    tmux
-    starship
+  ] ++ lib.optionals isDarwin [
+    # macOS-only: GUI apps and tools that need OrbStack
+    docker-client # Docker CLI (OrbStack provides daemon)
+    devpod       # Dev environment manager (CLI)
+    devpod-desktop # Dev environment manager (GUI)
   ];
 
   # ============================================================================
@@ -111,16 +95,10 @@ in
       EDITOR = "nvim";
     };
 
-    # Source nix profile early (in .zshenv) so it works for non-interactive shells too
-    envExtra = ''
-      # Add nix profile to PATH directly (guard may already be set by container setup)
-      if [ -e "$HOME/.nix-profile/bin" ] && [[ ":$PATH:" != *":$HOME/.nix-profile/bin:"* ]]; then
-        export PATH="$HOME/.nix-profile/bin:$PATH"
-      fi
-      if [ -e "/nix/var/nix/profiles/default/bin" ] && [[ ":$PATH:" != *":/nix/var/nix/profiles/default/bin:"* ]]; then
-        export PATH="/nix/var/nix/profiles/default/bin:$PATH"
-      fi
-    '';
+    # Environment setup in .zshenv (runs for all shells including non-interactive)
+    # Note: Nix PATH is handled by devcontainer feature's containerEnv on Linux,
+    #       and by nix-daemon.sh on macOS
+    envExtra = "";
 
     # Add to PATH (runs in .zshrc for interactive shells)
     initContent = ''

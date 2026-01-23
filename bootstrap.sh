@@ -1,19 +1,17 @@
 #!/bin/bash
 # Bootstrap script for dotfiles with Home Manager
-# This is the only script you need to run on a fresh machine
+# Nix is expected to be pre-installed (via devcontainer feature or system install)
 
 set -e
 
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
 info() { echo -e "${BLUE}==>${NC} $1"; }
 success() { echo -e "${GREEN}==>${NC} $1"; }
-warn() { echo -e "${YELLOW}==>${NC} $1"; }
 error() { echo -e "${RED}==>${NC} $1"; exit 1; }
 
 # Ensure USER is set (required by home-manager, may not be set in containers)
@@ -44,46 +42,18 @@ case "$(uname -s)-$(uname -m)" in
     Darwin-x86_64) SYSTEM="x86_64-darwin" ;;
     Linux-x86_64) SYSTEM="x86_64-linux" ;;
     Linux-aarch64) SYSTEM="aarch64-linux" ;;
+    Linux-armv7l) SYSTEM="armv7l-linux" ;;
     *) error "Unsupported system: $(uname -s)-$(uname -m)" ;;
 esac
 info "Detected system: $SYSTEM"
 
-# Step 1: Install Nix if not present
+# Verify Nix is available
 if ! command -v nix &> /dev/null; then
-    info "Installing Nix..."
-    
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS: Use the standard installer
-        curl -L https://nixos.org/nix/install | sh -s -- --daemon
-    else
-        # Linux containers: Configure Nix for single-user mode BEFORE installing
-        mkdir -p /etc/nix ~/.config/nix
-        
-        # Disable sandbox and build users for single-user container install
-        cat > /etc/nix/nix.conf << 'NIXCONF'
-build-users-group =
-sandbox = false
-experimental-features = nix-command flakes
-NIXCONF
-        cp /etc/nix/nix.conf ~/.config/nix/nix.conf
-        
-        # Install Nix
-        curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-    fi
-    
-    # Source Nix for this session
-    if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
-        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-    elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-    fi
-    
-    success "Nix installed"
-else
-    success "Nix already installed"
+    error "Nix is not installed. Please install Nix first (devcontainer feature or https://nixos.org/download)"
 fi
+success "Nix is available"
 
-# Step 2: Enable flakes if not already enabled
+# Enable flakes if not already enabled
 if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
     info "Enabling Nix flakes..."
     mkdir -p ~/.config/nix
@@ -93,7 +63,7 @@ else
     success "Flakes already enabled"
 fi
 
-# Step 3: Run Home Manager
+# Apply Home Manager configuration
 info "Applying Home Manager configuration..."
 cd "$DOTFILES_DIR"
 
@@ -103,7 +73,7 @@ nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 
 success "Home Manager configuration applied!"
 
-# Step 4: Set zsh as default shell (if not already)
+# Set zsh as default shell (if not already)
 if [ "$SHELL" != "/bin/zsh" ] && [ -x /bin/zsh ]; then
     info "Setting zsh as default shell..."
     if command -v chsh &>/dev/null; then
@@ -113,18 +83,6 @@ if [ "$SHELL" != "/bin/zsh" ] && [ -x /bin/zsh ]; then
     if [ "$(id -u)" = "0" ] && [ -w /etc/passwd ]; then
         sed -i "s|^root:.*:/bin/bash|root:x:0:0:root:/root:/bin/zsh|" /etc/passwd 2>/dev/null || true
     fi
-fi
-
-# Step 5: Add bash fallback (source nix profile in .bashrc)
-if ! grep -q "nix-daemon.sh" ~/.bashrc 2>/dev/null; then
-    info "Adding nix profile to .bashrc as fallback..."
-    cat >> ~/.bashrc << 'BASHRC'
-
-# Nix profile (added by dotfiles bootstrap)
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
-BASHRC
 fi
 
 echo ""
