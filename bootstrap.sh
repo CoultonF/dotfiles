@@ -16,6 +16,11 @@ success() { echo -e "${GREEN}==>${NC} $1"; }
 warn() { echo -e "${YELLOW}==>${NC} $1"; }
 error() { echo -e "${RED}==>${NC} $1"; exit 1; }
 
+# Ensure USER is set (required by home-manager, may not be set in containers)
+if [ -z "$USER" ]; then
+    export USER=$(whoami)
+fi
+
 # Determine dotfiles directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$SCRIPT_DIR"
