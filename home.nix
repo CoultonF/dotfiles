@@ -72,11 +72,23 @@ in
     unzip
     jq           # JSON processor
   ] ++ lib.optionals (!isDarwin) [
-    # Linux containers: minimal packages (container has most tools)
-    # Just add things the container doesn't have
-    starship     # Prompt (needed for zsh integration)
-    fzf          # For fzf zsh integration
-    delta        # Better diffs
+    # Linux containers: essential CLI tools (skip heavy GUI/docker packages to avoid OOM)
+    neovim
+    opencode
+    
+    # Search & Navigation  
+    ripgrep
+    fd
+    fzf
+    tree
+    
+    # Git
+    lazygit
+    delta
+    
+    # Terminal
+    tmux
+    starship
   ];
 
   # ============================================================================
