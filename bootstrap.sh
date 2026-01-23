@@ -81,6 +81,26 @@ cd "$DOTFILES_DIR"
 nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 success "Home Manager configuration applied!"
 
+# Set zsh as default shell
+ZSH_PATH="$HOME/.nix-profile/bin/zsh"
+if [ -x "$ZSH_PATH" ]; then
+    CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+    if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
+        info "Setting zsh as default shell..."
+        # Add to /etc/shells if not present
+        if ! grep -q "$ZSH_PATH" /etc/shells 2>/dev/null; then
+            echo "$ZSH_PATH" >> /etc/shells 2>/dev/null || true
+        fi
+        # Change shell (try chsh first, fall back to usermod for containers)
+        if command -v chsh &> /dev/null; then
+            chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
+        else
+            usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
+        fi
+        success "Default shell set to zsh"
+    fi
+fi
+
 echo ""
 echo "=========================================="
 echo "  Bootstrap Complete!"
