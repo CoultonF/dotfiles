@@ -131,19 +131,6 @@ in
         fi
       fi
       
-      # SSH wrapper for DevPod - auto-attach to tmux session
-      # Usage: ssh rcom.devpod → automatically attaches to DevPod's tmux
-      # Use Ctrl+A Ctrl+A <key> to send commands to nested DevPod tmux
-      # Note: Requires zsh as default shell in DevPod (set by bootstrap.sh)
-      #       and .zshenv sourcing Nix (set by home-manager)
-      ssh() {
-        if [[ "$1" == *".devpod" && "$#" -eq 1 ]]; then
-          local session_name="$1"
-          command ssh -t "$1" "tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'"
-        else
-          command ssh "$@"
-        fi
-      }
     '';
 
     # Completions
@@ -163,11 +150,39 @@ in
   };
 
   # ============================================================================
-  # Starship Prompt
+  # Starship Prompt (minimal for mobile)
   # ============================================================================
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
+    settings = {
+      format = "$directory$git_branch$character";
+      
+      directory = {
+        truncation_length = 2;
+        truncate_to_repo = true;
+        style = "bold cyan";
+      };
+      
+      git_branch = {
+        format = "[$branch]($style) ";
+        style = "bold purple";
+      };
+      
+      character = {
+        success_symbol = "[❯](green)";
+        error_symbol = "[❯](red)";
+      };
+      
+      # Disable verbose modules
+      aws.disabled = true;
+      nodejs.disabled = true;
+      python.disabled = true;
+      package.disabled = true;
+      cmd_duration.disabled = true;
+      username.disabled = true;
+      hostname.disabled = true;
+    };
   };
 
   # ============================================================================

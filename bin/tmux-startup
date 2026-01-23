@@ -3,7 +3,8 @@
 # Mac: Tab 1: Terminal, Tab 2: Docker (lazydocker/ctop)
 # Container: Tab 1: Terminal only (no Docker socket access)
 
-SESSION="main"
+# Use DevPod workspace name if available, otherwise "main"
+SESSION="${DEVPOD_WORKSPACE_ID:-main}"
 
 # Detect if running inside a container (comprehensive check)
 in_container() {
