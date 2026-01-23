@@ -96,9 +96,13 @@ in
     };
 
     # Environment setup in .zshenv (runs for all shells including non-interactive)
-    # Note: Nix PATH is handled by devcontainer feature's containerEnv on Linux,
-    #       and by nix-daemon.sh on macOS
-    envExtra = "";
+    envExtra = ''
+      # Source Nix profile if available (needed in containers where Nix is installed via bootstrap.sh)
+      # Safe to call multiple times - nix-daemon.sh guards against double-sourcing
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+    '';
 
     # Add to PATH (runs in .zshrc for interactive shells)
     initContent = ''
@@ -131,9 +135,9 @@ in
       ssh() {
         if [[ "$1" == *".devpod" && "$#" -eq 1 ]]; then
           # DevPod SSH: auto-attach to tmux session named after the devpod
-          # Source Nix profile first since tmux is installed via Nix
+          # Use bash login shell (-l) to source /etc/profile.d/nix.sh (which adds Nix to PATH)
           local session_name="$1"
-          command ssh -t "$1" "source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh 2>/dev/null; tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'"
+          command ssh -t "$1" "bash -lc \"tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'\""
         else
           # Normal SSH passthrough
           command ssh "$@"
