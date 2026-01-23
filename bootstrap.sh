@@ -56,19 +56,19 @@ if ! command -v nix &> /dev/null; then
         # macOS: Use the standard installer
         curl -L https://nixos.org/nix/install | sh -s -- --daemon
     else
-        # Linux containers: Create nixbld group and configure for single-user
-        if ! getent group nixbld >/dev/null 2>&1; then
-            groupadd -r nixbld 2>/dev/null || true
-        fi
+        # Linux containers: Configure Nix for single-user mode BEFORE installing
+        mkdir -p /etc/nix ~/.config/nix
+        
+        # Disable sandbox and build users for single-user container install
+        cat > /etc/nix/nix.conf << 'NIXCONF'
+build-users-group =
+sandbox = false
+experimental-features = nix-command flakes
+NIXCONF
+        cp /etc/nix/nix.conf ~/.config/nix/nix.conf
         
         # Install Nix
         curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-        
-        # Configure Nix to not require build users (single-user mode)
-        mkdir -p ~/.config/nix
-        if ! grep -q "build-users-group" ~/.config/nix/nix.conf 2>/dev/null; then
-            echo "build-users-group = " >> ~/.config/nix/nix.conf
-        fi
     fi
     
     # Source Nix for this session
