@@ -130,8 +130,9 @@ in
       # Use Ctrl+A Ctrl+A <key> to send commands to nested DevPod tmux
       ssh() {
         if [[ "$1" == *".devpod" && "$#" -eq 1 ]]; then
-          # DevPod SSH: auto-attach to tmux session "main"
-          command ssh -t "$1" 'tmux attach-session -t main 2>/dev/null || tmux new-session -s main'
+          # DevPod SSH: auto-attach to tmux session named after the devpod
+          local session_name="$1"
+          command ssh -t "$1" "tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'"
         else
           # Normal SSH passthrough
           command ssh "$@"
