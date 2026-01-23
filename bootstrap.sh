@@ -79,18 +79,23 @@ if ! command -v nix &> /dev/null; then
 fi
 
 # Ensure Nix is sourced for ALL zsh shells (system-wide)
-# This is more reliable than relying on ~/.zshenv which can be affected by ZDOTDIR
-if [ -d /etc/zsh ]; then
-    if ! grep -q "nix-daemon.sh" /etc/zsh/zshenv 2>/dev/null; then
-        info "Adding Nix to /etc/zsh/zshenv..."
-        sudo tee -a /etc/zsh/zshenv > /dev/null << 'EOF'
-
+# Try both /etc/zshenv and /etc/zsh/zshenv (different distros use different paths)
+NIX_ZSHENV_SNIPPET='
 # Nix package manager
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi'
+
+# /etc/zshenv (Arch, macOS, etc.)
+if ! grep -q "nix-daemon.sh" /etc/zshenv 2>/dev/null; then
+    info "Adding Nix to /etc/zshenv..."
+    echo "$NIX_ZSHENV_SNIPPET" | sudo tee -a /etc/zshenv > /dev/null
 fi
-EOF
-    fi
+
+# /etc/zsh/zshenv (Debian, Ubuntu, etc.)
+if [ -d /etc/zsh ] && ! grep -q "nix-daemon.sh" /etc/zsh/zshenv 2>/dev/null; then
+    info "Adding Nix to /etc/zsh/zshenv..."
+    echo "$NIX_ZSHENV_SNIPPET" | sudo tee -a /etc/zsh/zshenv > /dev/null
 fi
 
 # Enable flakes if not already enabled
