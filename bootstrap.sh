@@ -73,6 +73,21 @@ else
     success "Nix is available"
 fi
 
+# Ensure Nix is sourced for ALL zsh shells (system-wide)
+# This is more reliable than relying on ~/.zshenv which can be affected by ZDOTDIR
+if [ -d /etc/zsh ]; then
+    if ! grep -q "nix-daemon.sh" /etc/zsh/zshenv 2>/dev/null; then
+        info "Adding Nix to /etc/zsh/zshenv..."
+        sudo tee -a /etc/zsh/zshenv > /dev/null << 'EOF'
+
+# Nix package manager
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+EOF
+    fi
+fi
+
 # Enable flakes if not already enabled
 if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
     info "Enabling Nix flakes..."
