@@ -58,8 +58,7 @@ in
     # Terminal Multiplexer
     tmux
 
-    # Docker Tools
-    colima       # Container runtime for macOS
+    # Docker Tools (OrbStack provides the docker daemon on macOS)
     docker-client # Docker CLI
     lazydocker   # Docker TUI
     ctop         # Container metrics
@@ -255,20 +254,7 @@ in
   ];
 
   # ============================================================================
-  # Launchd Agents (macOS only)
+  # Note: OrbStack is used for Docker on macOS (installed separately)
+  # OrbStack handles its own startup and doesn't need a launchd agent
   # ============================================================================
-  launchd.agents.colima = lib.mkIf isDarwin {
-    enable = true;
-    config = {
-      Label = "com.github.colima";
-      ProgramArguments = [ 
-        "${pkgs.colima}/bin/colima" "start" "--foreground"
-        "--cpu" "4" "--memory" "16" "--disk" "100"
-      ];
-      RunAtLoad = true;
-      KeepAlive = true;
-      StandardOutPath = "/tmp/colima.log";
-      StandardErrorPath = "/tmp/colima.error.log";
-    };
-  };
 }
