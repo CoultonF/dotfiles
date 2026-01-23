@@ -1,6 +1,6 @@
 #!/bin/bash
 # Bootstrap script for dotfiles with Home Manager
-# Nix will be installed automatically if not present (idempotent)
+# Installs Nix (single-user mode) and applies Home Manager configuration
 
 set -e
 
@@ -47,97 +47,69 @@ case "$(uname -s)-$(uname -m)" in
 esac
 info "Detected system: $SYSTEM"
 
-# Install Nix if not present (idempotent)
+# Install Nix if not present
 if ! command -v nix &> /dev/null; then
-    info "Nix not found, installing..."
-    
-    # Clean up any stale backup files from previous failed installs
-    sudo rm -f /etc/bash.bashrc.backup-before-nix /etc/bashrc.backup-before-nix 2>/dev/null || true
-    sudo rm -f /etc/profile.d/nix.sh.backup-before-nix 2>/dev/null || true
-    sudo rm -f /etc/zshrc.backup-before-nix /etc/zshenv.backup-before-nix 2>/dev/null || true
-    sudo rm -f /etc/zsh/zshrc.backup-before-nix /etc/zsh/zshenv.backup-before-nix 2>/dev/null || true
-    
-    # Install Nix in daemon mode (multi-user)
-    # --yes skips confirmation prompts
-    curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
-    
+    info "Installing Nix (single-user mode)..."
+    curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --yes
     success "Nix installed"
-else
-    success "Nix is available"
 fi
 
-# Ensure Nix is in PATH for this session
-# The installer says "Nix won't work in active shell sessions until you restart them"
-# but we can work around this by explicitly setting PATH
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+# Source Nix for this session
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
 fi
-export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
 
 # Verify Nix is working
 if ! command -v nix &> /dev/null; then
-    error "Nix installation failed - 'nix' command not found in PATH. Try restarting your shell and running bootstrap.sh again."
+    error "Nix installation failed - 'nix' command not found. Try restarting your shell and running bootstrap.sh again."
 fi
 
-# Ensure Nix is sourced for ALL zsh shells (system-wide)
-# Try both /etc/zshenv and /etc/zsh/zshenv (different distros use different paths)
+# Ensure Nix is in PATH for all zsh shells (system-wide)
+# This ensures SSH commands have Nix available
 NIX_ZSHENV_SNIPPET='
-# Nix package manager
-if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
-    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+# Nix single-user
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
 fi'
 
-# /etc/zshenv (Arch, macOS, etc.)
-if ! grep -q "nix-daemon.sh" /etc/zshenv 2>/dev/null; then
-    info "Adding Nix to /etc/zshenv..."
-    echo "$NIX_ZSHENV_SNIPPET" | sudo tee -a /etc/zshenv > /dev/null
-fi
+for zshenv_path in /etc/zshenv /etc/zsh/zshenv; do
+    if [ -e "$zshenv_path" ] || [ -d "$(dirname "$zshenv_path")" ]; then
+        if ! grep -q "nix-profile" "$zshenv_path" 2>/dev/null; then
+            info "Adding Nix to $zshenv_path..."
+            echo "$NIX_ZSHENV_SNIPPET" | sudo tee -a "$zshenv_path" > /dev/null
+        fi
+    fi
+done
 
-# /etc/zsh/zshenv (Debian, Ubuntu, etc.)
-if [ -d /etc/zsh ] && ! grep -q "nix-daemon.sh" /etc/zsh/zshenv 2>/dev/null; then
-    info "Adding Nix to /etc/zsh/zshenv..."
-    echo "$NIX_ZSHENV_SNIPPET" | sudo tee -a /etc/zsh/zshenv > /dev/null
-fi
-
-# Enable flakes if not already enabled
+# Enable flakes
 if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
     info "Enabling Nix flakes..."
     mkdir -p ~/.config/nix
     echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-    success "Flakes enabled"
-else
-    success "Flakes already enabled"
 fi
 
 # Apply Home Manager configuration
 info "Applying Home Manager configuration..."
 cd "$DOTFILES_DIR"
-
-# Use nix run to execute home-manager without installing it globally first
-# --impure allows reading $USER and $HOME environment variables
 nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
-
 success "Home Manager configuration applied!"
 
 # Set Nix zsh as default shell
-# The zsh installed by Nix is at ~/.nix-profile/bin/zsh
 NIX_ZSH="$HOME/.nix-profile/bin/zsh"
 if [ -x "$NIX_ZSH" ]; then
     info "Setting Nix zsh as default shell..."
     
-    # Add Nix zsh to /etc/shells if not already there
+    # Add to /etc/shells
     if ! grep -q "$NIX_ZSH" /etc/shells 2>/dev/null; then
         echo "$NIX_ZSH" | sudo tee -a /etc/shells > /dev/null
     fi
     
     # Change default shell
-    if command -v chsh &>/dev/null; then
-        sudo chsh -s "$NIX_ZSH" "$USER" 2>/dev/null || chsh -s "$NIX_ZSH" 2>/dev/null || true
-    fi
+    sudo chsh -s "$NIX_ZSH" "$USER" 2>/dev/null || chsh -s "$NIX_ZSH" 2>/dev/null || true
     
-    # Also update /etc/passwd directly (works in containers where chsh might fail)
-    if [ -w /etc/passwd ] || [ "$(id -u)" = "0" ]; then
-        sudo sed -i "s|$USER:.*:/bin/bash|$USER:x:$(id -u):$(id -g)::/home/$USER:$NIX_ZSH|" /etc/passwd 2>/dev/null || true
+    # Fallback: update /etc/passwd directly (containers)
+    if [ "$(id -u)" = "0" ]; then
+        sed -i "s|$USER:.*:/bin/bash|$USER:x:$(id -u):$(id -g)::/home/$USER:$NIX_ZSH|" /etc/passwd 2>/dev/null || true
     fi
     
     success "Default shell set to $NIX_ZSH"
@@ -147,13 +119,6 @@ echo ""
 echo "=========================================="
 echo "  Bootstrap Complete!"
 echo "=========================================="
-echo ""
-echo "Your dotfiles are now managed by Home Manager."
-echo ""
-echo "Common commands:"
-echo "  home-manager switch --flake ~/.dotfiles   # Apply changes"
-echo "  home-manager generations                  # List generations"
-echo "  home-manager packages                     # List installed packages"
 echo ""
 echo "Restart your terminal or run: exec zsh"
 echo ""

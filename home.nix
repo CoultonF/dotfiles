@@ -97,9 +97,10 @@ in
 
     # Environment setup in .zshenv (runs for all shells including non-interactive)
     envExtra = ''
-      # Source Nix profile if available (needed in containers where Nix is installed via bootstrap.sh)
-      # Safe to call multiple times - nix-daemon.sh guards against double-sourcing
-      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+      # Source Nix profile (supports both single-user and multi-user installations)
+      if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+      elif [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
     '';
