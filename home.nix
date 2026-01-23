@@ -37,6 +37,7 @@ in
     # Git
     lazygit      # Git TUI
     git          # Git CLI
+    gh           # GitHub CLI
     delta        # Better git diff
 
     # Language Support
