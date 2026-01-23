@@ -165,6 +165,27 @@ in
     mouse = true;
     terminal = "tmux-256color";
     
+    # Plugins
+    plugins = with pkgs.tmuxPlugins; [
+      {
+        plugin = resurrect;
+        extraConfig = ''
+          # Save/restore sessions
+          set -g @resurrect-capture-pane-contents 'on'
+          set -g @resurrect-strategy-nvim 'session'
+        '';
+      }
+      {
+        plugin = continuum;
+        extraConfig = ''
+          # Auto-save every 15 minutes
+          set -g @continuum-save-interval '15'
+          # Auto-restore on tmux start
+          set -g @continuum-restore 'on'
+        '';
+      }
+    ];
+    
     # Extra configuration (our full config)
     extraConfig = builtins.readFile ./tmux/tmux.conf;
   };

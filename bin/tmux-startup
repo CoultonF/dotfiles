@@ -1,9 +1,30 @@
 #!/usr/bin/env bash
 # tmux-startup: Initialize tmux with default layout
-# Tab 1: Terminal
-# Tab 2: Docker (lazydocker 70% top, ctop 30% bottom)
+# Mac: Tab 1: Terminal, Tab 2: Docker (lazydocker/ctop)
+# Container: Tab 1: Terminal only (no Docker socket access)
 
 SESSION="main"
+
+# Detect if running inside a container (comprehensive check)
+in_container() {
+    # File markers created by container runtimes
+    [[ -f "/.dockerenv" ]] && return 0
+    [[ -f "/run/.containerenv" ]] && return 0
+    
+    # Environment variables from container runtimes/orchestrators
+    [[ -n "$container" ]] && return 0           # systemd-nspawn, podman
+    [[ -n "$DEVPOD_WORKSPACE_ID" ]] && return 0 # DevPod
+    [[ -n "$CODESPACES" ]] && return 0          # GitHub Codespaces
+    [[ -n "$REMOTE_CONTAINERS" ]] && return 0   # VS Code devcontainers
+    [[ -n "$KUBERNETES_SERVICE_HOST" ]] && return 0  # Kubernetes pod
+    
+    # Check cgroups for container signatures (Linux only)
+    if [[ -f /proc/1/cgroup ]]; then
+        grep -qE '(docker|containerd|kubepods|lxc|libpod)' /proc/1/cgroup 2>/dev/null && return 0
+    fi
+    
+    return 1
+}
 
 # Check if session already exists
 if tmux has-session -t "$SESSION" 2>/dev/null; then
@@ -15,17 +36,20 @@ fi
 # Create new session with first window (Terminal)
 tmux new-session -d -s "$SESSION" -n "Terminal"
 
-# Create second window (Docker)
-tmux new-window -t "$SESSION" -n "Docker"
+# Only create Docker window on host machines (not in containers)
+if ! in_container; then
+    # Create second window (Docker)
+    tmux new-window -t "$SESSION" -n "Docker"
 
-# Split the Docker window: top 70%, bottom 30%
-tmux split-window -t "$SESSION:Docker" -v -p 30
+    # Split the Docker window: top 70%, bottom 30%
+    tmux split-window -t "$SESSION:Docker" -v -p 30
 
-# Run lazydocker in top pane (pane 0)
-tmux send-keys -t "$SESSION:Docker.0" "lazydocker" Enter
+    # Run lazydocker in top pane (pane 0)
+    tmux send-keys -t "$SESSION:Docker.0" "lazydocker" Enter
 
-# Run ctop in bottom pane (pane 1)
-tmux send-keys -t "$SESSION:Docker.1" "ctop" Enter
+    # Run ctop in bottom pane (pane 1)
+    tmux send-keys -t "$SESSION:Docker.1" "ctop" Enter
+fi
 
 # Select the first window (Terminal)
 tmux select-window -t "$SESSION:Terminal"

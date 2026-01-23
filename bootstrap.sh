@@ -1,6 +1,6 @@
 #!/bin/bash
 # Bootstrap script for dotfiles with Home Manager
-# Nix is expected to be pre-installed (via devcontainer feature or system install)
+# Nix will be installed automatically if not present (idempotent)
 
 set -e
 
@@ -47,11 +47,31 @@ case "$(uname -s)-$(uname -m)" in
 esac
 info "Detected system: $SYSTEM"
 
-# Verify Nix is available
+# Install Nix if not present (idempotent)
 if ! command -v nix &> /dev/null; then
-    error "Nix is not installed. Please install Nix first (devcontainer feature or https://nixos.org/download)"
+    info "Nix not found, installing..."
+    
+    # Clean up any stale backup files from previous failed installs
+    rm -f /etc/bash.bashrc.backup-before-nix /etc/bashrc.backup-before-nix 2>/dev/null || true
+    rm -f /etc/profile.d/nix.sh.backup-before-nix 2>/dev/null || true
+    
+    # Install Nix in daemon mode (multi-user)
+    # --yes skips confirmation prompts
+    curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
+    
+    # Source Nix for this session
+    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+    fi
+    
+    success "Nix installed"
+else
+    # Source Nix if available but not in PATH (e.g., volume mount scenario)
+    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+    fi
+    success "Nix is available"
 fi
-success "Nix is available"
 
 # Enable flakes if not already enabled
 if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
