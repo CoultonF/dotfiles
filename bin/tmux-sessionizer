@@ -5,12 +5,19 @@
 # Usage: tmux-sessionizer [directory]
 #        If no directory provided, uses fzf to select from project directories
 
-# Project directories to search
+# Project directories to search (defaults)
 SEARCH_DIRS=(
     "$HOME/Repos"
     "$HOME/Projects"
     "$HOME/.dotfiles"
 )
+
+# Add directories from TMUX_SESSIONIZER_DIRS env var (colon-separated, like PATH)
+# Example: export TMUX_SESSIONIZER_DIRS="/project:/other/path"
+if [[ -n "$TMUX_SESSIONIZER_DIRS" ]]; then
+    IFS=':' read -ra EXTRA_DIRS <<< "$TMUX_SESSIONIZER_DIRS"
+    SEARCH_DIRS+=("${EXTRA_DIRS[@]}")
+fi
 
 # Build find paths (only existing directories)
 FIND_PATHS=()
