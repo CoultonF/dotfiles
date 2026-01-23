@@ -77,7 +77,8 @@ info "Applying Home Manager configuration..."
 cd "$DOTFILES_DIR"
 
 # Use nix run to execute home-manager without installing it globally first
-nix run home-manager/master -- switch --flake ".#$SYSTEM" -b backup
+# --impure allows reading $USER and $HOME environment variables
+nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 
 success "Home Manager configuration applied!"
 

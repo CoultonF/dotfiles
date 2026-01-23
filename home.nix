@@ -1,5 +1,14 @@
-{ config, pkgs, lib, username, homeDirectory, ... }:
+{ config, pkgs, lib, isDarwin, ... }:
 
+let
+  # Get from environment, with fallback for pure evaluation
+  envUser = builtins.getEnv "USER";
+  envHome = builtins.getEnv "HOME";
+  
+  username = if envUser != "" then envUser else "cfraser";
+  homeDirectory = if envHome != "" then envHome else 
+    (if isDarwin then "/Users/${username}" else "/home/${username}");
+in
 {
   # Home Manager configuration
   home.username = username;
@@ -80,7 +89,7 @@
     };
 
     # Add to PATH
-    initExtra = ''
+    initContent = ''
       # Add dotfiles bin to PATH
       export PATH="$HOME/.dotfiles/bin:$PATH"
       
@@ -154,23 +163,24 @@
   programs.git = {
     enable = true;
     
-    # Delta for better diffs
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        light = false;
-        side-by-side = true;
-        line-numbers = true;
-      };
-    };
-
-    extraConfig = {
+    settings = {
       init.defaultBranch = "main";
       pull.rebase = false;
       push.autoSetupRemote = true;
       merge.conflictstyle = "diff3";
       diff.colorMoved = "default";
+    };
+  };
+
+  # Delta for better diffs
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      light = false;
+      side-by-side = true;
+      line-numbers = true;
     };
   };
 
