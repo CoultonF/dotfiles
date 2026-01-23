@@ -60,18 +60,22 @@ if ! command -v nix &> /dev/null; then
     # --yes skips confirmation prompts
     curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
     
-    # Source Nix for this session
-    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-    fi
-    
     success "Nix installed"
 else
-    # Source Nix if available but not in PATH (e.g., volume mount scenario)
-    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-    fi
     success "Nix is available"
+fi
+
+# Ensure Nix is in PATH for this session
+# The installer says "Nix won't work in active shell sessions until you restart them"
+# but we can work around this by explicitly setting PATH
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
+
+# Verify Nix is working
+if ! command -v nix &> /dev/null; then
+    error "Nix installation failed - 'nix' command not found in PATH. Try restarting your shell and running bootstrap.sh again."
 fi
 
 # Ensure Nix is sourced for ALL zsh shells (system-wide)
