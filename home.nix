@@ -57,6 +57,10 @@ in
     # Terminal Multiplexer
     tmux
 
+    # Docker Tools
+    lazydocker   # Docker TUI
+    ctop         # Container metrics
+
     # Utilities
     curl
     wget
@@ -106,10 +110,10 @@ in
         alias google-chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
       fi
       
-      # Auto-start tmux (skip if in IDE or already in tmux)
+      # Auto-start tmux with default layout (skip if in IDE or already in tmux)
       if [[ "$TERM_PROGRAM" != "vscode" && -z "$INTELLIJ_ENVIRONMENT_READER" && -z "$VSCODE_PID" && -z "$VSCODE_INJECTION" ]]; then
         if command -v tmux &>/dev/null && [[ -z "$TMUX" ]]; then
-          tmux new-session -A -s main
+          ~/.dotfiles/bin/tmux-startup
         fi
       fi
     '';

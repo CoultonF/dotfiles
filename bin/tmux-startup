@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# tmux-startup: Initialize tmux with default layout
+# Tab 1: Terminal
+# Tab 2: Docker (lazydocker 70% top, ctop 30% bottom)
+
+SESSION="main"
+
+# Check if session already exists
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+    # Session exists, just attach
+    tmux attach-session -t "$SESSION"
+    exit 0
+fi
+
+# Create new session with first window (Terminal)
+tmux new-session -d -s "$SESSION" -n "Terminal"
+
+# Create second window (Docker)
+tmux new-window -t "$SESSION" -n "Docker"
+
+# Split the Docker window: top 70%, bottom 30%
+tmux split-window -t "$SESSION:Docker" -v -p 30
+
+# Run lazydocker in top pane (pane 0)
+tmux send-keys -t "$SESSION:Docker.0" "lazydocker" Enter
+
+# Run ctop in bottom pane (pane 1)
+tmux send-keys -t "$SESSION:Docker.1" "ctop" Enter
+
+# Select the first window (Terminal)
+tmux select-window -t "$SESSION:Terminal"
+
+# Attach to session
+tmux attach-session -t "$SESSION"
