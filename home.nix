@@ -131,8 +131,9 @@ in
       ssh() {
         if [[ "$1" == *".devpod" && "$#" -eq 1 ]]; then
           # DevPod SSH: auto-attach to tmux session named after the devpod
+          # Source Nix profile first since tmux is installed via Nix
           local session_name="$1"
-          command ssh -t "$1" "tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'"
+          command ssh -t "$1" "source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh 2>/dev/null; tmux attach-session -t '$session_name' 2>/dev/null || tmux new-session -s '$session_name'"
         else
           # Normal SSH passthrough
           command ssh "$@"
