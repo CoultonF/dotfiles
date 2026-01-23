@@ -92,6 +92,30 @@ nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 
 success "Home Manager configuration applied!"
 
+# Step 4: Set zsh as default shell (if not already)
+if [ "$SHELL" != "/bin/zsh" ] && [ -x /bin/zsh ]; then
+    info "Setting zsh as default shell..."
+    if command -v chsh &>/dev/null; then
+        chsh -s /bin/zsh "$USER" 2>/dev/null || sudo chsh -s /bin/zsh "$USER" 2>/dev/null || true
+    fi
+    # Also update /etc/passwd directly if we're root (common in containers)
+    if [ "$(id -u)" = "0" ] && [ -w /etc/passwd ]; then
+        sed -i "s|^root:.*:/bin/bash|root:x:0:0:root:/root:/bin/zsh|" /etc/passwd 2>/dev/null || true
+    fi
+fi
+
+# Step 5: Add bash fallback (source nix profile in .bashrc)
+if ! grep -q "nix-daemon.sh" ~/.bashrc 2>/dev/null; then
+    info "Adding nix profile to .bashrc as fallback..."
+    cat >> ~/.bashrc << 'BASHRC'
+
+# Nix profile (added by dotfiles bootstrap)
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+BASHRC
+fi
+
 echo ""
 echo "=========================================="
 echo "  Bootstrap Complete!"
