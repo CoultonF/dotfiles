@@ -62,7 +62,8 @@ in
     docker-client # Docker CLI
     lazydocker   # Docker TUI
     ctop         # Container metrics
-    devpod       # Dev environment manager
+    devpod       # Dev environment manager (CLI)
+    devpod-desktop # Dev environment manager (GUI)
 
     # Utilities
     curl
