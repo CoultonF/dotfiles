@@ -21,7 +21,8 @@ in
   # ============================================================================
   # Packages
   # ============================================================================
-  home.packages = with pkgs; [
+  # Full packages for macOS, minimal for Linux containers (they have their own packages)
+  home.packages = with pkgs; lib.optionals isDarwin [
     # Editor
     neovim
 
@@ -70,9 +71,12 @@ in
     wget
     unzip
     jq           # JSON processor
-  ] ++ lib.optionals pkgs.stdenv.isLinux [
-    # Linux-only packages (for headless clipboard in containers)
-    xclip
+  ] ++ lib.optionals (!isDarwin) [
+    # Linux containers: minimal packages (container has most tools)
+    # Just add things the container doesn't have
+    starship     # Prompt (needed for zsh integration)
+    fzf          # For fzf zsh integration
+    delta        # Better diffs
   ];
 
   # ============================================================================
@@ -231,9 +235,9 @@ in
   ];
 
   # ============================================================================
-  # Launchd Agents (macOS)
+  # Launchd Agents (macOS only)
   # ============================================================================
-  launchd.agents.colima = {
+  launchd.agents.colima = lib.mkIf isDarwin {
     enable = true;
     config = {
       Label = "com.github.colima";
