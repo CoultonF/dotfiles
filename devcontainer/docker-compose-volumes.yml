@@ -1,10 +1,13 @@
-# Add these volumes to your docker-compose.dev.yml rcom service
-# Under services.rcom.volumes:
+# Add these volumes to your docker-compose.dev.yml service
+# Under services.<service>.volumes:
 
 # volumes:
 #   # ... existing volumes ...
-#   # Neovim config and data
-#   - ${HOME}/.config-docker/nvim:/root/.config/nvim:cached
+#   # Dotfiles (contains nvim, tmux, etc.)
+#   - ${HOME}/.dotfiles:/root/.dotfiles:cached
+#   # Neovim data (plugins, state)
 #   - ${HOME}/.local-docker/share/nvim:/root/.local/share/nvim:cached
-#   # Nix config
-#   - ${HOME}/.config-docker/nix:/root/.config/nixpkgs:cached
+#   # Nix store (persist installed packages)
+#   - ${HOME}/.nix-docker:/nix:cached
+
+# Then run: cd ~/.dotfiles && ./devcontainer/post-install.sh

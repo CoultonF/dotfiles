@@ -1,9 +1,9 @@
 {
   "_comment": "Add these mounts to your devcontainer.json 'mounts' array",
   "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config-docker/nvim,target=/root/.config/nvim,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.dotfiles,target=/root/.dotfiles,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.local-docker/share/nvim,target=/root/.local/share/nvim,type=bind",
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config-docker/nix,target=/root/.config/nixpkgs,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.nix-docker,target=/nix,type=bind"
-  ]
+  ],
+  "_note": "Mount dotfiles directly, then run: cd ~/.dotfiles && ./devcontainer/post-install.sh"
 }

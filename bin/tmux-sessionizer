@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# tmux-sessionizer: Quick project session switcher
+# Bound to Ctrl-g in tmux
+#
+# Usage: tmux-sessionizer [directory]
+#        If no directory provided, uses fzf to select from project directories
+
+# Project directories to search
+SEARCH_DIRS=(
+    "$HOME/Repos"
+    "$HOME/Projects"
+    "$HOME/.dotfiles"
+)
+
+# Build find paths (only existing directories)
+FIND_PATHS=()
+for dir in "${SEARCH_DIRS[@]}"; do
+    if [[ -d "$dir" ]]; then
+        FIND_PATHS+=("$dir")
+    fi
+done
+
+# If a directory was passed as argument, use it
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    # Use fzf to select a project
+    # Find all directories 1-2 levels deep that contain a .git folder or are direct children
+    selected=$(
+        {
+            # Add search directories themselves
+            for dir in "${FIND_PATHS[@]}"; do
+                echo "$dir"
+            done
+            # Find subdirectories (depth 1-2)
+            if [[ ${#FIND_PATHS[@]} -gt 0 ]]; then
+                find "${FIND_PATHS[@]}" -mindepth 1 -maxdepth 2 -type d 2>/dev/null
+            fi
+        } | sort -u | fzf --height=50% --layout=reverse --border --prompt="Project: "
+    )
+fi
+
+# Exit if nothing selected
+if [[ -z "$selected" ]]; then
+    exit 0
+fi
+
+# Create session name from directory (replace dots with underscores, tmux doesn't like dots)
+selected_name=$(basename "$selected" | tr '.' '_')
+
+# Check if tmux is running
+tmux_running=$(pgrep tmux)
+
+# If not in tmux and tmux is not running, start new session
+if [[ -z "$TMUX" ]] && [[ -z "$tmux_running" ]]; then
+    tmux new-session -s "$selected_name" -c "$selected"
+    exit 0
+fi
+
+# If session doesn't exist, create it (detached)
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+    tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+# Switch to the session
+if [[ -z "$TMUX" ]]; then
+    tmux attach-session -t "$selected_name"
+else
+    tmux switch-client -t "$selected_name"
+fi

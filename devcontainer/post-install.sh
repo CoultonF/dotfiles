@@ -1,11 +1,13 @@
 #!/bin/bash
 # Post-install script for devcontainers
-# Add this to your post-create-command.sh or run manually
+# Lightweight setup without full Home Manager (faster for ephemeral containers)
+#
+# For full Home Manager setup, use: ./bootstrap.sh
 
 set -e
 
 echo "=========================================="
-echo "Installing Nix Dev Tools..."
+echo "Installing Nix Dev Tools (Container Mode)"
 echo "=========================================="
 
 # Check if Nix is available
@@ -14,9 +16,6 @@ if ! command -v nix-env &> /dev/null; then
     curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
 
     # Source nix
-    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-    fi
     if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/nix.sh"
     fi
@@ -24,23 +23,81 @@ if ! command -v nix-env &> /dev/null; then
     # Add to bashrc for future sessions
     echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bashrc
 
-    echo "✅ Nix installed"
+    echo "Nix installed"
 else
-    echo "✅ Nix already installed"
+    echo "Nix already installed"
 fi
 
-# Install packages from config.nix
-if [ -f /root/.config/nixpkgs/config.nix ]; then
-    echo "Installing dev tools from config.nix..."
-    nix-env -iA nixpkgs.devTools
-    echo "✅ Dev tools installed"
-else
-    echo "⚠️ No config.nix found at /root/.config/nixpkgs/config.nix"
-    echo "   Mount your dotfiles nix config or install packages manually:"
-    echo "   nix-env -iA nixpkgs.neovim nixpkgs.opencode nixpkgs.lazygit nixpkgs.ripgrep"
+# Install packages directly
+echo "Installing dev tools..."
+nix-env -iA \
+    nixpkgs.neovim \
+    nixpkgs.tmux \
+    nixpkgs.ripgrep \
+    nixpkgs.fd \
+    nixpkgs.fzf \
+    nixpkgs.lazygit \
+    nixpkgs.git \
+    nixpkgs.delta \
+    nixpkgs.nodejs_22 \
+    nixpkgs.python312 \
+    nixpkgs.gcc \
+    nixpkgs.gnumake \
+    nixpkgs.curl \
+    nixpkgs.jq
+
+echo "Dev tools installed"
+
+# Copy configs if dotfiles are mounted
+DOTFILES_DIR="$HOME/.dotfiles"
+if [ -d "$DOTFILES_DIR" ]; then
+    echo "Setting up configs from dotfiles..."
+    
+    # Neovim
+    mkdir -p ~/.config/nvim
+    cp -r "$DOTFILES_DIR/nvim/"* ~/.config/nvim/
+    
+    # tmux
+    mkdir -p ~/.config/tmux
+    cp "$DOTFILES_DIR/tmux/tmux.conf" ~/.config/tmux/
+    
+    # tmux-sessionizer
+    mkdir -p ~/.dotfiles/bin
+    cp "$DOTFILES_DIR/bin/tmux-sessionizer" ~/.dotfiles/bin/
+    chmod +x ~/.dotfiles/bin/tmux-sessionizer
+    
+    # Add to PATH
+    echo 'export PATH="$HOME/.dotfiles/bin:$PATH"' >> ~/.bashrc
+    
+    echo "Configs copied"
 fi
 
 # Verify installations
+echo ""
+echo "Verifying installations..."
+
+for cmd in nvim tmux lazygit rg fd fzf; do
+    if command -v "$cmd" &> /dev/null; then
+        echo "  $cmd: $(command -v $cmd)"
+    else
+        echo "  $cmd: not found"
+    fi
+done
+
+echo ""
+echo "=========================================="
+echo "Setup complete!"
+echo "=========================================="
+echo ""
+echo "Usage:"
+echo "  tmux             # Start tmux"
+echo "  nvim .           # Open Neovim"
+echo "  lazygit          # Git TUI"
+echo ""
+echo "In tmux:"
+echo "  Ctrl+g           # Project sessionizer"
+echo "  Ctrl+a           # Last session"
+echo "  Ctrl+b [         # Copy mode"
 echo ""
 echo "Verifying installations..."
 

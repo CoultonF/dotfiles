@@ -1,0 +1,223 @@
+{ config, pkgs, lib, username, homeDirectory, ... }:
+
+{
+  # Home Manager configuration
+  home.username = username;
+  home.homeDirectory = homeDirectory;
+  home.stateVersion = "24.05";
+
+  # Let Home Manager manage itself
+  programs.home-manager.enable = true;
+
+  # ============================================================================
+  # Packages
+  # ============================================================================
+  home.packages = with pkgs; [
+    # Editor
+    neovim
+
+    # AI Coding Assistant
+    opencode
+
+    # Search & Navigation
+    ripgrep      # Fast grep (rg)
+    fd           # Fast find
+    fzf          # Fuzzy finder
+    tree         # Directory tree
+
+    # Git
+    lazygit      # Git TUI
+    git          # Git CLI
+    delta        # Better git diff
+
+    # Language Support
+    nodejs_22    # For LSP servers
+    python312    # For debugpy
+    lua5_1       # For Neovim plugins
+
+    # LSP Servers
+    nodePackages.typescript-language-server
+    nodePackages.vscode-langservers-extracted  # HTML, CSS, JSON, ESLint
+    pyright      # Python LSP
+    lua-language-server
+
+    # Build Tools
+    gcc          # C compiler (treesitter needs this)
+    gnumake
+
+    # Terminal Multiplexer
+    tmux
+
+    # Utilities
+    curl
+    wget
+    unzip
+    jq           # JSON processor
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    # Linux-only packages (for headless clipboard in containers)
+    xclip
+  ];
+
+  # ============================================================================
+  # Zsh
+  # ============================================================================
+  programs.zsh = {
+    enable = true;
+    
+    # Aliases
+    shellAliases = {
+      python = "python3";
+      pip = "pip3";
+      ll = "ls -alG";
+      ts = "tmux-sessionizer";
+      lg = "lazygit";
+      v = "nvim";
+    };
+
+    # Environment variables set in .zshenv
+    sessionVariables = {
+      EDITOR = "nvim";
+    };
+
+    # Add to PATH
+    initExtra = ''
+      # Add dotfiles bin to PATH
+      export PATH="$HOME/.dotfiles/bin:$PATH"
+      
+      # pipx path
+      export PATH="$PATH:$HOME/.local/bin"
+      
+      # Bun
+      export BUN_INSTALL="$HOME/.bun"
+      export PATH="$BUN_INSTALL/bin:$PATH"
+      [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+      
+      # Google Chrome alias (macOS)
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        alias google-chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+      fi
+      
+      # Auto-start tmux (skip if in IDE or already in tmux)
+      if [[ "$TERM_PROGRAM" != "vscode" && -z "$INTELLIJ_ENVIRONMENT_READER" && -z "$VSCODE_PID" && -z "$VSCODE_INJECTION" ]]; then
+        if command -v tmux &>/dev/null && [[ -z "$TMUX" ]]; then
+          tmux new-session -A -s main
+        fi
+      fi
+    '';
+
+    # Completions
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+
+    # History
+    history = {
+      size = 10000;
+      save = 10000;
+      ignoreDups = true;
+      ignoreAllDups = true;
+      ignoreSpace = true;
+      share = true;
+    };
+  };
+
+  # ============================================================================
+  # Starship Prompt
+  # ============================================================================
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  # ============================================================================
+  # tmux
+  # ============================================================================
+  programs.tmux = {
+    enable = true;
+    
+    # Basic settings
+    prefix = "C-b";
+    keyMode = "vi";
+    baseIndex = 1;
+    escapeTime = 0;
+    historyLimit = 10000;
+    mouse = true;
+    terminal = "tmux-256color";
+    
+    # Extra configuration (our full config)
+    extraConfig = builtins.readFile ./tmux/tmux.conf;
+  };
+
+  # ============================================================================
+  # Git
+  # ============================================================================
+  programs.git = {
+    enable = true;
+    
+    # Delta for better diffs
+    delta = {
+      enable = true;
+      options = {
+        navigate = true;
+        light = false;
+        side-by-side = true;
+        line-numbers = true;
+      };
+    };
+
+    extraConfig = {
+      init.defaultBranch = "main";
+      pull.rebase = false;
+      push.autoSetupRemote = true;
+      merge.conflictstyle = "diff3";
+      diff.colorMoved = "default";
+    };
+  };
+
+  # ============================================================================
+  # FZF
+  # ============================================================================
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    defaultOptions = [
+      "--height=50%"
+      "--layout=reverse"
+      "--border"
+    ];
+  };
+
+  # ============================================================================
+  # Config Files
+  # ============================================================================
+  
+  # Neovim config (link entire directory)
+  xdg.configFile."nvim" = {
+    source = ./nvim;
+    recursive = true;
+  };
+
+  # Ghostty config
+  xdg.configFile."ghostty/config".source = ./ghostty/config;
+
+  # OpenCode config
+  xdg.configFile."opencode/opencode.json".source = ./opencode/opencode.json;
+
+  # ============================================================================
+  # Scripts
+  # ============================================================================
+  
+  # tmux-sessionizer script
+  home.file.".dotfiles/bin/tmux-sessionizer" = {
+    source = ./bin/tmux-sessionizer;
+    executable = true;
+  };
+
+  # ============================================================================
+  # Environment
+  # ============================================================================
+  home.sessionPath = [
+    "$HOME/.dotfiles/bin"
+    "$HOME/.local/bin"
+  ];
+}
