@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bootstrap script for dotfiles with Home Manager
-# Installs Nix (single-user mode) and applies Home Manager configuration
-# No sudo required - everything installs to user's home directory
+# Installs Nix and applies Home Manager configuration
+# Uses Determinate Systems installer (works as root and in containers)
 
 set -e
 
@@ -48,15 +48,18 @@ case "$(uname -s)-$(uname -m)" in
 esac
 info "Detected system: $SYSTEM"
 
-# Install Nix if not present (single-user mode, no sudo required)
+# Install Nix if not present
 if ! command -v nix &> /dev/null; then
-    info "Installing Nix (single-user mode)..."
-    curl -L https://nixos.org/nix/install | sh -s -- --no-daemon --yes
+    info "Installing Nix..."
+    # Use Determinate Systems installer - works as root and in containers
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
     success "Nix installed"
 fi
 
 # Source Nix for this session
-if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+    . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
     . "$HOME/.nix-profile/etc/profile.d/nix.sh"
 fi
 
