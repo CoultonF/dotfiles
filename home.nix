@@ -102,6 +102,11 @@ in
 
     # Add to PATH
     initContent = ''
+      # Source nix profile (zsh doesn't read /etc/profile.d/ by default)
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+      
       # Add dotfiles bin to PATH
       export PATH="$HOME/.dotfiles/bin:$PATH"
       
