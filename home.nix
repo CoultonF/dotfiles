@@ -67,6 +67,7 @@ in
     wget
     unzip
     jq           # JSON processor
+    awscli2      # AWS CLI
   ] ++ lib.optionals isDarwin [
     # macOS-only: GUI apps and tools that need OrbStack
     docker-client # Docker CLI (OrbStack provides daemon)
