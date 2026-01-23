@@ -227,4 +227,19 @@ in
     "$HOME/.dotfiles/bin"
     "$HOME/.local/bin"
   ];
+
+  # ============================================================================
+  # Launchd Agents (macOS)
+  # ============================================================================
+  launchd.agents.colima = {
+    enable = true;
+    config = {
+      Label = "com.github.colima";
+      ProgramArguments = [ "${pkgs.colima}/bin/colima" "start" "--foreground" ];
+      RunAtLoad = true;
+      KeepAlive = true;
+      StandardOutPath = "/tmp/colima.log";
+      StandardErrorPath = "/tmp/colima.error.log";
+    };
+  };
 }
