@@ -261,7 +261,10 @@ in
     enable = true;
     config = {
       Label = "com.github.colima";
-      ProgramArguments = [ "${pkgs.colima}/bin/colima" "start" "--foreground" ];
+      ProgramArguments = [ 
+        "${pkgs.colima}/bin/colima" "start" "--foreground"
+        "--cpu" "4" "--memory" "16" "--disk" "100"
+      ];
       RunAtLoad = true;
       KeepAlive = true;
       StandardOutPath = "/tmp/colima.log";
