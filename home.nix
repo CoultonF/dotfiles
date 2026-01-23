@@ -124,6 +124,19 @@ in
           ~/.dotfiles/bin/tmux-startup
         fi
       fi
+      
+      # SSH wrapper for DevPod - auto-attach to tmux session
+      # Usage: ssh rcom.devpod → automatically attaches to DevPod's tmux
+      # Use Ctrl+A Ctrl+A <key> to send commands to nested DevPod tmux
+      ssh() {
+        if [[ "$1" == *".devpod" && "$#" -eq 1 ]]; then
+          # DevPod SSH: auto-attach to tmux session "main"
+          command ssh -t "$1" 'tmux attach-session -t main 2>/dev/null || tmux new-session -s main'
+        else
+          # Normal SSH passthrough
+          command ssh "$@"
+        fi
+      }
     '';
 
     # Completions
