@@ -54,6 +54,7 @@ if ! command -v nix &> /dev/null; then
     # Clean up any stale backup files from previous failed installs
     sudo rm -f /etc/bash.bashrc.backup-before-nix /etc/bashrc.backup-before-nix 2>/dev/null || true
     sudo rm -f /etc/profile.d/nix.sh.backup-before-nix 2>/dev/null || true
+    sudo rm -f /etc/zshrc.backup-before-nix /etc/zshenv.backup-before-nix 2>/dev/null || true
     sudo rm -f /etc/zsh/zshrc.backup-before-nix /etc/zsh/zshenv.backup-before-nix 2>/dev/null || true
     
     # Install Nix in daemon mode (multi-user)
