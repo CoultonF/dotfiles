@@ -58,6 +58,8 @@ in
     tmux
 
     # Docker Tools
+    colima       # Container runtime for macOS
+    docker-client # Docker CLI
     lazydocker   # Docker TUI
     ctop         # Container metrics
 
