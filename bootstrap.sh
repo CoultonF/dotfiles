@@ -64,19 +64,6 @@ if ! command -v nix &> /dev/null; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
     fi
     
-    # Ensure /etc/profile.d/nix.sh exists for login shells
-    # (the Nix installer sometimes doesn't create this on all systems)
-    if [ -d /etc/profile.d ] && [ ! -e /etc/profile.d/nix.sh ]; then
-        info "Creating /etc/profile.d/nix.sh..."
-        sudo tee /etc/profile.d/nix.sh > /dev/null << 'EOF'
-# Nix package manager
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
-EOF
-        sudo chmod +x /etc/profile.d/nix.sh
-    fi
-    
     success "Nix installed"
 else
     # Source Nix if available but not in PATH (e.g., volume mount scenario)
@@ -84,6 +71,19 @@ else
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
     fi
     success "Nix is available"
+fi
+
+# Ensure /etc/profile.d/nix.sh exists for login shells
+# This runs regardless of whether Nix was just installed or already available (volume mount)
+if [ -d /etc/profile.d ] && [ ! -e /etc/profile.d/nix.sh ]; then
+    info "Creating /etc/profile.d/nix.sh..."
+    sudo tee /etc/profile.d/nix.sh > /dev/null << 'EOF'
+# Nix package manager
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+EOF
+    sudo chmod +x /etc/profile.d/nix.sh
 fi
 
 # Enable flakes if not already enabled
