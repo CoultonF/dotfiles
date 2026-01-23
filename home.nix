@@ -214,18 +214,9 @@ in
   xdg.configFile."opencode/opencode.json".source = ./opencode/opencode.json;
 
   # ============================================================================
-  # Scripts
-  # ============================================================================
-  
-  # tmux-sessionizer script
-  home.file.".dotfiles/bin/tmux-sessionizer" = {
-    source = ./bin/tmux-sessionizer;
-    executable = true;
-  };
-
-  # ============================================================================
   # Environment
   # ============================================================================
+  # Note: tmux-sessionizer is already in ~/.dotfiles/bin/ which is added to PATH
   home.sessionPath = [
     "$HOME/.dotfiles/bin"
     "$HOME/.local/bin"
