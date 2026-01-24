@@ -54,6 +54,10 @@ in
     # Build Tools
     gcc          # C compiler (treesitter needs this)
     gnumake
+    
+    # Python package dependencies
+    cairo        # For cairosvg (SVG to PNG conversion)
+    protobuf     # For gcld3 (language detection)
 
     # Terminal
     tmux
