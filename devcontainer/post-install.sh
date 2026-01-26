@@ -137,12 +137,13 @@ if [ -d "$DOTFILES_DIR" ]; then
     echo "Configs copied"
 fi
 
-# Setup direnv hook
+# Setup direnv hook for all shells
 if ! grep -q "direnv hook" ~/.bashrc 2>/dev/null; then
     echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
 fi
+touch ~/.zshrc
 if ! grep -q "direnv hook" ~/.zshrc 2>/dev/null; then
-    echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc 2>/dev/null || true
+    echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
 fi
 
 # Verify installations
