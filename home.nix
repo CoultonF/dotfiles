@@ -52,12 +52,21 @@ in
     lua-language-server
 
     # Build Tools
-    gcc          # C compiler (treesitter needs this)
+    gcc          # C compiler (treesitter needs this), includes g++
     gnumake
-    
-    # Python package dependencies
-    cairo        # For cairosvg (SVG to PNG conversion)
-    protobuf     # For gcld3 (language detection)
+    pkg-config   # Find libraries during builds
+
+    # Database
+    postgresql   # PostgreSQL client (psql) and libpq
+    libpq        # PostgreSQL C client library
+
+    # C/C++ Libraries for Python packages
+    libffi       # Foreign function interface (required by cffi, etc.)
+    protobuf     # Protobuf compiler and libraries (for gcld3, etc.)
+
+    # Cairo for SVG conversion
+    cairo        # 2D graphics library
+    pango        # Text rendering (often needed with cairo)
 
     # Terminal
     tmux
@@ -99,6 +108,12 @@ in
     # Environment variables set in .zshenv
     sessionVariables = {
       EDITOR = "nvim";
+      # Help pip/Python find nix-installed libraries during compilation
+      PKG_CONFIG_PATH = "$HOME/.nix-profile/lib/pkgconfig:$HOME/.nix-profile/share/pkgconfig";
+      LIBRARY_PATH = "$HOME/.nix-profile/lib";
+      C_INCLUDE_PATH = "$HOME/.nix-profile/include";
+      CPLUS_INCLUDE_PATH = "$HOME/.nix-profile/include";
+      LD_LIBRARY_PATH = "$HOME/.nix-profile/lib";
     };
 
     # Environment setup in .zshenv (runs for all shells including non-interactive)

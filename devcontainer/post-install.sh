@@ -20,13 +20,69 @@ if ! command -v nix-env &> /dev/null; then
         . "$HOME/.nix-profile/etc/profile.d/nix.sh"
     fi
 
-    # Add to bashrc for future sessions
+    # Add to bashrc for interactive shells
     echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bashrc
+
+    # Add to bash_profile for login shells
+    echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bash_profile
+    echo '[ -f ~/.bashrc ] && . ~/.bashrc' >> ~/.bash_profile
+
+    # Add to profile for non-interactive scripts (FastAPI, etc.)
+    echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.profile
+
+    # Add to zshrc/zshenv for zsh users
+    echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.zshenv
+
+    # Add library paths for pip/Python compilation (all shell types)
+    for rcfile in ~/.bashrc ~/.zshenv ~/.profile; do
+        cat >> "$rcfile" << 'NIXLIBS'
+# Nix library paths for pip/Python compilation
+export PKG_CONFIG_PATH="$HOME/.nix-profile/lib/pkgconfig:$HOME/.nix-profile/share/pkgconfig:$PKG_CONFIG_PATH"
+export LIBRARY_PATH="$HOME/.nix-profile/lib:$LIBRARY_PATH"
+export C_INCLUDE_PATH="$HOME/.nix-profile/include:$C_INCLUDE_PATH"
+export CPLUS_INCLUDE_PATH="$HOME/.nix-profile/include:$CPLUS_INCLUDE_PATH"
+export LD_LIBRARY_PATH="$HOME/.nix-profile/lib:$LD_LIBRARY_PATH"
+NIXLIBS
+    done
 
     echo "Nix installed"
 else
     echo "Nix already installed"
+    
+    # Ensure nix is sourced in all shell contexts (even if nix was pre-installed)
+    if ! grep -q "nix.sh" ~/.bashrc 2>/dev/null; then
+        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bashrc
+    fi
+    if ! grep -q "nix.sh" ~/.bash_profile 2>/dev/null; then
+        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bash_profile
+        echo '[ -f ~/.bashrc ] && . ~/.bashrc' >> ~/.bash_profile
+    fi
+    if ! grep -q "nix.sh" ~/.profile 2>/dev/null; then
+        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.profile
+    fi
+    if ! grep -q "nix.sh" ~/.zshenv 2>/dev/null; then
+        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.zshenv
+    fi
+    
+    # Add library paths if not already present
+    if ! grep -q "CPLUS_INCLUDE_PATH" ~/.bashrc 2>/dev/null; then
+        for rcfile in ~/.bashrc ~/.zshenv ~/.profile; do
+            cat >> "$rcfile" << 'NIXLIBS'
+# Nix library paths for pip/Python compilation
+export PKG_CONFIG_PATH="$HOME/.nix-profile/lib/pkgconfig:$HOME/.nix-profile/share/pkgconfig:$PKG_CONFIG_PATH"
+export LIBRARY_PATH="$HOME/.nix-profile/lib:$LIBRARY_PATH"
+export C_INCLUDE_PATH="$HOME/.nix-profile/include:$C_INCLUDE_PATH"
+export CPLUS_INCLUDE_PATH="$HOME/.nix-profile/include:$CPLUS_INCLUDE_PATH"
+export LD_LIBRARY_PATH="$HOME/.nix-profile/lib:$LD_LIBRARY_PATH"
+NIXLIBS
+        done
+    fi
 fi
+
+# Ensure nixpkgs channel is configured
+echo "Setting up nixpkgs channel..."
+nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+nix-channel --update
 
 # Install packages directly
 echo "Installing dev tools..."
@@ -43,8 +99,16 @@ nix-env -iA \
     nixpkgs.python312 \
     nixpkgs.gcc \
     nixpkgs.gnumake \
+    nixpkgs.pkg-config \
     nixpkgs.curl \
-    nixpkgs.jq
+    nixpkgs.jq \
+    nixpkgs.unzip \
+    nixpkgs.postgresql \
+    nixpkgs.libpq \
+    nixpkgs.libffi \
+    nixpkgs.protobuf \
+    nixpkgs.cairo \
+    nixpkgs.pango
 
 echo "Dev tools installed"
 
