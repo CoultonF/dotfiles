@@ -82,6 +82,7 @@ in
     unzip
     jq           # JSON processor
     awscli2      # AWS CLI
+    direnv       # Per-directory environment variables
   ] ++ lib.optionals isDarwin [
     # macOS-only: GUI apps and tools that need OrbStack
     docker-client # Docker CLI (OrbStack provides daemon)
@@ -283,6 +284,15 @@ in
       "--layout=reverse"
       "--border"
     ];
+  };
+
+  # ============================================================================
+  # Direnv
+  # ============================================================================
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;  # Better nix integration
   };
 
   # ============================================================================

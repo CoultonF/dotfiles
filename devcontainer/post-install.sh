@@ -108,7 +108,8 @@ nix-env -iA \
     nixpkgs.libffi \
     nixpkgs.protobuf \
     nixpkgs.cairo \
-    nixpkgs.pango
+    nixpkgs.pango \
+    nixpkgs.direnv
 
 echo "Dev tools installed"
 
@@ -134,6 +135,14 @@ if [ -d "$DOTFILES_DIR" ]; then
     echo 'export PATH="$HOME/.dotfiles/bin:$PATH"' >> ~/.bashrc
     
     echo "Configs copied"
+fi
+
+# Setup direnv hook
+if ! grep -q "direnv hook" ~/.bashrc 2>/dev/null; then
+    echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+fi
+if ! grep -q "direnv hook" ~/.zshrc 2>/dev/null; then
+    echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc 2>/dev/null || true
 fi
 
 # Verify installations
@@ -179,6 +188,7 @@ check_command lazygit
 check_command rg
 check_command fd
 check_command fzf
+check_command direnv
 
 echo ""
 echo "=========================================="
