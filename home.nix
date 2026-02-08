@@ -219,7 +219,7 @@ in
     keyMode = "vi";
     baseIndex = 1;
     escapeTime = 0;
-    historyLimit = 10000;
+    historyLimit = 50000;
     mouse = true;
     terminal = "tmux-256color";
     
