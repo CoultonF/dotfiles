@@ -41,5 +41,8 @@ clipboard-paste-protection = false
 clipboard-paste-bracketed-safe = false
 copy-on-select = clipboard
 
+# Links - cmd+click to open URLs (shift+cmd+click inside tmux)
+link-url = true
+
 # Scrollback
 scrollback-limit = 10000

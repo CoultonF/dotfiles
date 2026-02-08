@@ -242,6 +242,8 @@ in
           set -g @continuum-restore 'on'
         '';
       }
+      # Note: fzf-tmux-url plugin replaced by ~/.dotfiles/bin/tmux-url-picker
+      # (bound to prefix+u in tmux.conf) to handle URLs that wrap across lines
     ];
     
     # Extra configuration (our full config)
