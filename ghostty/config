@@ -22,6 +22,9 @@ window-inherit-font-size = true
 cursor-style = block
 cursor-style-blink = false
 
+# Terminal
+term = xterm-256color
+
 # Shell integration
 shell-integration = detect
 

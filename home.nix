@@ -177,7 +177,9 @@ in
     enable = true;
     enableZshIntegration = true;
     settings = {
+      add_newline = false;
       format = "$directory$git_branch$character";
+      right_format = "";
       
       directory = {
         truncation_length = 2;
