@@ -1,2 +1,9 @@
 #!/bin/bash
-printf '\a'
+# Send BEL to the Claude Code pane's tty device directly
+# (hook subprocesses have stdout captured, so printf '\a' alone doesn't reach tmux)
+if [ -n "$TMUX_PANE" ]; then
+    TTY=$(tmux display-message -t "$TMUX_PANE" -p '#{pane_tty}' 2>/dev/null)
+    [ -n "$TTY" ] && printf '\a' > "$TTY"
+else
+    printf '\a'
+fi
