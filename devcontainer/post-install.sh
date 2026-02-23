@@ -10,108 +10,80 @@ echo "=========================================="
 echo "Installing Nix Dev Tools (Container Mode)"
 echo "=========================================="
 
-# Check if Nix is available
-if ! command -v nix-env &> /dev/null; then
-    echo "Nix not found. Installing..."
-    curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-
-    # Source nix
-    if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+# Source Nix into PATH if not already available
+if ! command -v nix &> /dev/null; then
+    if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+    elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-    fi
-
-    # Add to bashrc for interactive shells
-    echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bashrc
-
-    # Add to bash_profile for login shells
-    echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bash_profile
-    echo '[ -f ~/.bashrc ] && . ~/.bashrc' >> ~/.bash_profile
-
-    # Add to profile for non-interactive scripts (FastAPI, etc.)
-    echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.profile
-
-    # Add to zshrc/zshenv for zsh users
-    echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.zshenv
-
-    # Add library paths for pip/Python compilation (all shell types)
-    for rcfile in ~/.bashrc ~/.zshenv ~/.profile; do
-        cat >> "$rcfile" << 'NIXLIBS'
-# Nix library paths for pip/Python compilation
-export PKG_CONFIG_PATH="$HOME/.nix-profile/lib/pkgconfig:$HOME/.nix-profile/share/pkgconfig:$PKG_CONFIG_PATH"
-export LIBRARY_PATH="$HOME/.nix-profile/lib:$LIBRARY_PATH"
-export C_INCLUDE_PATH="$HOME/.nix-profile/include:$C_INCLUDE_PATH"
-export CPLUS_INCLUDE_PATH="$HOME/.nix-profile/include:$CPLUS_INCLUDE_PATH"
-export LD_LIBRARY_PATH="$HOME/.nix-profile/lib:$LD_LIBRARY_PATH"
-NIXLIBS
-    done
-
-    echo "Nix installed"
-else
-    echo "Nix already installed"
-    
-    # Ensure nix is sourced in all shell contexts (even if nix was pre-installed)
-    if ! grep -q "nix.sh" ~/.bashrc 2>/dev/null; then
-        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bashrc
-    fi
-    if ! grep -q "nix.sh" ~/.bash_profile 2>/dev/null; then
-        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.bash_profile
-        echo '[ -f ~/.bashrc ] && . ~/.bashrc' >> ~/.bash_profile
-    fi
-    if ! grep -q "nix.sh" ~/.profile 2>/dev/null; then
-        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.profile
-    fi
-    if ! grep -q "nix.sh" ~/.zshenv 2>/dev/null; then
-        echo 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' >> ~/.zshenv
-    fi
-    
-    # Add library paths if not already present
-    if ! grep -q "CPLUS_INCLUDE_PATH" ~/.bashrc 2>/dev/null; then
-        for rcfile in ~/.bashrc ~/.zshenv ~/.profile; do
-            cat >> "$rcfile" << 'NIXLIBS'
-# Nix library paths for pip/Python compilation
-export PKG_CONFIG_PATH="$HOME/.nix-profile/lib/pkgconfig:$HOME/.nix-profile/share/pkgconfig:$PKG_CONFIG_PATH"
-export LIBRARY_PATH="$HOME/.nix-profile/lib:$LIBRARY_PATH"
-export C_INCLUDE_PATH="$HOME/.nix-profile/include:$C_INCLUDE_PATH"
-export CPLUS_INCLUDE_PATH="$HOME/.nix-profile/include:$CPLUS_INCLUDE_PATH"
-export LD_LIBRARY_PATH="$HOME/.nix-profile/lib:$LD_LIBRARY_PATH"
-NIXLIBS
-        done
     fi
 fi
 
-# Ensure nixpkgs channel is configured
-echo "Setting up nixpkgs channel..."
-nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
-nix-channel --update
+# Last resort: force PATH if nix binary exists but sourcing didn't work
+if ! command -v nix &> /dev/null && [ -x "/nix/var/nix/profiles/default/bin/nix" ]; then
+    export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
+fi
 
-# Install packages directly
+# Verify Nix is available
+if ! command -v nix &> /dev/null; then
+    echo "ERROR: Nix not found. Ensure the devcontainer nix feature is enabled."
+    exit 1
+fi
+
+echo "Using $(nix --version)"
+
+# Enable flakes if not already configured
+if ! nix show-config 2>/dev/null | grep -q "flakes"; then
+    if ! grep -q "experimental-features" /etc/nix/nix.conf 2>/dev/null && \
+       ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
+        echo "Enabling Nix flakes..."
+        mkdir -p ~/.config/nix
+        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    fi
+fi
+
+# Install packages using nix profile (flakes-native, works with Determinate Nix)
 echo "Installing dev tools..."
-nix-env -iA \
-    nixpkgs.neovim \
-    nixpkgs.tmux \
-    nixpkgs.ripgrep \
-    nixpkgs.fd \
-    nixpkgs.fzf \
-    nixpkgs.lazygit \
-    nixpkgs.git \
-    nixpkgs.delta \
-    nixpkgs.nodejs_22 \
-    nixpkgs.python312 \
-    nixpkgs.gcc \
-    nixpkgs.gnumake \
-    nixpkgs.pkg-config \
-    nixpkgs.curl \
-    nixpkgs.jq \
-    nixpkgs.unzip \
-    nixpkgs.postgresql \
-    nixpkgs.libpq \
-    nixpkgs.libffi \
-    nixpkgs.protobuf \
-    nixpkgs.cairo \
-    nixpkgs.pango \
-    nixpkgs.direnv
+nix profile install \
+    nixpkgs#neovim \
+    nixpkgs#tmux \
+    nixpkgs#ripgrep \
+    nixpkgs#fd \
+    nixpkgs#fzf \
+    nixpkgs#lazygit \
+    nixpkgs#git \
+    nixpkgs#delta \
+    nixpkgs#nodejs_22 \
+    nixpkgs#python312 \
+    nixpkgs#gcc \
+    nixpkgs#gnumake \
+    nixpkgs#pkg-config \
+    nixpkgs#curl \
+    nixpkgs#jq \
+    nixpkgs#unzip \
+    nixpkgs#postgresql \
+    nixpkgs#libpq \
+    nixpkgs#libffi \
+    nixpkgs#protobuf \
+    nixpkgs#cairo \
+    nixpkgs#pango \
+    nixpkgs#direnv
 
 echo "Dev tools installed"
+
+# Ensure Nix is sourced in shell profiles
+for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv; do
+    if [ ! -f "$rcfile" ] || ! grep -q "nix-daemon.sh\|nix.sh" "$rcfile" 2>/dev/null; then
+        cat >> "$rcfile" << 'NIXSOURCE'
+# Source Nix
+if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+    . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+fi
+NIXSOURCE
+    fi
+done
 
 # Copy configs if dotfiles are mounted
 DOTFILES_DIR="$HOME/.dotfiles"
@@ -134,6 +106,18 @@ if [ -d "$DOTFILES_DIR" ]; then
     # Add to PATH
     echo 'export PATH="$HOME/.dotfiles/bin:$PATH"' >> ~/.bashrc
     
+    # Claude Code hooks
+    if command -v jq &> /dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
+        mkdir -p ~/.claude
+        CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+        if [ -f "$CLAUDE_SETTINGS" ]; then
+            jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" > "${CLAUDE_SETTINGS}.tmp" \
+                && mv "${CLAUDE_SETTINGS}.tmp" "$CLAUDE_SETTINGS"
+        else
+            jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' > "$CLAUDE_SETTINGS"
+        fi
+    fi
+
     echo "Configs copied"
 fi
 

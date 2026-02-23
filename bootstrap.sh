@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bootstrap script for dotfiles with Home Manager
-# Installs Nix and applies Home Manager configuration
-# Uses Determinate Systems installer (works as root and in containers)
+# If Nix is already installed (e.g. via devcontainer feature), skips installation
+# Otherwise installs via Determinate Systems installer
 
 set -e
 
@@ -48,31 +48,52 @@ case "$(uname -s)-$(uname -m)" in
 esac
 info "Detected system: $SYSTEM"
 
-# Install Nix if not present
+# Source Nix into PATH if not already available
+# Check common locations: PATH, Determinate Nix default profile, single-user profile
 if ! command -v nix &> /dev/null; then
-    info "Installing Nix..."
-    # Use Determinate Systems installer - works as root and in containers
-    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
-    success "Nix installed"
+    if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+    elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    fi
 fi
 
-# Source Nix for this session
-if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
-    . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+# Install Nix only if it's truly not present (not just missing from PATH)
+if ! command -v nix &> /dev/null && [ ! -x "/nix/var/nix/profiles/default/bin/nix" ]; then
+    info "Installing Nix..."
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
+    success "Nix installed"
+
+    # Source after fresh install
+    if [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+        . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+    elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    fi
+else
+    success "Nix already installed, skipping installation"
+fi
+
+# Last resort: force PATH if nix binary exists but sourcing didn't work
+if ! command -v nix &> /dev/null && [ -x "/nix/var/nix/profiles/default/bin/nix" ]; then
+    export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
 fi
 
 # Verify Nix is working
 if ! command -v nix &> /dev/null; then
-    error "Nix installation failed - 'nix' command not found. Try restarting your shell and running bootstrap.sh again."
+    error "Nix not found. Install Nix first (e.g. devcontainer nix feature or: curl -sSf -L https://install.determinate.systems/nix | sh -s -- install)"
 fi
 
-# Enable flakes
-if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
-    info "Enabling Nix flakes..."
-    mkdir -p ~/.config/nix
-    echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+info "Using $(nix --version)"
+
+# Enable flakes if not already configured (devcontainer feature may have set this)
+if ! nix show-config 2>/dev/null | grep -q "flakes"; then
+    if ! grep -q "experimental-features" /etc/nix/nix.conf 2>/dev/null && \
+       ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
+        info "Enabling Nix flakes..."
+        mkdir -p ~/.config/nix
+        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    fi
 fi
 
 # Apply Home Manager configuration
@@ -80,6 +101,20 @@ info "Applying Home Manager configuration..."
 cd "$DOTFILES_DIR"
 nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 success "Home Manager configuration applied!"
+
+# Apply Claude Code hooks
+if command -v jq &> /dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
+    info "Applying Claude Code hooks..."
+    mkdir -p ~/.claude
+    CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+    if [ -f "$CLAUDE_SETTINGS" ]; then
+        jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" > "${CLAUDE_SETTINGS}.tmp" \
+            && mv "${CLAUDE_SETTINGS}.tmp" "$CLAUDE_SETTINGS"
+    else
+        jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' > "$CLAUDE_SETTINGS"
+    fi
+    success "Claude Code hooks applied"
+fi
 
 # Set zsh as default shell
 ZSH_PATH="$HOME/.nix-profile/bin/zsh"

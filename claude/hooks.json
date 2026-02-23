@@ -1,0 +1,22 @@
+{
+  "Notification": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "~/.dotfiles/bin/claude-notify"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "~/.dotfiles/bin/claude-notify"
+        }
+      ]
+    }
+  ]
+}

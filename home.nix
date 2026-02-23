@@ -39,6 +39,7 @@ in
     git          # Git CLI
     gh           # GitHub CLI
     delta        # Better git diff
+    neovim-remote # nvr - open files in parent nvim from lazygit
 
     # Language Support
     nodejs_22    # For LSP servers
