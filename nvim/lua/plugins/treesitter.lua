@@ -96,10 +96,7 @@ return {
       },
     },
     config = function(_, opts)
-      local ok, configs = pcall(require, "nvim-treesitter.configs")
-      if ok then
-        configs.setup(opts)
-      end
+      require("nvim-treesitter.configs").setup(opts)
     end,
   },
 }
