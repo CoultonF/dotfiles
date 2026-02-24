@@ -1,6 +1,6 @@
 os:
   editPreset: "nvim-remote"
-  open: "lazygit-open"
+  open: "lazygit-open {{filename}}"
 gui:
   theme:
     selectedLineBgColor:
