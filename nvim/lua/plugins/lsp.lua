@@ -101,6 +101,7 @@ return {
           },
         },
         pyright = {
+          root_markers = { ".venv", "pyrightconfig.json", "pyproject.toml", ".git" },
           settings = {
             python = {
               analysis = {
