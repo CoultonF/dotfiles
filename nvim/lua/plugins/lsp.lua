@@ -132,13 +132,14 @@ return {
       }
 
       -- Setup each server using new vim.lsp.config API (nvim 0.11+)
+      local server_names = {}
       for server, config in pairs(servers) do
         config.capabilities = capabilities
         config.on_attach = config.on_attach or on_attach
-
-        -- Use new vim.lsp.config API
         vim.lsp.config(server, config)
+        table.insert(server_names, server)
       end
+      vim.lsp.enable(server_names)
 
       -- Diagnostic configuration
       vim.diagnostic.config({

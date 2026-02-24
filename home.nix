@@ -55,6 +55,8 @@ in
     # Build Tools
     gcc          # C compiler (treesitter needs this), includes g++
     gnumake
+    # Note: tree-sitter-cli installed via npm (nixpkgs lags behind nvim-treesitter requirements)
+    # See home.activation.npmGlobalPackages below
     pkg-config   # Find libraries during builds
 
     # Database
@@ -110,6 +112,8 @@ in
     # Environment variables set in .zshenv
     sessionVariables = {
       EDITOR = "nvim";
+      # npm global prefix (writable location outside nix store)
+      NPM_CONFIG_PREFIX = "$HOME/.npm-global";
       # Help pip/Python find nix-installed libraries during compilation
       PKG_CONFIG_PATH = "$HOME/.nix-profile/lib/pkgconfig:$HOME/.nix-profile/share/pkgconfig";
       LIBRARY_PATH = "$HOME/.nix-profile/lib";
@@ -324,9 +328,19 @@ in
   # ============================================================================
   # Note: tmux-sessionizer is already in ~/.dotfiles/bin/ which is added to PATH
   home.sessionPath = [
+    "$HOME/.npm-global/bin"
     "$HOME/.dotfiles/bin"
     "$HOME/.local/bin"
   ];
+
+  # ============================================================================
+  # npm global packages (for tools where nixpkgs lags behind)
+  # ============================================================================
+  home.activation.npmGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+    export PATH="$HOME/.npm-global/bin:$PATH"
+    ${pkgs.nodejs_22}/bin/npm install -g tree-sitter-cli 2>/dev/null || true
+  '';
 
   # ============================================================================
   # Note: OrbStack is used for Docker on macOS (installed separately)

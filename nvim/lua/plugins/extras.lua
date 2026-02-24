@@ -152,6 +152,7 @@ return {
   {
     "NvChad/nvim-colorizer.lua",
     event = { "BufReadPre", "BufNewFile" },
+    build = "rm -rf doc",
     opts = {
       filetypes = { "*" },
       user_default_options = {

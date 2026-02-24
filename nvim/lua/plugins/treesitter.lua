@@ -1,21 +1,16 @@
 -- Treesitter: Syntax highlighting and code understanding
+-- NOTE: nvim 0.11+ has treesitter highlight/indent built-in.
+-- nvim-treesitter plugin now only manages parser installation.
 
 return {
+  -- Parser installation and management
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
-    dependencies = {
-      {
-        "nvim-treesitter/nvim-treesitter-textobjects",
-        init = function()
-          -- Disable plugin until after treesitter loads
-          require("lazy.core.loader").disable_rtp_plugin("nvim-treesitter-textobjects")
-        end,
-      },
-    },
-    opts = {
-      ensure_installed = {
+    config = function()
+      -- Install parsers that are missing
+      local langs = {
         "bash",
         "c",
         "css",
@@ -24,7 +19,6 @@ return {
         "html",
         "javascript",
         "json",
-        "jsonc",
         "lua",
         "luadoc",
         "luap",
@@ -43,60 +37,69 @@ return {
         "vimdoc",
         "xml",
         "yaml",
-      },
-      auto_install = true,
-      highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = false,
-      },
-      indent = {
-        enable = true,
-      },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "<C-space>",
-          node_incremental = "<C-space>",
-          scope_incremental = false,
-          node_decremental = "<bs>",
-        },
-      },
-      textobjects = {
+      }
+
+      -- Auto-install missing parsers on startup
+      local installed = require("nvim-treesitter.config").get_installed()
+      local missing = vim.tbl_filter(function(lang)
+        return not vim.list_contains(installed, lang)
+      end, langs)
+
+      if #missing > 0 then
+        require("nvim-treesitter.install").install(missing)
+      end
+    end,
+  },
+
+  -- Treesitter text objects (select, move, swap)
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      require("nvim-treesitter-textobjects").setup({
         select = {
-          enable = true,
           lookahead = true,
-          keymaps = {
-            ["af"] = "@function.outer",
-            ["if"] = "@function.inner",
-            ["ac"] = "@class.outer",
-            ["ic"] = "@class.inner",
-            ["aa"] = "@parameter.outer",
-            ["ia"] = "@parameter.inner",
-          },
         },
         move = {
-          enable = true,
-          goto_next_start = {
-            ["]f"] = "@function.outer",
-            ["]c"] = "@class.outer",
-          },
-          goto_next_end = {
-            ["]F"] = "@function.outer",
-            ["]C"] = "@class.outer",
-          },
-          goto_previous_start = {
-            ["[f"] = "@function.outer",
-            ["[c"] = "@class.outer",
-          },
-          goto_previous_end = {
-            ["[F"] = "@function.outer",
-            ["[C"] = "@class.outer",
-          },
+          set_jumps = true,
         },
-      },
-    },
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+      })
+
+      local select = require("nvim-treesitter-textobjects.select")
+      local move = require("nvim-treesitter-textobjects.move")
+
+      -- Select text objects
+      local select_maps = {
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+        ["ac"] = "@class.outer",
+        ["ic"] = "@class.inner",
+        ["aa"] = "@parameter.outer",
+        ["ia"] = "@parameter.inner",
+      }
+      for keys, query in pairs(select_maps) do
+        vim.keymap.set({ "x", "o" }, keys, function()
+          select.select_textobject(query, "textobjects")
+        end, { desc = "TS: " .. query })
+      end
+
+      -- Move to next/previous text objects
+      local move_maps = {
+        ["]f"] = { move.goto_next_start, "@function.outer" },
+        ["]c"] = { move.goto_next_start, "@class.outer" },
+        ["]F"] = { move.goto_next_end, "@function.outer" },
+        ["]C"] = { move.goto_next_end, "@class.outer" },
+        ["[f"] = { move.goto_previous_start, "@function.outer" },
+        ["[c"] = { move.goto_previous_start, "@class.outer" },
+        ["[F"] = { move.goto_previous_end, "@function.outer" },
+        ["[C"] = { move.goto_previous_end, "@class.outer" },
+      }
+      for keys, def in pairs(move_maps) do
+        vim.keymap.set({ "n", "x", "o" }, keys, function()
+          def[1](def[2], "textobjects")
+        end, { desc = "TS: " .. def[2] })
+      end
     end,
   },
 }
