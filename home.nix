@@ -316,6 +316,9 @@ in
   # OpenCode config
   xdg.configFile."opencode/opencode.json".source = ./opencode/opencode.json;
 
+  # Lazygit config
+  xdg.configFile."lazygit/config.yml".source = ./lazygit/config.yml;
+
   # ============================================================================
   # Environment
   # ============================================================================

@@ -1,0 +1,9 @@
+os:
+  editPreset: "nvim-remote"
+  open: "lazygit-open"
+gui:
+  theme:
+    selectedLineBgColor:
+      - "#333333"
+    selectedRangeBgColor:
+      - "#333333"
