@@ -29,8 +29,13 @@ chosen=$(fzf-tmux -w 100% -h 50% --multi -0 --no-preview --wrap <<< "$items" | a
 
 while IFS= read -r url; do
     if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_TTY" ]; then
-        tmux set-buffer -w "$url"
-        tmux display-message "Copied URL to clipboard"
+        if tmux set-buffer -w "$url" 2>/dev/null; then
+            tmux display-message "Copied URL to clipboard"
+        else
+            encoded=$(printf '%s' "$url" | base64 | tr -d '\n')
+            printf '\ePtmux;\e\e]52;c;%s\a\e\\' "$encoded"
+            tmux display-message "Copied URL to clipboard (OSC 52)"
+        fi
     else
         open "$url"
     fi
