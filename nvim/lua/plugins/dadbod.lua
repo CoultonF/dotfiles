@@ -8,6 +8,7 @@ return {
     dependencies = {
       "tpope/vim-dadbod",
       "kristijanhusak/vim-dadbod-completion",
+      "tpope/vim-dotenv",
     },
     cmd = { "DBUI", "DBUIToggle", "DBUIAddConnection", "DBUIFindBuffer" },
     keys = {
