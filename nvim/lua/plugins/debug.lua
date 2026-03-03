@@ -78,6 +78,46 @@ return {
       { "<leader>dj", function() require("dap").down() end, desc = "Down" },
       { "<leader>dk", function() require("dap").up() end, desc = "Up" },
       { "<leader>dp", function() require("dap").pause() end, desc = "Pause" },
+      -- Web server debug picker (launch or attach individual servers)
+      { "<leader>dw", function()
+        local dap = require("dap")
+        local configs = dap.configurations.python or {}
+        local web_configs = vim.tbl_filter(function(c)
+          return c.name:match("FastAPI") or c.name:match("Flask")
+              or c.name:match("RCOM") or c.name:match("Attach")
+              or c.name:match("API w/")
+        end, configs)
+        if #web_configs == 0 then
+          vim.notify("No web server debug configs found", vim.log.levels.WARN)
+          return
+        end
+        vim.ui.select(web_configs, {
+          prompt = "Select web server debug config:",
+          format_item = function(c) return c.name end,
+        }, function(config)
+          if config then dap.run(config) end
+        end)
+      end, desc = "Debug web server" },
+      -- Attach All: compound attach to both FastAPI and Flask debugpy sessions
+      { "<leader>dW", function()
+        local dap = require("dap")
+        local configs = dap.configurations.python or {}
+        local attach_fastapi, attach_flask
+        for _, c in ipairs(configs) do
+          if c.name:match("Attach FastAPI") then attach_fastapi = c end
+          if c.name:match("Attach Flask") then attach_flask = c end
+        end
+        if not attach_fastapi or not attach_flask then
+          vim.notify("Attach configs not found. Is .vscode/launch.json present?", vim.log.levels.WARN)
+          return
+        end
+        -- Start FastAPI session, then attach Flask after it initializes
+        dap.run(attach_fastapi)
+        dap.listeners.after.event_initialized["attach_all"] = function()
+          dap.listeners.after.event_initialized["attach_all"] = nil
+          dap.run(attach_flask)
+        end
+      end, desc = "Debug all servers (attach)" },
     },
     config = function()
       local dap = require("dap")
@@ -123,6 +163,13 @@ return {
             cwd = "${workspaceFolder}",
           },
         }
+      end
+
+      -- Load project-specific debug configs from .vscode/launch.json
+      -- Maps VSCode's "debugpy" type to nvim-dap's "python" adapter
+      local vscode_ok, vscode_dap = pcall(require, "dap.ext.vscode")
+      if vscode_ok then
+        vscode_dap.load_launchjs(nil, { debugpy = "python" })
       end
     end,
   },
