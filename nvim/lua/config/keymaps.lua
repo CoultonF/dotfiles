@@ -99,6 +99,10 @@ map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { 
 map("n", "<C-o>", "<C-o>", { desc = "Jump back" })
 map("n", "<C-i>", "<C-i>", { desc = "Jump forward" })
 
+-- Comment toggle with Ctrl+/ (terminals send C-_ for C-/)
+map("n", "<C-_>", "gcc", { remap = true, desc = "Toggle comment" })
+map("v", "<C-_>", "gc", { remap = true, desc = "Toggle comment" })
+
 -- Better indenting (stay in visual mode)
 map("v", "<", "<gv", { desc = "Indent left" })
 map("v", ">", ">gv", { desc = "Indent right" })
