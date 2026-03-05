@@ -112,7 +112,7 @@ if [ -d "$DOTFILES_DIR" ]; then
         CLAUDE_SETTINGS="$HOME/.claude/settings.json"
         if [ -f "$CLAUDE_SETTINGS" ]; then
             jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" > "${CLAUDE_SETTINGS}.tmp" \
-                && mv "${CLAUDE_SETTINGS}.tmp" "$CLAUDE_SETTINGS"
+                && cat "${CLAUDE_SETTINGS}.tmp" > "$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
         else
             jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' > "$CLAUDE_SETTINGS"
         fi

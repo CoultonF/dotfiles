@@ -120,7 +120,7 @@ if command -v jq &> /dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
     CLAUDE_SETTINGS="$HOME/.claude/settings.json"
     if [ -f "$CLAUDE_SETTINGS" ]; then
         jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" > "${CLAUDE_SETTINGS}.tmp" \
-            && mv "${CLAUDE_SETTINGS}.tmp" "$CLAUDE_SETTINGS"
+            && cat "${CLAUDE_SETTINGS}.tmp" > "$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
     else
         jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' > "$CLAUDE_SETTINGS"
     fi
@@ -128,16 +128,19 @@ if command -v jq &> /dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 fi
 
 # Set zsh as default shell
-ZSH_PATH="$HOME/.nix-profile/bin/zsh"
+# Install zsh system-wide so SSH sessions can find it without nix profile resolution
+if ! command -v /usr/bin/zsh &> /dev/null; then
+    info "Installing zsh system-wide..."
+    sudo apt-get update -qq && sudo apt-get install -y -qq zsh > /dev/null 2>&1 || true
+fi
+ZSH_PATH=$(command -v zsh 2>/dev/null || echo "/usr/bin/zsh")
 if [ -x "$ZSH_PATH" ]; then
     CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
     if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
         info "Setting zsh as default shell..."
-        # Add to /etc/shells if not present
         if ! grep -q "$ZSH_PATH" /etc/shells 2>/dev/null; then
             echo "$ZSH_PATH" | sudo tee -a /etc/shells > /dev/null 2>/dev/null || true
         fi
-        # Change shell (try chsh first, fall back to sudo usermod for containers)
         if command -v chsh &> /dev/null; then
             sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
         else
