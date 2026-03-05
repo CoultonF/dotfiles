@@ -65,6 +65,11 @@ if ! command -v nix &> /dev/null && [ ! -x "/nix/var/nix/profiles/default/bin/ni
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none --extra-conf "sandbox = false"
         # Start the Nix daemon manually since there's no init system
         sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+        # Wait for daemon to be ready
+        for i in $(seq 1 30); do
+            if nix store ping 2>/dev/null; then break; fi
+            sleep 1
+        done
     else
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
     fi
@@ -130,13 +135,13 @@ if [ -x "$ZSH_PATH" ]; then
         info "Setting zsh as default shell..."
         # Add to /etc/shells if not present
         if ! grep -q "$ZSH_PATH" /etc/shells 2>/dev/null; then
-            echo "$ZSH_PATH" >> /etc/shells 2>/dev/null || true
+            echo "$ZSH_PATH" | sudo tee -a /etc/shells > /dev/null 2>/dev/null || true
         fi
-        # Change shell (try chsh first, fall back to usermod for containers)
+        # Change shell (try chsh first, fall back to sudo usermod for containers)
         if command -v chsh &> /dev/null; then
-            chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
+            sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
         else
-            usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
+            sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
         fi
         success "Default shell set to zsh"
     fi
