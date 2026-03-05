@@ -62,7 +62,9 @@ fi
 if ! command -v nix &> /dev/null && [ ! -x "/nix/var/nix/profiles/default/bin/nix" ]; then
     info "Installing Nix..."
     if [ "$(uname -s)" = "Linux" ] && ! pidof systemd > /dev/null 2>&1; then
-        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none --no-start-daemon --extra-conf "sandbox = false"
+        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none --extra-conf "sandbox = false"
+        # Start the Nix daemon manually since there's no init system
+        sudo /nix/var/nix/profiles/default/bin/nix-daemon &
     else
         curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
     fi
