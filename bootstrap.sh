@@ -61,11 +61,11 @@ fi
 # Install Nix only if it's truly not present (not just missing from PATH)
 if ! command -v nix &> /dev/null && [ ! -x "/nix/var/nix/profiles/default/bin/nix" ]; then
     info "Installing Nix..."
-    EXTRA_ARGS=""
     if [ "$(uname -s)" = "Linux" ] && ! pidof systemd > /dev/null 2>&1; then
-        EXTRA_ARGS="linux --extra-conf \"sandbox = false\" --no-start-daemon"
+        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none --no-start-daemon --extra-conf "sandbox = false"
+    else
+        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
     fi
-    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm $EXTRA_ARGS
     success "Nix installed"
 
     # Source after fresh install
