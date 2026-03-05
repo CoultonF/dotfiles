@@ -61,7 +61,11 @@ fi
 # Install Nix only if it's truly not present (not just missing from PATH)
 if ! command -v nix &> /dev/null && [ ! -x "/nix/var/nix/profiles/default/bin/nix" ]; then
     info "Installing Nix..."
-    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
+    INIT_FLAG=""
+    if ! pidof systemd > /dev/null 2>&1; then
+        INIT_FLAG="--init none"
+    fi
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm $INIT_FLAG
     success "Nix installed"
 
     # Source after fresh install
