@@ -97,6 +97,22 @@ fi
 
 info "Using $(nix --version)"
 
+# Ensure Nix daemon is running (containers without systemd need manual start)
+if [ "$(uname -s)" = "Linux" ] && ! pidof systemd > /dev/null 2>&1; then
+    if ! nix store ping 2>/dev/null; then
+        info "Starting Nix daemon..."
+        sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+        for i in $(seq 1 30); do
+            if nix store ping 2>/dev/null; then break; fi
+            sleep 1
+        done
+        if ! nix store ping 2>/dev/null; then
+            error "Nix daemon failed to start"
+        fi
+        success "Nix daemon started"
+    fi
+fi
+
 # Enable flakes if not already configured (devcontainer feature may have set this)
 if ! nix show-config 2>/dev/null | grep -q "flakes"; then
     if ! grep -q "experimental-features" /etc/nix/nix.conf 2>/dev/null && \
