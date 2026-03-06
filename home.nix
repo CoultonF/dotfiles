@@ -77,6 +77,7 @@ in
     ctop         # Container metrics
 
     # Utilities
+    openssh
     curl
     wget
     unzip
@@ -131,6 +132,11 @@ in
         . "$HOME/.nix-profile/etc/profile.d/nix.sh"
       elif [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+
+      # Source home-manager session variables (PATH from sessionPath, etc.)
+      if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
       fi
     '';
 
@@ -336,9 +342,13 @@ in
   # npm global packages (for tools where nixpkgs lags behind)
   # ============================================================================
   home.activation.npmGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    export NPM_CONFIG_PREFIX="$HOME/.npm-global"
-    export PATH="$HOME/.npm-global/bin:$PATH"
-    ${pkgs.nodejs_22}/bin/npm install -g tree-sitter-cli 2>/dev/null || true
+    export NPM_CONFIG_PREFIX="${homeDirectory}/.npm-global"
+    export PATH="${homeDirectory}/.npm-global/bin:$PATH"
+    mkdir -p "${homeDirectory}/.npm-global"
+    if ! ${pkgs.nodejs_22}/bin/npm list -g tree-sitter-cli >/dev/null 2>&1; then
+      echo "Installing tree-sitter-cli via npm..."
+      ${pkgs.nodejs_22}/bin/npm install -g tree-sitter-cli || echo "WARNING: Failed to install tree-sitter-cli"
+    fi
   '';
 
   # ============================================================================

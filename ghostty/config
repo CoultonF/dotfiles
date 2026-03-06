@@ -8,6 +8,9 @@ theme = Catppuccin Mocha
 font-family = JetBrainsMono Nerd Font
 font-size = 14
 font-thicken = true
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
 
 # Window
 window-padding-x = 10

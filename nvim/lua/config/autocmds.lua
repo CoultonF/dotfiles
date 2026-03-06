@@ -78,6 +78,15 @@ autocmd({ "BufRead", "BufNewFile" }, {
   command = "setfiletype markdown",
 })
 
+-- Enable treesitter highlighting (nvim 0.11+ built-in)
+augroup("TreesitterHighlight", { clear = true })
+autocmd("FileType", {
+  group = "TreesitterHighlight",
+  callback = function(ev)
+    pcall(vim.treesitter.start, ev.buf)
+  end,
+})
+
 -- Fix vim.ui.open based on environment
 local function in_container()
   return os.getenv("SSH_TTY")
