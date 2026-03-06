@@ -126,6 +126,10 @@ in
     # Environment setup in .zshenv (runs for all shells including non-interactive)
     envExtra = ''
       # Source Nix profile (supports both single-user and multi-user installations)
+      # Unset guard variable so nix-daemon.sh re-adds nix to PATH for this shell.
+      # The parent process (e.g. bash in devcontainers) may have already sourced it,
+      # setting the guard, but zsh rebuilds PATH from scratch and needs it re-sourced.
+      unset __ETC_PROFILE_NIX_SOURCED
       if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/nix.sh"
       elif [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
