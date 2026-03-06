@@ -131,11 +131,12 @@ return {
         pickers = {
           find_files = {
             hidden = true,
-            file_ignore_patterns = { ".git/", "node_modules/", ".venv/", "__pycache__/" },
+            no_ignore = true,
+            file_ignore_patterns = { ".git/", "node_modules/", ".venv/" },
           },
           live_grep = {
             additional_args = function()
-              return { "--hidden" }
+              return { "--hidden", "--no-ignore", "--glob", "!node_modules/", "--glob", "!.venv/", "--glob", "!.git/" }
             end,
           },
         },
