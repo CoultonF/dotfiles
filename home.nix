@@ -112,6 +112,7 @@ in
     # Environment variables set in .zshenv
     sessionVariables = {
       EDITOR = "nvim";
+      COLORTERM = "truecolor";
       # npm global prefix (writable location outside nix store)
       NPM_CONFIG_PREFIX = "$HOME/.npm-global";
       # Help pip/Python find nix-installed libraries during compilation
