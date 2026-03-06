@@ -47,7 +47,7 @@ return {
         { "<leader>c", group = "Close/Code" },
         { "<leader>d", group = "Debug" },
         { "<leader>g", group = "Git" },
-        { "<leader>o", group = "OpenCode" },
+        { "<leader>o", group = "Overseer" },
         { "<leader>q", group = "Quickfix" },
         { "<leader>s", group = "Search" },
         { "<leader>t", group = "Test" },

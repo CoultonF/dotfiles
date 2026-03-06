@@ -168,7 +168,6 @@ check_command() {
 }
 
 check_command nvim
-check_command opencode
 check_command lazygit
 check_command rg
 check_command fd
@@ -182,11 +181,9 @@ echo "=========================================="
 echo ""
 echo "Usage:"
 echo "  nvim .           # Open Neovim"
-echo "  opencode         # Start OpenCode AI assistant"
 echo "  lazygit          # Git TUI"
 echo ""
 echo "In Neovim:"
-echo "  <leader>oa       # Ask OpenCode"
 echo "  <leader>gg       # LazyGit"
 echo "  ff               # Find files"
 echo "  gf               # Grep in files"

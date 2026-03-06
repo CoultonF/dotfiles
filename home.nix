@@ -25,9 +25,6 @@ in
     # Editor
     neovim
 
-    # AI Coding Assistant
-    opencode
-
     # Search & Navigation
     ripgrep      # Fast grep (rg)
     fd           # Fast find
@@ -321,9 +318,6 @@ in
 
   # Ghostty config
   xdg.configFile."ghostty/config".source = ./ghostty/config;
-
-  # OpenCode config
-  xdg.configFile."opencode/opencode.json".source = ./opencode/opencode.json;
 
   # Lazygit config
   xdg.configFile."lazygit/config.yml".source = ./lazygit/config.yml;

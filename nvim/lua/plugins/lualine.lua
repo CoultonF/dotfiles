@@ -30,17 +30,6 @@ return {
           },
         },
         lualine_x = {
-          {
-            -- Show OpenCode connection status
-            function()
-              local ok, opencode = pcall(require, "opencode")
-              if ok and opencode.is_connected and opencode.is_connected() then
-                return "󰚩 OC"
-              end
-              return ""
-            end,
-            color = { fg = "#a6e3a1" },
-          },
           "encoding",
           "fileformat",
           "filetype",

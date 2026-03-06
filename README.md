@@ -27,7 +27,6 @@ That's it. Everything is installed and configured.
 | **Ghostty** | GPU-accelerated terminal with Catppuccin theme |
 | **tmux** | Terminal multiplexer with vim keybindings and Catppuccin theme |
 | **Neovim** | Full IDE setup with LSP, completion, debugging |
-| **OpenCode** | AI coding assistant integration |
 | **Zsh** | Shell with autosuggestions, syntax highlighting, starship prompt |
 
 ## Directory Structure
@@ -46,8 +45,6 @@ That's it. Everything is installed and configured.
 │   └── lua/
 │       ├── config/        # Core settings
 │       └── plugins/       # Plugin configurations
-├── opencode/
-│   └── opencode.json      # OpenCode MCP configuration
 └── bin/
     └── tmux-sessionizer   # Project session switcher (Ctrl-g)
 ```
@@ -84,7 +81,6 @@ home-manager switch --flake ~/.dotfiles --rollback
 All installed automatically via `home.nix`:
 
 - **Editor**: Neovim
-- **AI Assistant**: OpenCode
 - **Search**: ripgrep (rg), fd, fzf, tree
 - **Git**: lazygit, git, delta
 - **Languages**: Node.js 22, Python 3.12, Lua 5.1
@@ -128,7 +124,6 @@ Leader key: `<Space>`
 | `gd` | Go to definition |
 | `gr` | Go to references |
 | `<leader>gg` | LazyGit |
-| `<leader>oa` | Ask OpenCode |
 
 ## Customizing
 
