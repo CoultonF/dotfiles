@@ -113,6 +113,25 @@ if [ "$(uname -s)" = "Linux" ] && ! pidof systemd > /dev/null 2>&1; then
     fi
 fi
 
+# Fix missing nixbld group in containers (e.g. devcontainer nix feature)
+if ! getent group nixbld > /dev/null 2>&1; then
+    info "Creating nixbld group for Nix builds..."
+    sudo groupadd -r nixbld 2>/dev/null || true
+    for i in $(seq 1 8); do
+        sudo useradd -r -g nixbld -G nixbld -d /var/empty -s /usr/sbin/nologin "nixbld$i" 2>/dev/null || true
+    done
+    # Restart daemon to pick up the new group
+    if [ "$(uname -s)" = "Linux" ] && ! pidof systemd > /dev/null 2>&1; then
+        sudo pkill -f nix-daemon 2>/dev/null || true
+        sleep 1
+        sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+        for i in $(seq 1 30); do
+            if nix store ping 2>/dev/null; then break; fi
+            sleep 1
+        done
+    fi
+fi
+
 # Enable flakes if not already configured (devcontainer feature may have set this)
 if ! nix show-config 2>/dev/null | grep -q "flakes"; then
     if ! grep -q "experimental-features" /etc/nix/nix.conf 2>/dev/null && \

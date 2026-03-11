@@ -30,6 +30,7 @@ in
     fd           # Fast find
     fzf          # Fuzzy finder
     tree         # Directory tree
+    lsof         # List open files/ports
 
     # Git
     lazygit      # Git TUI
