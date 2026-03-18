@@ -85,6 +85,9 @@ in
     jq           # JSON processor
     awscli2      # AWS CLI
     direnv       # Per-directory environment variables
+  ] ++ lib.optionals (!isDarwin) [
+    # Linux-only: locale data for containers (macOS has built-in locale support)
+    glibcLocales
   ] ++ lib.optionals isDarwin [
     # macOS-only: GUI apps and tools that need OrbStack
     docker-client # Docker CLI (OrbStack provides daemon)
@@ -112,6 +115,8 @@ in
     sessionVariables = {
       EDITOR = "nvim";
       COLORTERM = "truecolor";
+      LANG = "en_US.UTF-8";
+      LC_ALL = "en_US.UTF-8";
       # npm global prefix (writable location outside nix store)
       NPM_CONFIG_PREFIX = "$HOME/.npm-global";
       # Help pip/Python find nix-installed libraries during compilation
@@ -138,6 +143,11 @@ in
       # Source home-manager session variables (PATH from sessionPath, etc.)
       if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+      fi
+
+      # Point glibc to Nix-provided locale data (Linux containers only)
+      if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -e "$HOME/.nix-profile/lib/locale/locale-archive" ]]; then
+        export LOCALE_ARCHIVE="$HOME/.nix-profile/lib/locale/locale-archive"
       fi
     '';
 
