@@ -122,6 +122,13 @@ return {
               ["<C-k>"] = "move_selection_previous",
               ["<C-q>"] = "close",
               ["<Esc>"] = "close",
+              -- Readline-style input editing
+              ["<C-a>"] = { "<Home>", type = "command" },
+              ["<C-e>"] = { "<End>", type = "command" },
+              ["<C-b>"] = { "<Left>", type = "command" },
+              ["<C-f>"] = { "<Right>", type = "command" },
+              ["<C-w>"] = { "<C-S-w>", type = "command" },
+              ["<C-u>"] = { "<C-u>", type = "command" },
             },
             n = {
               ["q"] = "close",

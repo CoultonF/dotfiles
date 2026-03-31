@@ -45,8 +45,9 @@ in
     lua5_1       # For Neovim plugins
 
     # LSP Servers
-    nodePackages.typescript-language-server
-    nodePackages.vscode-langservers-extracted  # HTML, CSS, JSON, ESLint
+    # Note: typescript-language-server and vscode-langservers-extracted installed via npm
+    # (nodePackages was removed from nixpkgs)
+    # See home.activation.npmGlobalPackages below
     pyright      # Python LSP
     lua-language-server
 
@@ -141,6 +142,9 @@ in
       fi
 
       # Source home-manager session variables (PATH from sessionPath, etc.)
+      # Unset guard so it re-runs — the parent process (e.g. bash in devcontainers)
+      # may have already sourced it, but zsh needs the sessionPath entries re-added.
+      unset __HM_SESS_VARS_SOURCED
       if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
       fi
@@ -354,12 +358,14 @@ in
   # ============================================================================
   home.activation.npmGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     export NPM_CONFIG_PREFIX="${homeDirectory}/.npm-global"
-    export PATH="${homeDirectory}/.npm-global/bin:$PATH"
+    export PATH="${pkgs.nodejs_22}/bin:${homeDirectory}/.npm-global/bin:$PATH"
     mkdir -p "${homeDirectory}/.npm-global"
-    if ! ${pkgs.nodejs_22}/bin/npm list -g tree-sitter-cli >/dev/null 2>&1; then
-      echo "Installing tree-sitter-cli via npm..."
-      ${pkgs.nodejs_22}/bin/npm install -g tree-sitter-cli || echo "WARNING: Failed to install tree-sitter-cli"
-    fi
+    for pkg in tree-sitter-cli typescript-language-server vscode-langservers-extracted; do
+      if ! ${pkgs.nodejs_22}/bin/npm list -g "$pkg" >/dev/null 2>&1; then
+        echo "Installing $pkg via npm..."
+        ${pkgs.nodejs_22}/bin/npm install -g "$pkg" || echo "WARNING: Failed to install $pkg"
+      fi
+    done
   '';
 
   # ============================================================================

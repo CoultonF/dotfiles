@@ -26,6 +26,18 @@ map("n", "*", "*zzzv", { desc = "Search word under cursor centered" })
 
 
 
+-- Delete/change without yanking (preserves clipboard/yank buffer)
+map("n", "d", '"_d', { desc = "Delete without yanking" })
+map("n", "D", '"_D', { desc = "Delete to end without yanking" })
+map("n", "c", '"_c', { desc = "Change without yanking" })
+map("n", "C", '"_C', { desc = "Change to end without yanking" })
+map("n", "x", '"_x', { desc = "Delete char without yanking" })
+map("x", "d", '"_d', { desc = "Delete without yanking" })
+map("x", "c", '"_c', { desc = "Change without yanking" })
+
+-- Cut: delete to register (use when you want to paste what you deleted)
+map({ "n", "v" }, "<leader>d", "d", { desc = "Cut (delete to register)" })
+
 -- Better paste (don't yank replaced text)
 map("x", "p", [["_dP]], { desc = "Paste without yanking" })
 
@@ -45,9 +57,6 @@ map("v", "<leader>Y", function()
 end, { desc = "Yank stripped to system clipboard" })
 map({ "n", "v" }, "<leader>p", [["+p]], { desc = "Paste from system clipboard" })
 map({ "n", "v" }, "<leader>P", [["+P]], { desc = "Paste before from system clipboard" })
-
--- Delete to void register
-map({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete to void register" })
 
 -- Window navigation with Ctrl+hjkl (navigate visible splits)
 map("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })

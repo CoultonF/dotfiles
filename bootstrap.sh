@@ -3,6 +3,12 @@
 # If Nix is already installed (e.g. via devcontainer feature), skips installation
 # Otherwise installs via Determinate Systems installer
 
+# Suppress locale warnings from system bash when en_US.UTF-8 isn't generated yet
+# (fixed later in this script by running locale-gen)
+if ! locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
+    unset LC_ALL
+fi
+
 set -e
 
 # Colors
@@ -110,6 +116,20 @@ if [ "$(uname -s)" = "Linux" ] && ! pidof systemd > /dev/null 2>&1; then
             error "Nix daemon failed to start"
         fi
         success "Nix daemon started"
+    fi
+fi
+
+# Generate en_US.UTF-8 locale for system programs (e.g. /bin/bash uses system
+# glibc which can't read Nix's locale archive due to version mismatch)
+if [ "$(uname -s)" = "Linux" ] && ! locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
+    info "Generating en_US.UTF-8 locale..."
+    if command -v locale-gen &> /dev/null; then
+        sudo sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
+        sudo locale-gen en_US.UTF-8 2>/dev/null || true
+    elif [ -f /etc/locale.gen ]; then
+        sudo apt-get update -qq && sudo apt-get install -y -qq locales > /dev/null 2>&1
+        sudo sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+        sudo locale-gen en_US.UTF-8 2>/dev/null || true
     fi
 fi
 
