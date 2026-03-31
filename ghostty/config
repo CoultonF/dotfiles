@@ -25,6 +25,9 @@ window-inherit-font-size = true
 cursor-style = block
 cursor-style-blink = false
 
+# Treat Option as Alt/Meta for terminal keybindings
+macos-option-as-alt = true
+
 # Terminal
 term = xterm-256color
 
