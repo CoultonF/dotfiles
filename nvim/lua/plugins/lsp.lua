@@ -122,9 +122,22 @@ return {
         tailwindcss = {},
         eslint = {
           on_attach = function(client, bufnr)
+            on_attach(client, bufnr)
             vim.api.nvim_create_autocmd("BufWritePre", {
               buffer = bufnr,
-              command = "EslintFixAll",
+              callback = function()
+                local clients = vim.lsp.get_clients({ bufnr = bufnr, name = "eslint" })
+                if #clients == 0 then return end
+                clients[1]:request_sync("workspace/executeCommand", {
+                  command = "eslint.applyAllFixes",
+                  arguments = {
+                    {
+                      uri = vim.uri_from_bufnr(bufnr),
+                      version = vim.lsp.util.buf_versions[bufnr],
+                    },
+                  },
+                }, 3000, bufnr)
+              end,
             })
           end,
         },
@@ -146,7 +159,20 @@ return {
         virtual_text = {
           prefix = "●",
         },
-        signs = true,
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = " ",
+            [vim.diagnostic.severity.WARN] = " ",
+            [vim.diagnostic.severity.HINT] = "󰌵 ",
+            [vim.diagnostic.severity.INFO] = " ",
+          },
+          numhl = {
+            [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+            [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+            [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+            [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+          },
+        },
         underline = true,
         update_in_insert = false,
         severity_sort = true,
@@ -155,13 +181,6 @@ return {
           source = "always",
         },
       })
-
-      -- Diagnostic signs
-      local signs = { Error = " ", Warn = " ", Hint = "󰌵 ", Info = " " }
-      for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-      end
     end,
   },
 }
