@@ -123,12 +123,11 @@ fi
 # glibc which can't read Nix's locale archive due to version mismatch)
 if [ "$(uname -s)" = "Linux" ] && ! locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
     info "Generating en_US.UTF-8 locale..."
+    if ! command -v locale-gen &> /dev/null; then
+        sudo apt-get update -qq && sudo apt-get install -y -qq locales > /dev/null 2>&1
+    fi
     if command -v locale-gen &> /dev/null; then
         sudo sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
-        sudo locale-gen en_US.UTF-8 2>/dev/null || true
-    elif [ -f /etc/locale.gen ]; then
-        sudo apt-get update -qq && sudo apt-get install -y -qq locales > /dev/null 2>&1
-        sudo sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
         sudo locale-gen en_US.UTF-8 2>/dev/null || true
     fi
 fi
