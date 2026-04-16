@@ -6,7 +6,7 @@ let
   envHome = builtins.getEnv "HOME";
   
   username = if envUser != "" then envUser else "cfraser";
-  homeDirectory = if envHome != "" then envHome else 
+  homeDirectory = if envHome != "" then envHome else
     (if isDarwin then "/Users/${username}" else "/home/${username}");
 in
 {
@@ -52,9 +52,9 @@ in
     lua-language-server
 
     # Build Tools
-    gcc          # C compiler (treesitter needs this), includes g++
+    gcc          # C compiler (treesitter parser compilation), includes g++
     gnumake
-    # Note: tree-sitter-cli installed via npm (nixpkgs lags behind nvim-treesitter requirements)
+    # Note: tree-sitter-cli installed via npm (nixpkgs lags behind requirements)
     # See home.activation.npmGlobalPackages below
     pkg-config   # Find libraries during builds
 
@@ -336,6 +336,7 @@ in
     source = ./nvim;
     recursive = true;
   };
+
 
   # Ghostty config
   xdg.configFile."ghostty/config".source = ./ghostty/config;

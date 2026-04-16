@@ -146,26 +146,4 @@ return {
     "kevinhwang91/nvim-bqf",
     ft = "qf",
     opts = {},
-  },
-
-  -- Colorizer (show colors in code)
-  {
-    "NvChad/nvim-colorizer.lua",
-    event = { "BufReadPre", "BufNewFile" },
-    build = "rm -rf doc",
-    opts = {
-      filetypes = { "*" },
-      user_default_options = {
-        RGB = true,
-        RRGGBB = true,
-        names = false,
-        RRGGBBAA = true,
-        css = true,
-        css_fn = true,
-        mode = "background",
-        tailwind = true,
-        virtualtext = "■",
-      },
-    },
-  },
-}
+  },}

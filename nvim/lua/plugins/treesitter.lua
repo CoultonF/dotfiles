@@ -1,15 +1,16 @@
--- Treesitter: Syntax highlighting and code understanding
--- NOTE: nvim 0.11+ has treesitter highlight/indent built-in.
--- nvim-treesitter plugin now only manages parser installation.
+-- Treesitter: Parser management for nvim 0.12+ native tree-sitter
+-- Highlighting and indentation are handled via autocmd (see config/autocmds.lua)
+-- Requires tree-sitter CLI (installed via npm, see home.nix)
 
 return {
   -- Parser installation and management
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
+    main = "nvim-treesitter",
     config = function()
-      -- Install parsers that are missing
       local langs = {
         "bash",
         "c",
@@ -39,14 +40,15 @@ return {
         "yaml",
       }
 
-      -- Auto-install missing parsers on startup
       local installed = require("nvim-treesitter.config").get_installed()
-      local missing = vim.tbl_filter(function(lang)
-        return not vim.list_contains(installed, lang)
-      end, langs)
+      local to_install = vim.iter(langs)
+        :filter(function(lang)
+          return not vim.tbl_contains(installed, lang)
+        end)
+        :totable()
 
-      if #missing > 0 then
-        require("nvim-treesitter.install").install(missing)
+      if #to_install > 0 then
+        require("nvim-treesitter").install(to_install)
       end
     end,
   },

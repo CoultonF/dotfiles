@@ -78,12 +78,13 @@ autocmd({ "BufRead", "BufNewFile" }, {
   command = "setfiletype markdown",
 })
 
--- Enable treesitter highlighting (nvim 0.11+ built-in)
+-- Enable treesitter highlighting and indentation (nvim 0.12+ native)
 augroup("TreesitterHighlight", { clear = true })
 autocmd("FileType", {
   group = "TreesitterHighlight",
-  callback = function(ev)
-    pcall(vim.treesitter.start, ev.buf)
+  callback = function()
+    pcall(vim.treesitter.start)
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end,
 })
 

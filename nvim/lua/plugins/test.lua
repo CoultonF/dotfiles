@@ -7,7 +7,6 @@ return {
       "nvim-neotest/nvim-nio",
       "nvim-lua/plenary.nvim",
       "antoinemadec/FixCursorHold.nvim",
-      "nvim-treesitter/nvim-treesitter",
       -- Test adapters
       "nvim-neotest/neotest-python",
       "nvim-neotest/neotest-jest",
