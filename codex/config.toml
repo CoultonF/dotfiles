@@ -4,6 +4,12 @@ plan_mode_reasoning_effort = "medium"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 
+[projects."/workspace"]
+trust_level = "trusted"
+
+[projects."/home/vscode/dotfiles"]
+trust_level = "trusted"
+
 [plugins."github@openai-curated"]
 enabled = true
 
