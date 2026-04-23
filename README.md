@@ -27,6 +27,7 @@ That's it. Everything is installed and configured.
 | **Ghostty** | GPU-accelerated terminal with Catppuccin theme |
 | **tmux** | Terminal multiplexer with vim keybindings and Catppuccin theme |
 | **Neovim** | Full IDE setup with LSP, completion, debugging |
+| **OpenCode** | Terminal AI coding agent with Catppuccin Macchiato and Space leader |
 | **Zsh** | Shell with autosuggestions, syntax highlighting, starship prompt |
 
 ## Directory Structure
@@ -38,6 +39,9 @@ That's it. Everything is installed and configured.
 ├── bootstrap.sh           # One-time setup script
 ├── ghostty/
 │   └── config             # Ghostty terminal config
+├── opencode/
+│   ├── opencode.json      # OpenCode runtime config
+│   └── tui.json           # OpenCode TUI theme + keybinds
 ├── tmux/
 │   └── tmux.conf          # tmux keybindings and theme
 ├── nvim/
@@ -57,6 +61,7 @@ Home Manager uses Nix to declaratively manage:
 - **Dotfiles** - Configs symlinked to `~/.config/`
 - **Shell** - Zsh with aliases, env vars, plugins
 - **Programs** - tmux, git, fzf, starship with native config
+- **AI Tools** - OpenCode with managed theme, keybinds, LSP, and permissions
 
 ### Applying Changes
 
@@ -81,10 +86,11 @@ home-manager switch --flake ~/.dotfiles --rollback
 All installed automatically via `home.nix`:
 
 - **Editor**: Neovim
+- **AI**: OpenCode
 - **Search**: ripgrep (rg), fd, fzf, tree
 - **Git**: lazygit, git, delta
 - **Languages**: Node.js 22, Python 3.12, Lua 5.1
-- **LSP Servers**: TypeScript, HTML/CSS/JSON, Python, Lua
+- **LSP Servers**: TypeScript, HTML/CSS/JSON, Ruff, Lua
 - **Terminal**: tmux
 - **Build Tools**: gcc, gnumake
 - **Utilities**: curl, wget, unzip, jq
@@ -124,6 +130,19 @@ Leader key: `<Space>`
 | `gd` | Go to definition |
 | `gr` | Go to references |
 | `<leader>gg` | LazyGit |
+
+### OpenCode
+
+Leader key: `<Space>`
+
+OpenCode is configured via `~/.config/opencode/` with:
+
+- `catppuccin-macchiato` TUI theme
+- Space as the leader key
+- Ruff as the Python LSP
+- Claude Code fallback support disabled via `OPENCODE_DISABLE_CLAUDE_CODE*`
+
+On first run, open `opencode` and use `/connect` to authenticate a provider.
 
 ## Customizing
 

@@ -6,6 +6,13 @@
 
 set -e
 
+append_line_if_missing() {
+    local line="$1"
+    local file="$2"
+    touch "$file"
+    grep -qxF "$line" "$file" 2>/dev/null || echo "$line" >> "$file"
+}
+
 echo "=========================================="
 echo "Installing Nix Dev Tools (Container Mode)"
 echo "=========================================="
@@ -55,6 +62,7 @@ nix profile install \
     nixpkgs#delta \
     nixpkgs#nodejs_22 \
     nixpkgs#python312 \
+    nixpkgs#ruff \
     nixpkgs#gcc \
     nixpkgs#gnumake \
     nixpkgs#pkg-config \
@@ -67,7 +75,8 @@ nix profile install \
     nixpkgs#protobuf \
     nixpkgs#cairo \
     nixpkgs#pango \
-    nixpkgs#direnv
+    nixpkgs#direnv \
+    nixpkgs#opencode
 
 echo "Dev tools installed"
 
@@ -97,6 +106,10 @@ if [ -d "$DOTFILES_DIR" ]; then
     # tmux
     mkdir -p ~/.config/tmux
     cp "$DOTFILES_DIR/tmux/tmux.conf" ~/.config/tmux/
+
+    # OpenCode
+    mkdir -p ~/.config/opencode
+    cp -r "$DOTFILES_DIR/opencode/"* ~/.config/opencode/
     
     # tmux-sessionizer
     mkdir -p ~/.dotfiles/bin
@@ -104,7 +117,7 @@ if [ -d "$DOTFILES_DIR" ]; then
     chmod +x ~/.dotfiles/bin/tmux-sessionizer
     
     # Add to PATH
-    echo 'export PATH="$HOME/.dotfiles/bin:$PATH"' >> ~/.bashrc
+    append_line_if_missing 'export PATH="$HOME/.dotfiles/bin:$PATH"' ~/.bashrc
     
     # Claude Code hooks
     if command -v jq &> /dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
@@ -121,20 +134,22 @@ if [ -d "$DOTFILES_DIR" ]; then
     echo "Configs copied"
 fi
 
+# Disable Claude Code fallbacks in OpenCode
+for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv ~/.zshrc; do
+    append_line_if_missing 'export OPENCODE_DISABLE_CLAUDE_CODE=1' "$rcfile"
+    append_line_if_missing 'export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1' "$rcfile"
+    append_line_if_missing 'export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1' "$rcfile"
+done
+
 # Setup direnv hook for all shells
-if ! grep -q "direnv hook" ~/.bashrc 2>/dev/null; then
-    echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
-fi
-touch ~/.zshrc
-if ! grep -q "direnv hook" ~/.zshrc 2>/dev/null; then
-    echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
-fi
+append_line_if_missing 'eval "$(direnv hook bash)"' ~/.bashrc
+append_line_if_missing 'eval "$(direnv hook zsh)"' ~/.zshrc
 
 # Verify installations
 echo ""
 echo "Verifying installations..."
 
-for cmd in nvim tmux lazygit rg fd fzf; do
+for cmd in nvim tmux lazygit rg fd fzf opencode ruff; do
     if command -v "$cmd" &> /dev/null; then
         echo "  $cmd: $(command -v $cmd)"
     else
@@ -151,6 +166,7 @@ echo "Usage:"
 echo "  tmux             # Start tmux"
 echo "  nvim .           # Open Neovim"
 echo "  lazygit          # Git TUI"
+echo "  opencode         # OpenCode TUI"
 echo ""
 echo "In tmux:"
 echo "  Ctrl+g           # Project sessionizer"
@@ -173,6 +189,8 @@ check_command rg
 check_command fd
 check_command fzf
 check_command direnv
+check_command opencode
+check_command ruff
 
 echo ""
 echo "=========================================="
@@ -182,6 +200,7 @@ echo ""
 echo "Usage:"
 echo "  nvim .           # Open Neovim"
 echo "  lazygit          # Git TUI"
+echo "  opencode         # OpenCode TUI"
 echo ""
 echo "In Neovim:"
 echo "  <leader>gg       # LazyGit"

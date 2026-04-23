@@ -25,7 +25,6 @@ return {
     opts = {
       ensure_installed = {
         "lua_ls",
-        "pyright",
         "ts_ls",
         "html",
         "cssls",
@@ -96,18 +95,6 @@ return {
               telemetry = { enable = false },
               diagnostics = {
                 globals = { "vim" },
-              },
-            },
-          },
-        },
-        pyright = {
-          root_markers = { ".venv", "pyrightconfig.json", "pyproject.toml", ".git" },
-          settings = {
-            python = {
-              analysis = {
-                typeCheckingMode = "basic",
-                autoSearchPaths = true,
-                useLibraryCodeForTypes = true,
               },
             },
           },

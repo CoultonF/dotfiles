@@ -24,6 +24,7 @@ in
   home.packages = with pkgs; [
     # Editor
     neovim
+    opencode
 
     # Search & Navigation
     ripgrep      # Fast grep (rg)
@@ -48,7 +49,7 @@ in
     # Note: typescript-language-server and vscode-langservers-extracted installed via npm
     # (nodePackages was removed from nixpkgs)
     # See home.activation.npmGlobalPackages below
-    pyright      # Python LSP
+    ruff         # Python LSP, linter, formatter
     lua-language-server
 
     # Build Tools
@@ -126,6 +127,9 @@ in
       C_INCLUDE_PATH = "$HOME/.nix-profile/include";
       CPLUS_INCLUDE_PATH = "$HOME/.nix-profile/include";
       LD_LIBRARY_PATH = "$HOME/.nix-profile/lib";
+      OPENCODE_DISABLE_CLAUDE_CODE = "1";
+      OPENCODE_DISABLE_CLAUDE_CODE_PROMPT = "1";
+      OPENCODE_DISABLE_CLAUDE_CODE_SKILLS = "1";
     };
 
     # Environment setup in .zshenv (runs for all shells including non-interactive)
@@ -343,6 +347,12 @@ in
 
   # Lazygit config
   xdg.configFile."lazygit/config.yml".source = ./lazygit/config.yml;
+
+  # OpenCode config
+  xdg.configFile."opencode" = {
+    source = ./opencode;
+    recursive = true;
+  };
 
   # ============================================================================
   # Environment
