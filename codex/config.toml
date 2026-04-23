@@ -1,0 +1,11 @@
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "medium"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[notice]
+hide_full_access_warning = true

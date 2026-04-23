@@ -87,6 +87,7 @@ in
     jq           # JSON processor
     awscli2      # AWS CLI
     direnv       # Per-directory environment variables
+    bubblewrap   # Sandbox utility required by Codex
   ] ++ lib.optionals (!isDarwin) [
     # Linux-only: locale data for containers (macOS has built-in locale support)
     glibcLocales
@@ -353,6 +354,9 @@ in
     source = ./opencode;
     recursive = true;
   };
+
+  # Codex CLI config
+  home.file.".codex/config.toml".source = ./codex/config.toml;
 
   # ============================================================================
   # Environment
