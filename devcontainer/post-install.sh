@@ -80,6 +80,17 @@ nix profile install \
 
 echo "Dev tools installed"
 
+# Install npm global tools that are managed outside nixpkgs
+export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+export PATH="$HOME/.npm-global/bin:$PATH"
+mkdir -p "$HOME/.npm-global"
+
+if ! npm list -g opentmux >/dev/null 2>&1; then
+    echo "Installing opentmux via npm..."
+    # Manage the opencode wrapper via dotfiles instead of upstream postinstall shell edits.
+    npm install -g --ignore-scripts opentmux
+fi
+
 # Ensure Nix is sourced in shell profiles
 for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv; do
     if [ ! -f "$rcfile" ] || ! grep -q "nix-daemon.sh\|nix.sh" "$rcfile" 2>/dev/null; then
@@ -149,7 +160,7 @@ append_line_if_missing 'eval "$(direnv hook zsh)"' ~/.zshrc
 echo ""
 echo "Verifying installations..."
 
-for cmd in nvim tmux lazygit rg fd fzf opencode ruff; do
+for cmd in nvim tmux lazygit rg fd fzf opencode opentmux ruff; do
     if command -v "$cmd" &> /dev/null; then
         echo "  $cmd: $(command -v $cmd)"
     else
@@ -190,6 +201,7 @@ check_command fd
 check_command fzf
 check_command direnv
 check_command opencode
+check_command opentmux
 check_command ruff
 
 echo ""

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if command -v opentmux >/dev/null 2>&1; then
+    exec opentmux "$@"
+fi
+
+if [[ -x "$HOME/.nix-profile/bin/opencode" ]]; then
+    echo "opentmux is not installed; falling back to the raw opencode binary." >&2
+    exec "$HOME/.nix-profile/bin/opencode" "$@"
+fi
+
+echo "Neither opentmux nor the raw opencode binary is available." >&2
+exit 1

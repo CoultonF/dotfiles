@@ -377,6 +377,11 @@ in
         ${pkgs.nodejs_22}/bin/npm install -g "$pkg" || echo "WARNING: Failed to install $pkg"
       fi
     done
+    if ! ${pkgs.nodejs_22}/bin/npm list -g opentmux >/dev/null 2>&1; then
+      echo "Installing opentmux via npm..."
+      # Manage the opencode wrapper via dotfiles instead of upstream postinstall shell edits.
+      ${pkgs.nodejs_22}/bin/npm install -g --ignore-scripts opentmux || echo "WARNING: Failed to install opentmux"
+    fi
   '';
 
   # ============================================================================

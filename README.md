@@ -27,7 +27,7 @@ That's it. Everything is installed and configured.
 | **Ghostty** | GPU-accelerated terminal with Catppuccin theme |
 | **tmux** | Terminal multiplexer with vim keybindings and Catppuccin theme |
 | **Neovim** | Full IDE setup with LSP, completion, debugging |
-| **OpenCode** | Terminal AI coding agent with Catppuccin Macchiato and Space leader |
+| **OpenCode** | Terminal AI coding agent with Catppuccin Macchiato, Space leader, and tmux integration |
 | **Zsh** | Shell with autosuggestions, syntax highlighting, starship prompt |
 
 ## Directory Structure
@@ -41,6 +41,7 @@ That's it. Everything is installed and configured.
 │   └── config             # Ghostty terminal config
 ├── opencode/
 │   ├── opencode.json      # OpenCode runtime config
+│   ├── opentmux.json      # opentmux layout/config
 │   └── tui.json           # OpenCode TUI theme + keybinds
 ├── tmux/
 │   └── tmux.conf          # tmux keybindings and theme
@@ -62,6 +63,7 @@ Home Manager uses Nix to declaratively manage:
 - **Shell** - Zsh with aliases, env vars, plugins
 - **Programs** - tmux, git, fzf, starship with native config
 - **AI Tools** - OpenCode with managed theme, keybinds, LSP, and permissions
+- **Agent UX** - opentmux wrapper and config for tmux-backed OpenCode sessions
 
 ### Applying Changes
 
@@ -140,7 +142,11 @@ OpenCode is configured via `~/.config/opencode/` with:
 - `catppuccin-macchiato` TUI theme
 - Space as the leader key
 - Ruff as the Python LSP
+- `opentmux` enabled through the OpenCode `plugin` array
+- `opentmux.json` managed from dotfiles for tmux layout defaults
 - Claude Code fallback support disabled via `OPENCODE_DISABLE_CLAUDE_CODE*`
+
+The `opencode` command is wrapped through `opentmux` from [bin/opencode](/home/vscode/dotfiles/bin/opencode:1), so launching OpenCode from your shell uses the tmux integration by default.
 
 On first run, open `opencode` and use `/connect` to authenticate a provider.
 
