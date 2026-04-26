@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+resolve_path() {
+    local target="$1"
+    if command -v readlink >/dev/null 2>&1; then
+        readlink -f "$target" 2>/dev/null && return 0
+    fi
+    printf '%s\n' "$target"
+}
+
+find_raw_oracle() {
+    local self candidate resolved_candidate
+    self="$(resolve_path "${BASH_SOURCE[0]:-$0}")"
+    while IFS= read -r candidate; do
+        [[ -n "$candidate" ]] || continue
+        resolved_candidate="$(resolve_path "$candidate")"
+        [[ "$resolved_candidate" == "$self" ]] && continue
+        printf '%s\n' "$candidate"
+        return 0
+    done < <(which -a oracle 2>/dev/null || true)
+
+    if [[ -x "$HOME/.npm-global/bin/oracle" ]]; then
+        printf '%s\n' "$HOME/.npm-global/bin/oracle"
+        return 0
+    fi
+
+    return 1
+}
+
+load_dotenv() {
+    local env_file="$1"
+    [[ -f "$env_file" ]] || return 0
+
+    set -a
+    # shellcheck disable=SC1090
+    source "$env_file"
+    set +a
+}
+
+load_dotenv ".env"
+
+if [[ -n "${ORACLE_SERVE_TOKEN:-}" && -z "${ORACLE_REMOTE_TOKEN:-}" ]]; then
+    export ORACLE_REMOTE_TOKEN="$ORACLE_SERVE_TOKEN"
+fi
+
+raw_oracle="$(find_raw_oracle || true)"
+if [[ -z "$raw_oracle" ]]; then
+    echo "No raw oracle binary was found." >&2
+    exit 1
+fi
+
+exec "$raw_oracle" "$@"
