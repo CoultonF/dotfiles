@@ -358,6 +358,9 @@ in
   # Codex CLI config
   home.file.".codex/config.toml".source = ./codex/config.toml;
 
+  # Oracle config
+  home.file.".oracle/config.json".source = ./oracle/config.json;
+
   # ============================================================================
   # Environment
   # ============================================================================
@@ -375,7 +378,7 @@ in
     export NPM_CONFIG_PREFIX="${homeDirectory}/.npm-global"
     export PATH="${pkgs.nodejs_22}/bin:${homeDirectory}/.npm-global/bin:$PATH"
     mkdir -p "${homeDirectory}/.npm-global"
-    for pkg in tree-sitter-cli typescript-language-server vscode-langservers-extracted; do
+    for pkg in tree-sitter-cli typescript-language-server vscode-langservers-extracted @steipete/oracle; do
       if ! ${pkgs.nodejs_22}/bin/npm list -g "$pkg" >/dev/null 2>&1; then
         echo "Installing $pkg via npm..."
         ${pkgs.nodejs_22}/bin/npm install -g "$pkg" || echo "WARNING: Failed to install $pkg"
