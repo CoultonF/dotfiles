@@ -362,7 +362,9 @@ in
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/codex/config.toml";
 
   # Oracle config
-  home.file.".oracle/config.json".source = ./oracle/config.json;
+  # Keep this out of the Nix store so Oracle sees dotfiles updates immediately.
+  home.file.".oracle/config.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/oracle/config.json";
 
   # ============================================================================
   # Environment
