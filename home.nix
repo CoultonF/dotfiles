@@ -42,6 +42,7 @@ in
 
     # Language Support
     nodejs_22    # For LSP servers
+    bun          # JS runtime / package manager (used for Codex install)
     python312    # For debugpy
     lua5_1       # For Neovim plugins
 
@@ -391,6 +392,22 @@ in
       # Manage the opencode wrapper via dotfiles instead of upstream postinstall shell edits.
       ${pkgs.nodejs_22}/bin/npm install -g --ignore-scripts opentmux || echo "WARNING: Failed to install opentmux"
     fi
+  '';
+
+  # ============================================================================
+  # bun global packages (Codex CLI distributed as @openai/codex on npm)
+  # ============================================================================
+  home.activation.bunGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export BUN_INSTALL="${homeDirectory}/.bun"
+    export PATH="${pkgs.bun}/bin:${homeDirectory}/.bun/bin:$PATH"
+    mkdir -p "${homeDirectory}/.bun/bin"
+    for pkg in @openai/codex; do
+      bin_name=$(basename "$pkg")
+      if [ ! -x "${homeDirectory}/.bun/bin/$bin_name" ]; then
+        echo "Installing $pkg via bun..."
+        ${pkgs.bun}/bin/bun install -g "$pkg" || echo "WARNING: Failed to install $pkg"
+      fi
+    done
   '';
 
   # ============================================================================

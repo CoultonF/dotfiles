@@ -76,7 +76,9 @@ nix profile install \
     nixpkgs#cairo \
     nixpkgs#pango \
     nixpkgs#direnv \
-    nixpkgs#opencode
+    nixpkgs#opencode \
+    nixpkgs#bun \
+    nixpkgs#bubblewrap
 
 echo "Dev tools installed"
 
@@ -89,6 +91,17 @@ if ! npm list -g opentmux >/dev/null 2>&1; then
     echo "Installing opentmux via npm..."
     # Manage the opencode wrapper via dotfiles instead of upstream postinstall shell edits.
     npm install -g --ignore-scripts opentmux
+fi
+
+# Install bun-managed CLIs (Codex)
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+mkdir -p "$BUN_INSTALL/bin"
+append_line_if_missing 'export PATH="$HOME/.bun/bin:$PATH"' ~/.bashrc
+
+if [ ! -x "$BUN_INSTALL/bin/codex" ]; then
+    echo "Installing @openai/codex via bun..."
+    bun install -g @openai/codex
 fi
 
 # Ensure Nix is sourced in shell profiles
