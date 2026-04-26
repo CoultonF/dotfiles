@@ -356,7 +356,9 @@ in
   };
 
   # Codex CLI config
-  home.file.".codex/config.toml".source = ./codex/config.toml;
+  # Keep this out of the Nix store so the CLI can persist model changes.
+  home.file.".codex/config.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/codex/config.toml";
 
   # Oracle config
   home.file.".oracle/config.json".source = ./oracle/config.json;

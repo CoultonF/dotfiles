@@ -1,6 +1,6 @@
-model = "gpt-5.4"
-model_reasoning_effort = "medium"
-plan_mode_reasoning_effort = "medium"
+model = "gpt-5.5"
+model_reasoning_effort = "low"
+plan_mode_reasoning_effort = "low"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 
@@ -15,3 +15,6 @@ enabled = true
 
 [notice]
 hide_full_access_warning = true
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
