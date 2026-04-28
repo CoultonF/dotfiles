@@ -45,6 +45,7 @@ in
     bun          # JS runtime / package manager (used for Codex install)
     python312    # For debugpy
     lua5_1       # For Neovim plugins
+    cargo        # Rust package manager
 
     # LSP Servers
     # Note: typescript-language-server and vscode-langservers-extracted installed via npm
