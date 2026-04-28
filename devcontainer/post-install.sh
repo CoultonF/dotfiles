@@ -72,7 +72,6 @@ nix profile install \
     nixpkgs#postgresql \
     nixpkgs#libpq \
     nixpkgs#libffi \
-    nixpkgs#protobuf \
     nixpkgs#cairo \
     nixpkgs#pango \
     nixpkgs#direnv \

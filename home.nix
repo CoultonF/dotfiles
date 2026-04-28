@@ -67,7 +67,6 @@ in
 
     # C/C++ Libraries for Python packages
     libffi       # Foreign function interface (required by cffi, etc.)
-    protobuf     # Protobuf compiler and libraries (for gcld3, etc.)
 
     # Cairo for SVG conversion
     cairo        # 2D graphics library
