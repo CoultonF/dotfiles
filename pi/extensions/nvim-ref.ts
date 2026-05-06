@@ -161,16 +161,33 @@ function _G.pi_nvim_ref_range(include_code, start_line, end_line)
   })
 end
 
+local function register_which_key()
+  local ok, wk = pcall(require, 'which-key')
+  if not ok or not wk.add then return end
+  wk.add({ { '<leader>I', group = 'Insert into Pi' } })
+end
+
 local function set_keymaps()
+  vim.keymap.set('n', '<leader>If', _G.pi_nvim_ref_file, { desc = 'Pi: tag current file' })
+  vim.keymap.set('n', '<leader>Ir', function() _G.pi_nvim_ref_range(false) end, { desc = 'Pi: reference last selected range' })
+  vim.keymap.set('n', '<leader>IR', function() _G.pi_nvim_ref_range(true) end, { desc = 'Pi: paste last selected code block' })
+  vim.keymap.set('x', '<leader>Ir', [[:<C-U>lua _G.pi_nvim_ref_range(false, vim.fn.line("'<"), vim.fn.line("'>"))<CR>]], { desc = 'Pi: reference selected range' })
+  vim.keymap.set('x', '<leader>IR', [[:<C-U>lua _G.pi_nvim_ref_range(true, vim.fn.line("'<"), vim.fn.line("'>"))<CR>]], { desc = 'Pi: paste selected code block' })
+
   vim.keymap.set('n', '<leader>af', _G.pi_nvim_ref_file, { desc = 'Pi: tag current file' })
   vim.keymap.set('n', '<leader>ar', function() _G.pi_nvim_ref_range(false) end, { desc = 'Pi: reference last selected range' })
   vim.keymap.set('n', '<leader>aR', function() _G.pi_nvim_ref_range(true) end, { desc = 'Pi: paste last selected code block' })
   vim.keymap.set('x', '<leader>ar', [[:<C-U>lua _G.pi_nvim_ref_range(false, vim.fn.line("'<"), vim.fn.line("'>"))<CR>]], { desc = 'Pi: reference selected range' })
   vim.keymap.set('x', '<leader>aR', [[:<C-U>lua _G.pi_nvim_ref_range(true, vim.fn.line("'<"), vim.fn.line("'>"))<CR>]], { desc = 'Pi: paste selected code block' })
+  register_which_key()
 end
 
 set_keymaps()
-vim.api.nvim_create_autocmd('VimEnter', { callback = set_keymaps })
+vim.api.nvim_create_autocmd('VimEnter', { callback = function()
+  set_keymaps()
+  vim.defer_fn(set_keymaps, 100)
+  vim.notify('Pi Neovim refs loaded: <leader>If tag file, visual <leader>Ir range, visual <leader>IR code block', vim.log.levels.INFO)
+end })
 vim.api.nvim_create_user_command('PiTagFile', _G.pi_nvim_ref_file, {})
 vim.api.nvim_create_user_command('PiRefRange', function(opts) _G.pi_nvim_ref_range(opts.bang, opts.line1, opts.line2) end, { bang = true, range = true })
 `;
@@ -199,7 +216,7 @@ async function openNvim(ctx: ExtensionContext): Promise<void> {
 	const wasRaw = Boolean(process.stdin.isTTY && process.stdin.isRaw);
 	try {
 		try {
-			ctx.ui.notify("Opening Neovim. Use <leader>af, <leader>ar, or <leader>aR; quit Neovim with :qa to return to Pi.");
+			ctx.ui.notify("Opening Neovim. Use <leader>If, visual <leader>Ir, or visual <leader>IR; fallback: :'<,'>PiRefRange!; quit with :qa.");
 			if (process.stdin.isTTY) process.stdin.setRawMode(false);
 			process.stdout.write("\x1b[2J\x1b[H");
 
