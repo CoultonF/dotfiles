@@ -241,4 +241,9 @@ export default function nvimRef(pi: ExtensionAPI): void {
 		description: "Alias for /nvim-ref",
 		handler: async (_args, ctx) => openNvim(ctx),
 	});
+
+	pi.registerShortcut("ctrl+shift+g", {
+		description: "Open Neovim reference picker",
+		handler: async (ctx) => openNvim(ctx),
+	});
 }
