@@ -8,6 +8,7 @@
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { AssistantMessage, TextContent } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import { Type } from "typebox";
 import { extractTodoItems, isSafeCommand, markCompletedSteps, type TodoItem } from "./utils.js";
 
 // Tools — questionnaire and todo are intentionally allowed in plan mode
@@ -83,6 +84,62 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 			executing: executionMode,
 		});
 	}
+
+	pi.registerTool({
+		name: "plan_progress",
+		label: "Plan Progress",
+		description: "Update or inspect the active plan execution progress",
+		promptSnippet: "Mark plan execution steps complete as soon as each step is finished",
+		promptGuidelines: [
+			"Use plan_progress with action=complete immediately after finishing each plan execution step so the plan UI updates live.",
+		],
+		parameters: Type.Object({
+			action: Type.Union([Type.Literal("list"), Type.Literal("complete")]),
+			step: Type.Optional(Type.Number({ description: "Plan step number for action=complete" })),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			if (params.action === "list") {
+				const text = todoItems.length
+					? todoItems.map((item) => `${item.completed ? "✓" : "○"} ${item.step}. ${item.text}`).join("\n")
+					: "No active plan steps";
+				return { content: [{ type: "text", text }], details: { todos: todoItems } };
+			}
+
+			if (!executionMode || todoItems.length === 0) {
+				return {
+					content: [{ type: "text", text: "No active plan execution" }],
+					details: { todos: todoItems, error: "no_active_plan" },
+					isError: true,
+				};
+			}
+
+			const step = params.step;
+			if (!Number.isInteger(step)) {
+				return {
+					content: [{ type: "text", text: "step is required for action=complete" }],
+					details: { todos: todoItems, error: "missing_step" },
+					isError: true,
+				};
+			}
+
+			const item = todoItems.find((todo) => todo.step === step);
+			if (!item) {
+				return {
+					content: [{ type: "text", text: `Plan step ${step} was not found` }],
+					details: { todos: todoItems, error: "unknown_step" },
+					isError: true,
+				};
+			}
+
+			item.completed = true;
+			updateStatus(ctx);
+			persistState();
+			return {
+				content: [{ type: "text", text: `Completed plan step ${item.step}: ${item.text}` }],
+				details: { todos: todoItems, completedStep: item.step },
+			};
+		},
+	});
 
 	pi.registerCommand("plan", {
 		description: "Toggle plan mode (read-only exploration)",
@@ -182,7 +239,8 @@ Remaining steps:
 ${todoList}
 
 Execute each step in order.
-After completing a step, include a [DONE:n] tag in your response.`,
+After completing each step, immediately call the plan_progress tool with action="complete" and that step number so the UI updates live.
+Also include [DONE:n] tags in your response as a fallback.`,
 					display: false,
 				},
 			};

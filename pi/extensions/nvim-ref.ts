@@ -112,7 +112,11 @@ local function emit(event)
     return
   end
   event.token = token
-  vim.fn.writefile({ json_encode(event) }, ref_file, 'a')
+  local ok, err = pcall(vim.fn.writefile, { json_encode(event) }, ref_file, 'a')
+  if not ok then
+    vim.notify('Failed to write Pi reference: ' .. tostring(err), vim.log.levels.ERROR)
+    return
+  end
   vim.notify('Added Pi reference: ' .. (event.path or ''), vim.log.levels.INFO)
 end
 
@@ -131,9 +135,9 @@ function _G.pi_nvim_ref_file()
   emit({ type = 'tag_file', path = relpath(file), modified = vim.bo.modified })
 end
 
-local function selected_lines()
-  local start_line = vim.fn.line("'<")
-  local end_line = vim.fn.line("'>")
+local function selected_lines(start_line, end_line)
+  start_line = start_line or vim.fn.line("'<")
+  end_line = end_line or vim.fn.line("'>")
   if start_line > end_line then
     start_line, end_line = end_line, start_line
   end
@@ -141,10 +145,11 @@ local function selected_lines()
   return start_line, end_line, table.concat(lines, '\n')
 end
 
-function _G.pi_nvim_ref_range(include_code)
+function _G.pi_nvim_ref_range(include_code, start_line, end_line)
   local file = current_file()
   if not file then return end
-  local start_line, end_line, text = selected_lines()
+  local text
+  start_line, end_line, text = selected_lines(start_line, end_line)
   emit({
     type = include_code and 'code_block' or 'reference_range',
     path = relpath(file),
@@ -156,11 +161,18 @@ function _G.pi_nvim_ref_range(include_code)
   })
 end
 
-vim.keymap.set('n', '<leader>af', _G.pi_nvim_ref_file, { desc = 'Pi: tag current file' })
-vim.keymap.set({ 'n', 'x' }, '<leader>ar', function() _G.pi_nvim_ref_range(false) end, { desc = 'Pi: reference selected range' })
-vim.keymap.set({ 'n', 'x' }, '<leader>aR', function() _G.pi_nvim_ref_range(true) end, { desc = 'Pi: paste selected code block' })
+local function set_keymaps()
+  vim.keymap.set('n', '<leader>af', _G.pi_nvim_ref_file, { desc = 'Pi: tag current file' })
+  vim.keymap.set('n', '<leader>ar', function() _G.pi_nvim_ref_range(false) end, { desc = 'Pi: reference last selected range' })
+  vim.keymap.set('n', '<leader>aR', function() _G.pi_nvim_ref_range(true) end, { desc = 'Pi: paste last selected code block' })
+  vim.keymap.set('x', '<leader>ar', [[:<C-U>lua _G.pi_nvim_ref_range(false, vim.fn.line("'<"), vim.fn.line("'>"))<CR>]], { desc = 'Pi: reference selected range' })
+  vim.keymap.set('x', '<leader>aR', [[:<C-U>lua _G.pi_nvim_ref_range(true, vim.fn.line("'<"), vim.fn.line("'>"))<CR>]], { desc = 'Pi: paste selected code block' })
+end
+
+set_keymaps()
+vim.api.nvim_create_autocmd('VimEnter', { callback = set_keymaps })
 vim.api.nvim_create_user_command('PiTagFile', _G.pi_nvim_ref_file, {})
-vim.api.nvim_create_user_command('PiRefRange', function(opts) _G.pi_nvim_ref_range(opts.bang) end, { bang = true, range = true })
+vim.api.nvim_create_user_command('PiRefRange', function(opts) _G.pi_nvim_ref_range(opts.bang, opts.line1, opts.line2) end, { bang = true, range = true })
 `;
 
 async function openNvim(ctx: ExtensionContext): Promise<void> {
