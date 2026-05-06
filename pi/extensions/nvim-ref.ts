@@ -156,9 +156,9 @@ function _G.pi_nvim_ref_range(include_code)
   })
 end
 
-vim.keymap.set('n', '<leader>pf', _G.pi_nvim_ref_file, { desc = 'Pi: tag current file' })
-vim.keymap.set('v', '<leader>pr', function() _G.pi_nvim_ref_range(false) end, { desc = 'Pi: reference selected range' })
-vim.keymap.set('v', '<leader>pR', function() _G.pi_nvim_ref_range(true) end, { desc = 'Pi: paste selected code block' })
+vim.keymap.set('n', '<leader>af', _G.pi_nvim_ref_file, { desc = 'Pi: tag current file' })
+vim.keymap.set('v', '<leader>ar', function() _G.pi_nvim_ref_range(false) end, { desc = 'Pi: reference selected range' })
+vim.keymap.set('v', '<leader>aR', function() _G.pi_nvim_ref_range(true) end, { desc = 'Pi: paste selected code block' })
 vim.api.nvim_create_user_command('PiTagFile', _G.pi_nvim_ref_file, {})
 vim.api.nvim_create_user_command('PiRefRange', function(opts) _G.pi_nvim_ref_range(opts.bang) end, { bang = true, range = true })
 `;
@@ -187,7 +187,7 @@ async function openNvim(ctx: ExtensionContext): Promise<void> {
 	const wasRaw = Boolean(process.stdin.isTTY && process.stdin.isRaw);
 	try {
 		try {
-			ctx.ui.notify("Opening Neovim. Use <leader>pf, visual <leader>pr, or visual <leader>pR; quit Neovim to return to Pi.");
+			ctx.ui.notify("Opening Neovim. Use <leader>af, visual <leader>ar, or visual <leader>aR; quit Neovim to return to Pi.");
 			if (process.stdin.isTTY) process.stdin.setRawMode(false);
 			process.stdout.write("\x1b[2J\x1b[H");
 

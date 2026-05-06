@@ -203,7 +203,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 |-----------|---------|
 | `plan-mode/` | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab` or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
 | `vim-model-thinking.ts` | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level. |
-| `nvim-ref.ts` | `/nvim` bridge that opens Neovim in the current project; `<leader>pf` tags a file, visual `<leader>pr` references a range, visual `<leader>pR` inserts selected code. |
+| `nvim-ref.ts` | `/nvim` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code. |
 | `questionnaire.ts` | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode. |
 | `inline-bash.ts` | Expands `!{command}` patterns inside user prompts before they reach the agent. Example: `current branch is !{git branch --show-current}`. Whole-line `!command` syntax is preserved. |
 | `auto-commit-on-exit.ts` | On Pi shutdown inside a git repo with uncommitted changes, prompts the user to auto-commit using the last assistant message as the subject. Skipped silently in non-interactive sessions. |
