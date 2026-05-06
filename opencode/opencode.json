@@ -3,9 +3,6 @@
   "autoupdate": false,
   "default_agent": "plan",
   "share": "manual",
-  "plugin": [
-    "opentmux"
-  ],
   "permission": {
     "external_directory": "allow",
     "bash": {

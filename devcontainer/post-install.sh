@@ -81,27 +81,27 @@ nix profile install \
 
 echo "Dev tools installed"
 
-# Install npm global tools that are managed outside nixpkgs
-export NPM_CONFIG_PREFIX="$HOME/.npm-global"
-export PATH="$HOME/.npm-global/bin:$PATH"
-mkdir -p "$HOME/.npm-global"
-
-if ! npm list -g opentmux >/dev/null 2>&1; then
-    echo "Installing opentmux via npm..."
-    # Manage the opencode wrapper via dotfiles instead of upstream postinstall shell edits.
-    npm install -g --ignore-scripts opentmux
-fi
-
-# Install bun-managed CLIs (Codex)
+# Install bun-managed CLIs from the npm registry
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 mkdir -p "$BUN_INSTALL/bin"
 append_line_if_missing 'export PATH="$HOME/.bun/bin:$PATH"' ~/.bashrc
 
-if [ ! -x "$BUN_INSTALL/bin/codex" ]; then
-    echo "Installing @openai/codex via bun..."
-    bun install -g @openai/codex
-fi
+install_bun_global() {
+    local pkg="$1"
+    local bin="$2"
+    if [ ! -x "$BUN_INSTALL/bin/$bin" ]; then
+        echo "Installing $pkg via bun..."
+        bun add -g "$pkg"
+    fi
+}
+
+install_bun_global tree-sitter-cli tree-sitter
+install_bun_global typescript-language-server typescript-language-server
+install_bun_global vscode-langservers-extracted vscode-json-language-server
+install_bun_global @steipete/oracle oracle
+install_bun_global @openai/codex codex
+install_bun_global @mariozechner/pi-coding-agent pi
 
 # Ensure Nix is sourced in shell profiles
 for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv; do
@@ -133,6 +133,15 @@ if [ -d "$DOTFILES_DIR" ]; then
     # OpenCode
     mkdir -p ~/.config/opencode
     cp -r "$DOTFILES_DIR/opencode/"* ~/.config/opencode/
+
+    # Pi
+    mkdir -p ~/.pi/agent ~/.pi/agent/skills ~/.pi/agent/extensions
+    cp "$DOTFILES_DIR/pi/settings.json" ~/.pi/agent/settings.json
+    cp "$DOTFILES_DIR/pi/APPEND_SYSTEM.md" ~/.pi/agent/APPEND_SYSTEM.md
+    cp "$DOTFILES_DIR/pi/keybindings.json" ~/.pi/agent/keybindings.json
+    cp "$DOTFILES_DIR/pi/mcp.json" ~/.pi/agent/mcp.json
+    cp -r "$DOTFILES_DIR/pi/skills/." ~/.pi/agent/skills/ 2>/dev/null || true
+    cp -r "$DOTFILES_DIR/pi/extensions/." ~/.pi/agent/extensions/ 2>/dev/null || true
     
     # tmux-sessionizer
     mkdir -p ~/.dotfiles/bin
@@ -172,7 +181,7 @@ append_line_if_missing 'eval "$(direnv hook zsh)"' ~/.zshrc
 echo ""
 echo "Verifying installations..."
 
-for cmd in nvim tmux lazygit rg fd fzf opencode opentmux ruff; do
+for cmd in nvim tmux lazygit rg fd fzf opencode pi ruff; do
     if command -v "$cmd" &> /dev/null; then
         echo "  $cmd: $(command -v $cmd)"
     else
@@ -190,6 +199,7 @@ echo "  tmux             # Start tmux"
 echo "  nvim .           # Open Neovim"
 echo "  lazygit          # Git TUI"
 echo "  opencode         # OpenCode TUI"
+echo "  pi               # Pi coding agent"
 echo ""
 echo "In tmux:"
 echo "  Ctrl+g           # Project sessionizer"
@@ -213,7 +223,7 @@ check_command fd
 check_command fzf
 check_command direnv
 check_command opencode
-check_command opentmux
+check_command pi
 check_command ruff
 
 echo ""
@@ -225,6 +235,7 @@ echo "Usage:"
 echo "  nvim .           # Open Neovim"
 echo "  lazygit          # Git TUI"
 echo "  opencode         # OpenCode TUI"
+echo "  pi               # Pi coding agent"
 echo ""
 echo "In Neovim:"
 echo "  <leader>gg       # LazyGit"

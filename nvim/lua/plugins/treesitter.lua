@@ -1,6 +1,6 @@
 -- Treesitter: Parser management for nvim 0.12+ native tree-sitter
 -- Highlighting and indentation are handled via autocmd (see config/autocmds.lua)
--- Requires tree-sitter CLI (installed via npm, see home.nix)
+-- Requires tree-sitter CLI (installed via bun, see home.nix)
 
 return {
   -- Parser installation and management

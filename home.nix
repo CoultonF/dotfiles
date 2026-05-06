@@ -48,17 +48,17 @@ in
     cargo        # Rust package manager
 
     # LSP Servers
-    # Note: typescript-language-server and vscode-langservers-extracted installed via npm
+    # Note: typescript-language-server and vscode-langservers-extracted installed via bun
     # (nodePackages was removed from nixpkgs)
-    # See home.activation.npmGlobalPackages below
+    # See home.activation.bunGlobalPackages below
     ruff         # Python LSP, linter, formatter
     lua-language-server
 
     # Build Tools
     gcc          # C compiler (treesitter parser compilation), includes g++
     gnumake
-    # Note: tree-sitter-cli installed via npm (nixpkgs lags behind requirements)
-    # See home.activation.npmGlobalPackages below
+    # Note: tree-sitter-cli installed via bun (nixpkgs lags behind requirements)
+    # See home.activation.bunGlobalPackages below
     pkg-config   # Find libraries during builds
 
     # Database
@@ -88,10 +88,10 @@ in
     jq           # JSON processor
     awscli2      # AWS CLI
     direnv       # Per-directory environment variables
-    bubblewrap   # Sandbox utility required by Codex
   ] ++ lib.optionals (!isDarwin) [
     # Linux-only: locale data for containers (macOS has built-in locale support)
     glibcLocales
+    bubblewrap   # Sandbox utility required by Codex on Linux
   ] ++ lib.optionals isDarwin [
     # macOS-only: GUI apps and tools that need OrbStack
     docker-client # Docker CLI (OrbStack provides daemon)
@@ -121,8 +121,6 @@ in
       COLORTERM = "truecolor";
       LANG = "en_US.UTF-8";
       LC_ALL = "en_US.UTF-8";
-      # npm global prefix (writable location outside nix store)
-      NPM_CONFIG_PREFIX = "$HOME/.npm-global";
       # Help pip/Python find nix-installed libraries during compilation
       PKG_CONFIG_PATH = "$HOME/.nix-profile/lib/pkgconfig:$HOME/.nix-profile/share/pkgconfig";
       LIBRARY_PATH = "$HOME/.nix-profile/lib";
@@ -366,50 +364,54 @@ in
   home.file.".oracle/config.json".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/oracle/config.json";
 
+  # Pi coding agent config
+  # Keep this out of the Nix store so Pi sees dotfiles updates immediately.
+  home.file.".pi/agent/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/settings.json";
+  home.file.".pi/agent/APPEND_SYSTEM.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/APPEND_SYSTEM.md";
+  home.file.".pi/agent/keybindings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/keybindings.json";
+  home.file.".pi/agent/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/mcp.json";
+  home.file.".pi/agent/skills".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/skills";
+  home.file.".pi/agent/extensions".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/extensions";
+
   # ============================================================================
   # Environment
   # ============================================================================
   # Note: tmux-sessionizer is already in ~/.dotfiles/bin/ which is added to PATH
   home.sessionPath = [
-    "$HOME/.npm-global/bin"
+    "$HOME/.bun/bin"
     "$HOME/.dotfiles/bin"
     "$HOME/.local/bin"
   ];
 
   # ============================================================================
-  # npm global packages (for tools where nixpkgs lags behind)
-  # ============================================================================
-  home.activation.npmGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    export NPM_CONFIG_PREFIX="${homeDirectory}/.npm-global"
-    export PATH="${pkgs.nodejs_22}/bin:${homeDirectory}/.npm-global/bin:$PATH"
-    mkdir -p "${homeDirectory}/.npm-global"
-    for pkg in tree-sitter-cli typescript-language-server vscode-langservers-extracted @steipete/oracle; do
-      if ! ${pkgs.nodejs_22}/bin/npm list -g "$pkg" >/dev/null 2>&1; then
-        echo "Installing $pkg via npm..."
-        ${pkgs.nodejs_22}/bin/npm install -g "$pkg" || echo "WARNING: Failed to install $pkg"
-      fi
-    done
-    if ! ${pkgs.nodejs_22}/bin/npm list -g opentmux >/dev/null 2>&1; then
-      echo "Installing opentmux via npm..."
-      # Manage the opencode wrapper via dotfiles instead of upstream postinstall shell edits.
-      ${pkgs.nodejs_22}/bin/npm install -g --ignore-scripts opentmux || echo "WARNING: Failed to install opentmux"
-    fi
-  '';
-
-  # ============================================================================
-  # bun global packages (Codex CLI distributed as @openai/codex on npm)
+  # bun global packages (for npm registry CLIs where nixpkgs lags behind)
   # ============================================================================
   home.activation.bunGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     export BUN_INSTALL="${homeDirectory}/.bun"
-    export PATH="${pkgs.bun}/bin:${homeDirectory}/.bun/bin:$PATH"
+    export PATH="${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:${homeDirectory}/.bun/bin:$PATH"
     mkdir -p "${homeDirectory}/.bun/bin"
-    for pkg in @openai/codex; do
-      bin_name=$(basename "$pkg")
-      if [ ! -x "${homeDirectory}/.bun/bin/$bin_name" ]; then
+
+    install_bun_global() {
+      pkg="$1"
+      bin="$2"
+      if [ ! -x "${homeDirectory}/.bun/bin/$bin" ]; then
         echo "Installing $pkg via bun..."
-        ${pkgs.bun}/bin/bun install -g "$pkg" || echo "WARNING: Failed to install $pkg"
+        ${pkgs.bun}/bin/bun add -g "$pkg" || echo "WARNING: Failed to install $pkg"
       fi
-    done
+    }
+
+    install_bun_global tree-sitter-cli tree-sitter
+    install_bun_global typescript-language-server typescript-language-server
+    install_bun_global vscode-langservers-extracted vscode-json-language-server
+    install_bun_global @steipete/oracle oracle
+    install_bun_global @openai/codex codex
+    install_bun_global @mariozechner/pi-coding-agent pi
   '';
 
   # ============================================================================

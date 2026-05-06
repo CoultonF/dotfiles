@@ -27,7 +27,8 @@ That's it. Everything is installed and configured.
 | **Ghostty** | GPU-accelerated terminal with Catppuccin theme |
 | **tmux** | Terminal multiplexer with vim keybindings and Catppuccin theme |
 | **Neovim** | Full IDE setup with LSP, completion, debugging |
-| **OpenCode** | Terminal AI coding agent with Catppuccin Macchiato, Space leader, and tmux integration |
+| **OpenCode** | Terminal AI coding agent with Catppuccin Macchiato and Space leader |
+| **Pi** | Coding agent CLI installed with Bun and managed global settings |
 | **Zsh** | Shell with autosuggestions, syntax highlighting, starship prompt |
 
 ## Directory Structure
@@ -41,8 +42,14 @@ That's it. Everything is installed and configured.
 │   └── config             # Ghostty terminal config
 ├── opencode/
 │   ├── opencode.json      # OpenCode runtime config
-│   ├── opentmux.json      # opentmux layout/config
 │   └── tui.json           # OpenCode TUI theme + keybinds
+├── pi/
+│   ├── settings.json      # Pi global agent settings
+│   ├── APPEND_SYSTEM.md   # System prompt extension (operator preferences)
+│   ├── keybindings.json   # Pi keybinding overrides
+│   ├── mcp.json           # MCP server scaffold
+│   ├── skills/            # SKILL.md skills (auto-discovered)
+│   └── extensions/        # TypeScript extensions (plan-mode/, questionnaire, inline-bash, auto-commit-on-exit)
 ├── tmux/
 │   └── tmux.conf          # tmux keybindings and theme
 ├── nvim/
@@ -62,8 +69,7 @@ Home Manager uses Nix to declaratively manage:
 - **Dotfiles** - Configs symlinked to `~/.config/`
 - **Shell** - Zsh with aliases, env vars, plugins
 - **Programs** - tmux, git, fzf, starship with native config
-- **AI Tools** - OpenCode with managed theme, keybinds, LSP, and permissions
-- **Agent UX** - opentmux wrapper and config for tmux-backed OpenCode sessions
+- **AI Tools** - OpenCode and Pi with managed config
 
 ### Applying Changes
 
@@ -88,7 +94,7 @@ home-manager switch --flake ~/.dotfiles --rollback
 All installed automatically via `home.nix`:
 
 - **Editor**: Neovim
-- **AI**: OpenCode
+- **AI**: OpenCode, Pi
 - **Search**: ripgrep (rg), fd, fzf, tree
 - **Git**: lazygit, git, delta
 - **Languages**: Node.js 22, Python 3.12, Lua 5.1
@@ -142,13 +148,90 @@ OpenCode is configured via `~/.config/opencode/` with:
 - `catppuccin-macchiato` TUI theme
 - Space as the leader key
 - Ruff as the Python LSP
-- `opentmux` enabled through the OpenCode `plugin` array
-- `opentmux.json` managed from dotfiles for tmux layout defaults
 - Claude Code fallback support disabled via `OPENCODE_DISABLE_CLAUDE_CODE*`
 
-The `opencode` command is wrapped through `opentmux` from [bin/opencode](/home/vscode/dotfiles/bin/opencode:1), so launching OpenCode from your shell uses the tmux integration by default.
-
 On first run, open `opencode` and use `/connect` to authenticate a provider.
+
+### Pi
+
+Pi is installed from `@mariozechner/pi-coding-agent` using Bun. The dotfiles repo manages everything Pi auto-discovers under `~/.pi/agent/` via out-of-store symlinks, so edits in `pi/` apply live (run `/reload` inside Pi to pick them up without restarting).
+
+| Path | Purpose |
+|------|---------|
+| `pi/settings.json` | Default provider, model, theme, telemetry, retry/compaction |
+| `pi/APPEND_SYSTEM.md` | Operator preferences appended to Pi's default system prompt |
+| `pi/keybindings.json` | Key remaps (`Shift+Tab` freed up for the plan-mode extension; thinking cycle moved to `Ctrl+T`) |
+| `pi/mcp.json` | MCP server scaffold (empty until populated) |
+| `pi/skills/` | Drop-in `SKILL.md` skills, auto-discovered |
+| `pi/extensions/` | TypeScript extensions, auto-loaded |
+
+On first run, open `pi` and use `/login` to authenticate a provider.
+
+#### Pi keybindings
+
+| Key | Action |
+|-----|--------|
+| `Shift+Tab` | Toggle plan / YOLO mode (custom extension) |
+| `Ctrl+L` | Open model selector |
+| `Ctrl+T` | Cycle thinking level (remapped from default Shift+Tab) |
+| `Ctrl+G` | Open external editor |
+| `Ctrl+D` | Exit |
+
+tmux passes modifier keys correctly thanks to `set -g extended-keys on` + `csi-u` in `tmux/tmux.conf`. Inside Ghostty / Kitty / iTerm2 the Kitty keyboard protocol handles this natively.
+
+#### Pi slash commands
+
+| Command | Purpose |
+|---------|---------|
+| `/plan` | Toggle plan mode (alternative to Shift+Tab / Ctrl+Alt+P) |
+| `/todos` | Show plan progress (steps + completion state) |
+| `/model` | Open model selector |
+| `/login` | Authenticate a provider |
+| `/reload` | Reload extensions, keybindings, and context files |
+| `/skill:<name>` | Invoke a skill from `pi/skills/` |
+| `/export <file>` | Write the session as HTML |
+| `/share` | Upload session as a private GitHub gist |
+| `/session`, `/new`, `/fork`, `/resume`, `/tree` | Session management |
+
+#### Extensions
+
+All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
+
+| Extension | Purpose |
+|-----------|---------|
+| `plan-mode/` | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab`, `Ctrl+Alt+P`, or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
+| `questionnaire.ts` | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode. |
+| `inline-bash.ts` | Expands `!{command}` patterns inside user prompts before they reach the agent. Example: `current branch is !{git branch --show-current}`. Whole-line `!command` syntax is preserved. |
+| `auto-commit-on-exit.ts` | On Pi shutdown inside a git repo with uncommitted changes, prompts the user to auto-commit using the last assistant message as the subject. Skipped silently in non-interactive sessions. |
+
+#### Plan mode behavior
+
+- **In plan mode**: tools restricted to `read`, `bash` (read-only allowlist), `grep`, `find`, `ls`, `questionnaire`, `todo`. Bash commands like `rm`, `mv`, `git commit`, `npm install`, etc. are blocked. The agent is instructed to output a `Plan:` section with numbered steps.
+- **On exit from plan mode**: a select dialog offers Execute / Stay / Refine. Executing flips Pi to full tool access and tracks step completion via `[DONE:n]` tags from the agent.
+- **State persists** across `/reload` and session resumes. The status line shows `⏸ plan` while planning and `📋 n/m` during execution.
+
+#### Adding a skill
+
+```bash
+mkdir -p ~/.dotfiles/pi/skills/my-skill
+cat > ~/.dotfiles/pi/skills/my-skill/SKILL.md <<'EOF'
+---
+name: my-skill
+description: One-line description shown to the model
+tags: [example]
+---
+
+# Skill body in markdown
+
+Detailed instructions loaded into context only when invoked via /skill:my-skill.
+EOF
+```
+
+Run `/reload` inside Pi to pick it up.
+
+#### tmux
+
+Pi runs cleanly inside tmux. The repo's `tmux/tmux.conf` already enables the extended-keys protocol so `Shift+Tab`, `Ctrl+Enter`, etc. reach Pi without being collapsed to plain `Enter` / `Tab`. Use `Ctrl-g` to launch the project sessionizer and start a new tmux session per project, then run `pi` inside.
 
 ## Customizing
 
