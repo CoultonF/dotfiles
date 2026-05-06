@@ -91,7 +91,8 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 		description: "Update or inspect the active plan execution progress",
 		promptSnippet: "Mark plan execution steps complete as soon as each step is finished",
 		promptGuidelines: [
-			"Use plan_progress with action=complete immediately after finishing each plan execution step so the plan UI updates live.",
+			"During plan execution, call plan_progress with action=complete immediately after finishing each individual step, before doing any further work or sending a final response.",
+			"Do not batch multiple completed steps into one final response unless you have already called plan_progress for each step.",
 		],
 		parameters: Type.Object({
 			action: Type.Union([Type.Literal("list"), Type.Literal("complete")]),
@@ -239,8 +240,9 @@ Remaining steps:
 ${todoList}
 
 Execute each step in order.
-After completing each step, immediately call the plan_progress tool with action="complete" and that step number so the UI updates live.
-Also include [DONE:n] tags in your response as a fallback.`,
+After completing each individual step, your next action MUST be a plan_progress tool call with action="complete" and that step number. Do this before starting the next step, before calling any other tool, and before sending a final response.
+Do not batch completed steps at the end. The plan UI only updates live when plan_progress is called.
+Also include [DONE:n] tags in your response as a fallback; those are reconciled after the turn but are not live.`,
 					display: false,
 				},
 			};
