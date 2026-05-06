@@ -172,7 +172,9 @@ On first run, open `pi` and use `/login` to authenticate a provider.
 | Key | Action |
 |-----|--------|
 | `Shift+Tab` | Toggle plan / YOLO mode (custom extension) |
-| `Ctrl+L` | Open model selector |
+| `Ctrl+J` / `Ctrl+K` | Cycle model down/up; move down/up in selectors |
+| `Ctrl+H` / `Ctrl+L` | Decrease/increase thinking level |
+| `Ctrl+Shift+L` | Open model selector |
 | `Ctrl+T` | Cycle thinking level (remapped from default Shift+Tab) |
 | `Ctrl+G` | Open external editor |
 | `Ctrl+D` | Exit |
@@ -200,6 +202,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 | Extension | Purpose |
 |-----------|---------|
 | `plan-mode/` | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab`, `Ctrl+Alt+P`, or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
+| `vim-model-thinking.ts` | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level. |
 | `questionnaire.ts` | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode. |
 | `inline-bash.ts` | Expands `!{command}` patterns inside user prompts before they reach the agent. Example: `current branch is !{git branch --show-current}`. Whole-line `!command` syntax is preserved. |
 | `auto-commit-on-exit.ts` | On Pi shutdown inside a git repo with uncommitted changes, prompts the user to auto-commit using the last assistant message as the subject. Skipped silently in non-interactive sessions. |
