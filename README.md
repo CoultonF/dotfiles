@@ -160,7 +160,7 @@ Pi is installed from `@mariozechner/pi-coding-agent` using Bun. The dotfiles rep
 |------|---------|
 | `pi/settings.json` | Default provider, model, theme, telemetry, retry/compaction |
 | `pi/APPEND_SYSTEM.md` | Operator preferences appended to Pi's default system prompt |
-| `pi/keybindings.json` | Key remaps (`Shift+Tab` freed up for the plan-mode extension; thinking cycle moved to `Ctrl+T`) |
+| `pi/keybindings.json` | Key remaps for vim-style model cycling and selector navigation |
 | `pi/mcp.json` | MCP server scaffold (empty until populated) |
 | `pi/skills/` | Drop-in `SKILL.md` skills, auto-discovered |
 | `pi/extensions/` | TypeScript extensions, auto-loaded |
@@ -175,7 +175,6 @@ On first run, open `pi` and use `/login` to authenticate a provider.
 | `Ctrl+J` / `Ctrl+K` | Cycle model down/up; move down/up in selectors |
 | `Ctrl+H` / `Ctrl+L` | Decrease/increase thinking level |
 | `Ctrl+Shift+L` | Open model selector |
-| `Ctrl+T` | Cycle thinking level (remapped from default Shift+Tab) |
 | `Ctrl+G` | Open external editor |
 | `Ctrl+D` | Exit |
 

@@ -1,9 +1,9 @@
 {
-  "app.thinking.cycle": ["ctrl+t"],
   "app.model.cycleForward": ["ctrl+j"],
   "app.model.cycleBackward": ["ctrl+k"],
   "app.model.select": ["ctrl+shift+l"],
   "tui.select.down": ["down", "ctrl+j"],
   "tui.select.up": ["up", "ctrl+k"],
-  "tui.editor.deleteToLineEnd": []
+  "tui.editor.deleteToLineEnd": [],
+  "app.tree.filter.labeledOnly": []
 }
