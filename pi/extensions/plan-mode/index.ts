@@ -2,13 +2,12 @@
  * Plan Mode Extension (upstream copy with Shift+Tab binding added)
  *
  * Read-only exploration mode for safe code analysis.
- * Toggle with `/plan`, `Ctrl+Alt+P`, or `Shift+Tab`.
+ * Toggle with `/plan` or `Shift+Tab`.
  */
 
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { AssistantMessage, TextContent } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { Key } from "@mariozechner/pi-tui";
 import { extractTodoItems, isSafeCommand, markCompletedSteps, type TodoItem } from "./utils.js";
 
 // Tools — questionnaire and todo are intentionally allowed in plan mode
@@ -102,13 +101,6 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 		},
 	});
 
-	pi.registerShortcut(Key.ctrlAlt("p"), {
-		description: "Toggle plan mode",
-		handler: async (ctx) => togglePlanMode(ctx),
-	});
-
-	// Local tweak: also bind Shift+Tab (matches Claude Code muscle memory).
-	// Requires keybindings.json to free shift+tab from app.thinking.cycle.
 	pi.registerShortcut("shift+tab", {
 		description: "Toggle plan mode",
 		handler: async (ctx) => togglePlanMode(ctx),

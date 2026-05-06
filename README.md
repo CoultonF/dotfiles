@@ -201,7 +201,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 
 | Extension | Purpose |
 |-----------|---------|
-| `plan-mode/` | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab`, `Ctrl+Alt+P`, or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
+| `plan-mode/` | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab` or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
 | `vim-model-thinking.ts` | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level. |
 | `nvim-ref.ts` | `/nvim` bridge that opens Neovim in the current project; `<leader>pf` tags a file, visual `<leader>pr` references a range, visual `<leader>pR` inserts selected code. |
 | `questionnaire.ts` | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode. |

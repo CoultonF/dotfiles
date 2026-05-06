@@ -1,4 +1,5 @@
 {
+  "app.thinking.cycle": [],
   "app.model.cycleForward": ["ctrl+j"],
   "app.model.cycleBackward": ["ctrl+k"],
   "app.model.select": ["ctrl+shift+l"],
