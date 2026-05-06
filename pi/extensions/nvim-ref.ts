@@ -191,7 +191,7 @@ async function openNvim(ctx: ExtensionContext): Promise<void> {
 			if (process.stdin.isTTY) process.stdin.setRawMode(false);
 			process.stdout.write("\x1b[2J\x1b[H");
 
-			const result = spawnSync(cmd, [...cmdArgs, "--cmd", `lua dofile(${JSON.stringify(pluginFile)})`, "."], {
+			const result = spawnSync(cmd, [...cmdArgs, ".", "-c", `lua dofile(${JSON.stringify(pluginFile)})`], {
 				cwd: ctx.cwd,
 				stdio: "inherit",
 				env: {
