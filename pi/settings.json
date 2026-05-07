@@ -23,6 +23,7 @@
     "npm:pi-lens",
     "npm:pi-docparser",
     "npm:@kaiserlich-dev/pi-session-search",
-    "npm:pi-mermaid"
+    "npm:pi-mermaid",
+    "npm:@ifi/oh-pi-themes"
   ]
 }
