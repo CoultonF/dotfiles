@@ -26,8 +26,11 @@ export default function (pi: ExtensionAPI) {
 		});
 		if (statusResult.code !== 0) return undefined;
 
-		const count = statusResult.stdout.split("\n").filter((line) => line.trim().length > 0).length;
-		return { branch, count };
+		const changedFiles = statusResult.stdout.split("\n").filter((line) => line.trim().length > 0).length;
+		const commitsResult = await pi.exec("git", ["rev-list", "--count", "main..HEAD"], { timeout: 2_000 });
+		const commitsSinceMain = commitsResult.code === 0 ? Number.parseInt(commitsResult.stdout.trim(), 10) || 0 : 0;
+
+		return { branch, changedFiles, commitsSinceMain };
 	}
 
 	async function refresh(ctx: ExtensionContext) {
@@ -42,8 +45,11 @@ export default function (pi: ExtensionAPI) {
 			const status = await getGitStatus();
 			const text = status
 				? `${ctx.ui.theme.fg("accent", ` ${status.branch}`)} ${ctx.ui.theme.fg(
-						status.count === 0 ? "success" : "warning",
-						`±${status.count}`,
+						status.commitsSinceMain === 0 ? "success" : "warning",
+						`↑${status.commitsSinceMain}`,
+					)} ${ctx.ui.theme.fg(
+						status.changedFiles === 0 ? "success" : "warning",
+						`±${status.changedFiles}`,
 					)}`
 				: undefined;
 
