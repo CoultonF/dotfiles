@@ -7,12 +7,28 @@
 
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { AssistantMessage, TextContent } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+} from "@mariozechner/pi-coding-agent";
 import { Type } from "typebox";
-import { extractTodoItems, isSafeCommand, markCompletedSteps, type TodoItem } from "./utils.js";
+import {
+	extractTodoItems,
+	isSafeCommand,
+	markCompletedSteps,
+	type TodoItem,
+} from "./utils.js";
 
 // Tools — questionnaire and todo are intentionally allowed in plan mode
-const PLAN_MODE_TOOLS = ["read", "bash", "grep", "find", "ls", "questionnaire", "todo"];
+const PLAN_MODE_TOOLS = [
+	"read",
+	"bash",
+	"grep",
+	"find",
+	"ls",
+	"questionnaire",
+	"todo",
+];
 const NORMAL_MODE_TOOLS = ["read", "bash", "edit", "write"];
 
 function isAssistantMessage(m: AgentMessage): m is AssistantMessage {
@@ -40,7 +56,10 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 	function updateStatus(ctx: ExtensionContext): void {
 		if (executionMode && todoItems.length > 0) {
 			const completed = todoItems.filter((t) => t.completed).length;
-			ctx.ui.setStatus("plan-mode", ctx.ui.theme.fg("accent", `📋 ${completed}/${todoItems.length}`));
+			ctx.ui.setStatus(
+				"plan-mode",
+				ctx.ui.theme.fg("accent", `📋 ${completed}/${todoItems.length}`),
+			);
 		} else if (planModeEnabled) {
 			ctx.ui.setStatus("plan-mode", ctx.ui.theme.fg("warning", "⏸ plan"));
 		} else {
@@ -51,7 +70,8 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 			const lines = todoItems.map((item) => {
 				if (item.completed) {
 					return (
-						ctx.ui.theme.fg("success", "☑ ") + ctx.ui.theme.fg("muted", ctx.ui.theme.strikethrough(item.text))
+						ctx.ui.theme.fg("success", "☑ ") +
+						ctx.ui.theme.fg("muted", ctx.ui.theme.strikethrough(item.text))
 					);
 				}
 				return `${ctx.ui.theme.fg("muted", "☐ ")}${item.text}`;
@@ -89,21 +109,32 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 		name: "plan_progress",
 		label: "Plan Progress",
 		description: "Update or inspect the active plan execution progress",
-		promptSnippet: "Mark plan execution steps complete as soon as each step is finished",
+		promptSnippet:
+			"Mark plan execution steps complete as soon as each step is finished",
 		promptGuidelines: [
 			"During plan execution, call plan_progress with action=complete immediately after finishing each individual step, before doing any further work or sending a final response.",
 			"Do not batch multiple completed steps into one final response unless you have already called plan_progress for each step.",
 		],
 		parameters: Type.Object({
 			action: Type.Union([Type.Literal("list"), Type.Literal("complete")]),
-			step: Type.Optional(Type.Number({ description: "Plan step number for action=complete" })),
+			step: Type.Optional(
+				Type.Number({ description: "Plan step number for action=complete" }),
+			),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			if (params.action === "list") {
 				const text = todoItems.length
-					? todoItems.map((item) => `${item.completed ? "✓" : "○"} ${item.step}. ${item.text}`).join("\n")
+					? todoItems
+							.map(
+								(item) =>
+									`${item.completed ? "✓" : "○"} ${item.step}. ${item.text}`,
+							)
+							.join("\n")
 					: "No active plan steps";
-				return { content: [{ type: "text", text }], details: { todos: todoItems } };
+				return {
+					content: [{ type: "text", text }],
+					details: { todos: todoItems },
+				};
 			}
 
 			if (!executionMode || todoItems.length === 0) {
@@ -117,7 +148,9 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 			const step = params.step;
 			if (!Number.isInteger(step)) {
 				return {
-					content: [{ type: "text", text: "step is required for action=complete" }],
+					content: [
+						{ type: "text", text: "step is required for action=complete" },
+					],
 					details: { todos: todoItems, error: "missing_step" },
 					isError: true,
 				};
@@ -136,7 +169,12 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 			updateStatus(ctx);
 			persistState();
 			return {
-				content: [{ type: "text", text: `Completed plan step ${item.step}: ${item.text}` }],
+				content: [
+					{
+						type: "text",
+						text: `Completed plan step ${item.step}: ${item.text}`,
+					},
+				],
 				details: { todos: todoItems, completedStep: item.step },
 			};
 		},
@@ -154,7 +192,11 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 				ctx.ui.notify("No todos. Create a plan first with /plan", "info");
 				return;
 			}
-			const list = todoItems.map((item, i) => `${i + 1}. ${item.completed ? "✓" : "○"} ${item.text}`).join("\n");
+			const list = todoItems
+				.map(
+					(item, i) => `${i + 1}. ${item.completed ? "✓" : "○"} ${item.text}`,
+				)
+				.join("\n");
 			ctx.ui.notify(`Plan Progress:\n${list}`, "info");
 		},
 	});
@@ -191,7 +233,9 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 				}
 				if (Array.isArray(content)) {
 					return !content.some(
-						(c) => c.type === "text" && (c as TextContent).text?.includes("[PLAN MODE ACTIVE]"),
+						(c) =>
+							c.type === "text" &&
+							(c as TextContent).text?.includes("[PLAN MODE ACTIVE]"),
 					);
 				}
 				return true;
@@ -215,12 +259,27 @@ Restrictions:
 Ask clarifying questions using the questionnaire tool.
 Use brave-search skill via bash for web research.
 
-Create a detailed numbered plan under a "Plan:" header:
+Create a concrete plan with these sections:
+
+Proposed file references:
+- List exact files/directories you expect to inspect or change, with a short reason for each.
+- Use \`path/to/file.ext:line\` when you know the line; otherwise use \`path/to/file.ext\`.
+
+Data schema references:
+- Include this section whenever data, API payloads, database rows, config records, events, or typed models are involved.
+- Show the expected shape as JSON, TypeScript, SQL columns, or Pydantic-style fields.
+- Include representative create/update/delete payloads with realistic field names and example values.
+- If no data shape is involved, write \`None expected\`.
 
 Plan:
-1. First step description
-2. Second step description
+1. Specific action including target file/function/system and expected outcome
+2. Specific action including validation or decision criteria
 ...
+
+Plan quality rules:
+- Avoid generic steps like "update the code" or "verify changes" unless they name the exact files, commands, data shapes, or observable behavior.
+- Prefer concrete implementation details over vague intent.
+- Mention important assumptions and ask clarifying questions with questionnaire when data shape, files, or desired behavior are ambiguous.
 
 Do NOT attempt to make changes - just describe what you would do.`,
 					display: false,
@@ -265,7 +324,11 @@ Also include [DONE:n] tags in your response as a fallback; those are reconciled 
 			if (todoItems.every((t) => t.completed)) {
 				const completedList = todoItems.map((t) => `~~${t.text}~~`).join("\n");
 				pi.sendMessage(
-					{ customType: "plan-complete", content: `**Plan Complete!** ✓\n\n${completedList}`, display: true },
+					{
+						customType: "plan-complete",
+						content: `**Plan Complete!** ✓\n\n${completedList}`,
+						display: true,
+					},
 					{ triggerTurn: false },
 				);
 				executionMode = false;
@@ -279,7 +342,9 @@ Also include [DONE:n] tags in your response as a fallback; those are reconciled 
 
 		if (!planModeEnabled || !ctx.hasUI) return;
 
-		const lastAssistant = [...event.messages].reverse().find(isAssistantMessage);
+		const lastAssistant = [...event.messages]
+			.reverse()
+			.find(isAssistantMessage);
 		if (lastAssistant) {
 			const extracted = extractTodoItems(getTextContent(lastAssistant));
 			if (extracted.length > 0) {
@@ -288,7 +353,9 @@ Also include [DONE:n] tags in your response as a fallback; those are reconciled 
 		}
 
 		if (todoItems.length > 0) {
-			const todoListText = todoItems.map((t, i) => `${i + 1}. ☐ ${t.text}`).join("\n");
+			const todoListText = todoItems
+				.map((t, i) => `${i + 1}. ☐ ${t.text}`)
+				.join("\n");
 			pi.sendMessage(
 				{
 					customType: "plan-todo-list",
@@ -300,7 +367,9 @@ Also include [DONE:n] tags in your response as a fallback; those are reconciled 
 		}
 
 		const choice = await ctx.ui.select("Plan mode - what next?", [
-			todoItems.length > 0 ? "Execute the plan (track progress)" : "Execute the plan",
+			todoItems.length > 0
+				? "Execute the plan (track progress)"
+				: "Execute the plan",
 			"Stay in plan mode",
 			"Refine the plan",
 		]);
@@ -316,7 +385,11 @@ Also include [DONE:n] tags in your response as a fallback; those are reconciled 
 					? `Execute the plan. Start with: ${todoItems[0].text}`
 					: "Execute the plan you just created.";
 			pi.sendMessage(
-				{ customType: "plan-mode-execute", content: execMessage, display: true },
+				{
+					customType: "plan-mode-execute",
+					content: execMessage,
+					display: true,
+				},
 				{ triggerTurn: true },
 			);
 		} else if (choice === "Refine the plan") {
@@ -335,8 +408,13 @@ Also include [DONE:n] tags in your response as a fallback; those are reconciled 
 		const entries = ctx.sessionManager.getEntries();
 
 		const planModeEntry = entries
-			.filter((e: { type: string; customType?: string }) => e.type === "custom" && e.customType === "plan-mode")
-			.pop() as { data?: { enabled: boolean; todos?: TodoItem[]; executing?: boolean } } | undefined;
+			.filter(
+				(e: { type: string; customType?: string }) =>
+					e.type === "custom" && e.customType === "plan-mode",
+			)
+			.pop() as
+			| { data?: { enabled: boolean; todos?: TodoItem[]; executing?: boolean } }
+			| undefined;
 
 		if (planModeEntry?.data) {
 			planModeEnabled = planModeEntry.data.enabled ?? planModeEnabled;
@@ -358,7 +436,11 @@ Also include [DONE:n] tags in your response as a fallback; those are reconciled 
 			const messages: AssistantMessage[] = [];
 			for (let i = executeIndex + 1; i < entries.length; i++) {
 				const entry = entries[i];
-				if (entry.type === "message" && "message" in entry && isAssistantMessage(entry.message as AgentMessage)) {
+				if (
+					entry.type === "message" &&
+					"message" in entry &&
+					isAssistantMessage(entry.message as AgentMessage)
+				) {
 					messages.push(entry.message as AssistantMessage);
 				}
 			}

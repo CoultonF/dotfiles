@@ -211,7 +211,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 
 #### Plan mode behavior
 
-- **In plan mode**: tools restricted to `read`, `bash` (read-only allowlist), `grep`, `find`, `ls`, `questionnaire`, `todo`. Bash commands like `rm`, `mv`, `git commit`, `npm install`, etc. are blocked. The agent is instructed to output a `Plan:` section with numbered steps.
+- **In plan mode**: tools restricted to `read`, `bash` (read-only allowlist), `grep`, `find`, `ls`, `questionnaire`, `todo`. Bash commands like `rm`, `mv`, `git commit`, `npm install`, etc. are blocked. The agent is instructed to output `Proposed file references`, `Data schema references`, and a concrete numbered `Plan:` with specific actions instead of generic steps.
 - **On exit from plan mode**: a select dialog offers Execute / Stay / Refine. Executing flips Pi to full tool access and tracks step completion via `[DONE:n]` tags from the agent.
 - **State persists** across `/reload` and session resumes. The status line shows `⏸ plan` while planning and `📋 n/m` during execution.
 
