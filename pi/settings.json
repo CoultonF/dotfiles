@@ -18,6 +18,7 @@
     "openai-codex/gpt-5.3-codex-spark"
   ],
   "packages": [
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "npm:pi-web-access"
   ]
 }
