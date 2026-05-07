@@ -1,4 +1,7 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+} from "@mariozechner/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 
 function shortModel(id: string | undefined): string {
@@ -14,13 +17,7 @@ function compactStatus(statuses: ReadonlyMap<string, string>): string {
 
 function installCodexUi(ctx: ExtensionContext): void {
 	ctx.ui.setWorkingIndicator({
-		frames: [
-			ctx.ui.theme.fg("dim", "•"),
-			ctx.ui.theme.fg("muted", "•"),
-			ctx.ui.theme.fg("accent", "•"),
-			ctx.ui.theme.fg("muted", "•"),
-		],
-		intervalMs: 180,
+		frames: [ctx.ui.theme.fg("accent", "•")],
 	});
 
 	ctx.ui.setFooter((tui, theme, footerData) => {
@@ -35,8 +32,12 @@ function installCodexUi(ctx: ExtensionContext): void {
 				const leftParts = [theme.fg("accent", shortModel(ctx.model?.id))];
 				if (branch) leftParts.push(theme.fg("muted", branch));
 				const left = leftParts.join(theme.fg("dim", "  "));
-				const right = statuses ? theme.fg("dim", statuses) : theme.fg("dim", "ready");
-				const gap = " ".repeat(Math.max(1, width - visibleWidth(left) - visibleWidth(right)));
+				const right = statuses
+					? theme.fg("dim", statuses)
+					: theme.fg("dim", "ready");
+				const gap = " ".repeat(
+					Math.max(1, width - visibleWidth(left) - visibleWidth(right)),
+				);
 				return [truncateToWidth(left + gap + right, width, "")];
 			},
 		};
