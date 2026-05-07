@@ -1,7 +1,7 @@
 {
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "low",
+  "defaultThinkingLevel": "medium",
   "theme": "catppuccin-mocha-readable",
   "enableInstallTelemetry": false,
   "compaction": {
@@ -25,5 +25,6 @@
     "npm:@kaiserlich-dev/pi-session-search",
     "npm:pi-mermaid",
     "npm:@ifi/oh-pi-themes"
-  ]
+  ],
+  "quietStartup": true
 }
