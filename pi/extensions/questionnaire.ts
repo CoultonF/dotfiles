@@ -56,7 +56,7 @@ const QuestionSchema = Type.Object({
 	),
 	prompt: Type.String({ description: "The full question text to display" }),
 	options: Type.Array(QuestionOptionSchema, { description: "Available options to choose from" }),
-	allowOther: Type.Optional(Type.Boolean({ description: "Allow 'Type something' option (default: true)" })),
+	allowOther: Type.Optional(Type.Boolean({ description: "Deprecated; custom text is always available as the last option" })),
 });
 
 const QuestionnaireParams = Type.Object({
@@ -89,11 +89,10 @@ export default function questionnaire(pi: ExtensionAPI) {
 				return errorResult("Error: No questions provided");
 			}
 
-			// Normalize questions with defaults
 			const questions: Question[] = params.questions.map((q, i) => ({
 				...q,
 				label: q.label || `Q${i + 1}`,
-				allowOther: q.allowOther !== false,
+				allowOther: true,
 			}));
 
 			const isMulti = questions.length > 1;
@@ -138,11 +137,15 @@ export default function questionnaire(pi: ExtensionAPI) {
 				function currentOptions(): RenderOption[] {
 					const q = currentQuestion();
 					if (!q) return [];
-					const opts: RenderOption[] = [...q.options];
-					if (q.allowOther) {
-						opts.push({ value: "__other__", label: "Type something.", isOther: true });
-					}
-					return opts;
+					return [
+						...q.options,
+						{
+							value: "__other__",
+							label: "None of the above — I'll type my own response.",
+							description: "Choose this when the listed options do not match what you want.",
+							isOther: true,
+						},
+					];
 				}
 
 				function allAnswered(): boolean {
