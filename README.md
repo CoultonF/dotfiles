@@ -1,4 +1,4 @@
-# Dotfiles
+# Dotfiles!
 
 Personal development environment configuration managed by **Nix Home Manager**.
 
@@ -21,15 +21,15 @@ That's it. Everything is installed and configured.
 
 ## What's Included
 
-| Component | Description |
-|-----------|-------------|
-| **Home Manager** | Declarative configuration management |
-| **Ghostty** | GPU-accelerated terminal with Catppuccin theme |
-| **tmux** | Terminal multiplexer with vim keybindings and Catppuccin theme |
-| **Neovim** | Full IDE setup with LSP, completion, debugging |
-| **OpenCode** | Terminal AI coding agent with Catppuccin Macchiato and Space leader |
-| **Pi** | Coding agent CLI installed with Bun and managed global settings |
-| **Zsh** | Shell with autosuggestions, syntax highlighting, starship prompt |
+| Component        | Description                                                         |
+| ---------------- | ------------------------------------------------------------------- |
+| **Home Manager** | Declarative configuration management                                |
+| **Ghostty**      | GPU-accelerated terminal with Catppuccin theme                      |
+| **tmux**         | Terminal multiplexer with vim keybindings and Catppuccin theme      |
+| **Neovim**       | Full IDE setup with LSP, completion, debugging                      |
+| **OpenCode**     | Terminal AI coding agent with Catppuccin Macchiato and Space leader |
+| **Pi**           | Coding agent CLI installed with Bun and managed global settings     |
+| **Zsh**          | Shell with autosuggestions, syntax highlighting, starship prompt    |
 
 ## Directory Structure
 
@@ -107,37 +107,37 @@ All installed automatically via `home.nix`:
 
 ### tmux
 
-| Key | Action |
-|-----|--------|
-| `Ctrl-g` | Open sessionizer (project switcher) |
-| `Ctrl-a` | Switch to last session |
-| `Ctrl-b` | Prefix key (then press another key) |
-| `Ctrl-b [` | Enter copy mode |
-| `Ctrl-b c` | New window |
-| `Ctrl-b 1-9` | Switch to window |
-| `Ctrl-b n/p` | Next/previous window |
-| `Ctrl-b "` or `-` | Split horizontally |
-| `Ctrl-b %` or `\|` | Split vertically |
-| `Ctrl-b h/j/k/l` | Navigate panes |
-| `Ctrl-b H/J/K/L` | Resize panes |
-| `Ctrl-b x` | Close pane |
-| `Ctrl-b z` | Zoom pane |
-| `Ctrl-b d` | Detach |
-| `Ctrl-b w` | Choose session/window |
+| Key                | Action                              |
+| ------------------ | ----------------------------------- |
+| `Ctrl-g`           | Open sessionizer (project switcher) |
+| `Ctrl-a`           | Switch to last session              |
+| `Ctrl-b`           | Prefix key (then press another key) |
+| `Ctrl-b [`         | Enter copy mode                     |
+| `Ctrl-b c`         | New window                          |
+| `Ctrl-b 1-9`       | Switch to window                    |
+| `Ctrl-b n/p`       | Next/previous window                |
+| `Ctrl-b "` or `-`  | Split horizontally                  |
+| `Ctrl-b %` or `\|` | Split vertically                    |
+| `Ctrl-b h/j/k/l`   | Navigate panes                      |
+| `Ctrl-b H/J/K/L`   | Resize panes                        |
+| `Ctrl-b x`         | Close pane                          |
+| `Ctrl-b z`         | Zoom pane                           |
+| `Ctrl-b d`         | Detach                              |
+| `Ctrl-b w`         | Choose session/window               |
 
 ### Neovim
 
 Leader key: `<Space>`
 
-| Key | Action |
-|-----|--------|
-| `ff` | Find files |
-| `gf` | Live grep |
-| `<leader>,` | Switch buffer |
-| `<leader>x` | File explorer (Oil) |
-| `gd` | Go to definition |
-| `gr` | Go to references |
-| `<leader>gg` | LazyGit |
+| Key          | Action              |
+| ------------ | ------------------- |
+| `ff`         | Find files          |
+| `gf`         | Live grep           |
+| `<leader>,`  | Switch buffer       |
+| `<leader>x`  | File explorer (Oil) |
+| `gd`         | Go to definition    |
+| `gr`         | Go to references    |
+| `<leader>gg` | LazyGit             |
 
 ### OpenCode
 
@@ -156,58 +156,58 @@ On first run, open `opencode` and use `/connect` to authenticate a provider.
 
 Pi is installed from `@mariozechner/pi-coding-agent` using Bun. The dotfiles repo manages everything Pi auto-discovers under `~/.pi/agent/` via out-of-store symlinks, so edits in `pi/` apply live (run `/reload` inside Pi to pick them up without restarting).
 
-| Path | Purpose |
-|------|---------|
-| `pi/settings.json` | Default provider, model, theme, telemetry, retry/compaction |
-| `pi/APPEND_SYSTEM.md` | Operator preferences appended to Pi's default system prompt |
+| Path                  | Purpose                                                        |
+| --------------------- | -------------------------------------------------------------- |
+| `pi/settings.json`    | Default provider, model, theme, telemetry, retry/compaction    |
+| `pi/APPEND_SYSTEM.md` | Operator preferences appended to Pi's default system prompt    |
 | `pi/keybindings.json` | Key remaps for vim-style model cycling and selector navigation |
-| `pi/mcp.json` | MCP server scaffold (empty until populated) |
-| `pi/skills/` | Drop-in `SKILL.md` skills, auto-discovered |
-| `pi/extensions/` | TypeScript extensions, auto-loaded |
+| `pi/mcp.json`         | MCP server scaffold (empty until populated)                    |
+| `pi/skills/`          | Drop-in `SKILL.md` skills, auto-discovered                     |
+| `pi/extensions/`      | TypeScript extensions, auto-loaded                             |
 
 On first run, open `pi` and use `/login` to authenticate a provider.
 
 #### Pi keybindings
 
-| Key | Action |
-|-----|--------|
-| `Shift+Tab` | Toggle plan / YOLO mode (custom extension) |
+| Key                 | Action                                         |
+| ------------------- | ---------------------------------------------- |
+| `Shift+Tab`         | Toggle plan / YOLO mode (custom extension)     |
 | `Ctrl+J` / `Ctrl+K` | Cycle model down/up; move down/up in selectors |
-| `Ctrl+H` / `Ctrl+L` | Decrease/increase thinking level |
-| `Ctrl+Shift+L` | Open model selector |
-| `Ctrl+Shift+G` | Open Neovim reference picker |
-| `Ctrl+G` | Open external editor |
-| `Ctrl+D` | Exit |
+| `Ctrl+H` / `Ctrl+L` | Decrease/increase thinking level               |
+| `Ctrl+Shift+L`      | Open model selector                            |
+| `Ctrl+Shift+G`      | Open Neovim reference picker                   |
+| `Ctrl+G`            | Open external editor                           |
+| `Ctrl+D`            | Exit                                           |
 
 tmux passes modifier keys correctly thanks to `set -g extended-keys on` + `csi-u` in `tmux/tmux.conf`. Inside Ghostty / Kitty / iTerm2 the Kitty keyboard protocol handles this natively.
 
 #### Pi slash commands
 
-| Command | Purpose |
-|---------|---------|
-| `/plan` | Toggle plan mode (alternative to Shift+Tab / Ctrl+Alt+P) |
-| `/todos` | Show plan progress (steps + completion state) |
-| `/model` | Open model selector |
-| `/nvim` / `/nvim-ref` | Open Neovim in the current project and append file/range/code references to the prompt |
-| `/login` | Authenticate a provider |
-| `/reload` | Reload extensions, keybindings, and context files |
-| `/skill:<name>` | Invoke a skill from `pi/skills/` |
-| `/export <file>` | Write the session as HTML |
-| `/share` | Upload session as a private GitHub gist |
-| `/session`, `/new`, `/fork`, `/resume`, `/tree` | Session management |
+| Command                                         | Purpose                                                                                |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `/plan`                                         | Toggle plan mode (alternative to Shift+Tab / Ctrl+Alt+P)                               |
+| `/todos`                                        | Show plan progress (steps + completion state)                                          |
+| `/model`                                        | Open model selector                                                                    |
+| `/nvim` / `/nvim-ref`                           | Open Neovim in the current project and append file/range/code references to the prompt |
+| `/login`                                        | Authenticate a provider                                                                |
+| `/reload`                                       | Reload extensions, keybindings, and context files                                      |
+| `/skill:<name>`                                 | Invoke a skill from `pi/skills/`                                                       |
+| `/export <file>`                                | Write the session as HTML                                                              |
+| `/share`                                        | Upload session as a private GitHub gist                                                |
+| `/session`, `/new`, `/fork`, `/resume`, `/tree` | Session management                                                                     |
 
 #### Extensions
 
 All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 
-| Extension | Purpose |
-|-----------|---------|
-| `plan-mode/` | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab` or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
-| `vim-model-thinking.ts` | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level. |
-| `nvim-ref.ts` | `/nvim` or `Ctrl+Shift+G` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code. |
-| `questionnaire.ts` | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode. |
-| `inline-bash.ts` | Expands `!{command}` patterns inside user prompts before they reach the agent. Example: `current branch is !{git branch --show-current}`. Whole-line `!command` syntax is preserved. |
-| `auto-commit-on-exit.ts` | On Pi shutdown inside a git repo with uncommitted changes, prompts the user to auto-commit using the last assistant message as the subject. Skipped silently in non-interactive sessions. |
+| Extension                | Purpose                                                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plan-mode/`             | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab` or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
+| `vim-model-thinking.ts`  | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level.                                                                                                                 |
+| `nvim-ref.ts`            | `/nvim` or `Ctrl+Shift+G` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code.                 |
+| `questionnaire.ts`       | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode.                                                                    |
+| `inline-bash.ts`         | Expands `!{command}` patterns inside user prompts before they reach the agent. Example: `current branch is !{git branch --show-current}`. Whole-line `!command` syntax is preserved.                    |
+| `auto-commit-on-exit.ts` | On Pi shutdown inside a git repo with uncommitted changes, prompts the user to auto-commit using the last assistant message as the subject. Skipped silently in non-interactive sessions.               |
 
 #### Plan mode behavior
 
@@ -308,6 +308,7 @@ home-manager switch --flake .
 ```
 
 In Neovim:
+
 ```vim
 :Lazy sync
 :MasonUpdate
