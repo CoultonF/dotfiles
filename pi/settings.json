@@ -22,6 +22,7 @@
     "npm:@ollama/pi-web-search",
     "npm:pi-lens",
     "npm:pi-docparser",
-    "npm:@kaiserlich-dev/pi-session-search"
+    "npm:@kaiserlich-dev/pi-session-search",
+    "npm:pi-mermaid"
   ]
 }
