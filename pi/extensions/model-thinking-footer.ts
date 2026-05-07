@@ -1,5 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
+import { truncateToWidth } from "@mariozechner/pi-tui";
 
 function installFooter(pi: ExtensionAPI, ctx: ExtensionContext) {
 	if (!ctx.hasUI) return;
@@ -8,14 +8,13 @@ function installFooter(pi: ExtensionAPI, ctx: ExtensionContext) {
 		dispose: footerData.onBranchChange(() => _tui.requestRender()),
 		invalidate() {},
 		render(width: number): string[] {
-			const statuses = Array.from(footerData.getExtensionStatuses().values()).filter(Boolean).join("  ");
+			const statuses = Array.from(footerData.getExtensionStatuses().values()).filter(Boolean);
 			const model = ctx.model?.id ?? "no-model";
 			const thinking = pi.getThinkingLevel();
-			const right = theme.fg("dim", `${model} ${thinking}`);
-			const left = statuses || theme.fg("dim", footerData.getGitBranch() ?? "no git");
-			const pad = " ".repeat(Math.max(1, width - visibleWidth(left) - visibleWidth(right)));
+			const modelStatus = `${theme.fg("accent", model)} ${theme.fg("warning", thinking)}`;
+			const line = [...statuses, modelStatus].join("  ");
 
-			return [truncateToWidth(left + pad + right, width)];
+			return [truncateToWidth(line, width)];
 		},
 	}));
 }
