@@ -378,6 +378,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/skills";
   home.file.".pi/agent/extensions".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/extensions";
+  home.file.".pi/agent/themes".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/themes";
 
   # ============================================================================
   # Environment

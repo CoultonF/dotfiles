@@ -164,6 +164,7 @@ Pi is installed from `@mariozechner/pi-coding-agent` using Bun. The dotfiles rep
 | `pi/mcp.json`         | MCP server scaffold (empty until populated)                    |
 | `pi/skills/`          | Drop-in `SKILL.md` skills, auto-discovered                     |
 | `pi/extensions/`      | TypeScript extensions, auto-loaded                             |
+| `pi/themes/`          | Custom Pi themes, auto-discovered                              |
 
 On first run, open `pi` and use `/login` to authenticate a provider.
 
