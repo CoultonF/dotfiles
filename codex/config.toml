@@ -10,6 +10,12 @@ trust_level = "trusted"
 [projects."/home/vscode/dotfiles"]
 trust_level = "trusted"
 
+[projects."/Users/cfraser/Repos/rcom-work"]
+trust_level = "trusted"
+
+[projects."/Users/cfraser/Repos/rcom"]
+trust_level = "trusted"
+
 [plugins."github@openai-curated"]
 enabled = true
 
