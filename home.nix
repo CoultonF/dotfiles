@@ -171,6 +171,10 @@ in
       export BUN_INSTALL="$HOME/.bun"
       export PATH="$BUN_INSTALL/bin:$PATH"
       [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+      # npm global installs must not target the immutable Nix node prefix.
+      export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+      export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
       
       # Google Chrome alias (macOS)
       if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -381,12 +385,18 @@ in
   home.file.".pi/agent/themes".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/themes";
 
+  # Keep npm global installs out of the immutable Nix store.
+  home.file.".npmrc".text = ''
+    prefix=${homeDirectory}/.npm-global
+  '';
+
   # ============================================================================
   # Environment
   # ============================================================================
   # Note: tmux-sessionizer is already in ~/.dotfiles/bin/ which is added to PATH
   home.sessionPath = [
     "$HOME/.bun/bin"
+    "$HOME/.npm-global/bin"
     "$HOME/.dotfiles/bin"
     "$HOME/.local/bin"
   ];

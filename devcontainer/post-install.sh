@@ -87,6 +87,14 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 mkdir -p "$BUN_INSTALL/bin"
 append_line_if_missing 'export PATH="$HOME/.bun/bin:$PATH"' ~/.bashrc
 
+# npm global installs must use a writable prefix; Nix's node prefix is immutable.
+export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+mkdir -p "$NPM_CONFIG_PREFIX/bin"
+printf 'prefix=%s\n' "$NPM_CONFIG_PREFIX" > "$HOME/.npmrc"
+append_line_if_missing 'export NPM_CONFIG_PREFIX="$HOME/.npm-global"' ~/.bashrc
+append_line_if_missing 'export PATH="$HOME/.npm-global/bin:$PATH"' ~/.bashrc
+
 install_bun_global() {
     local pkg="$1"
     local bin="$2"

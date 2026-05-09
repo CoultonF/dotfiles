@@ -11,7 +11,7 @@
     "enabled": true,
     "maxRetries": 3
   },
-  "lastChangelogVersion": "0.73.0",
+  "lastChangelogVersion": "0.74.0",
   "enabledModels": [
     "openai-codex/gpt-5.5",
     "openai-codex/gpt-5.4",
