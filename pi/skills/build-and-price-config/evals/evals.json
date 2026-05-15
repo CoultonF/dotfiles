@@ -1,0 +1,23 @@
+{
+  "skill_name": "build-and-price-config",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "In Build and Price, replace 050-0398 with 050-0500 anywhere 050-0398 is used as a pump-top option on the published preview. Generate the SQL file only; I will run it manually.",
+      "expected_output": "Creates a /tmp/build-and-price-edit-*.sql file with mcp-postgres inspection assumptions, latest-revision part lookup CTEs for both part numbers, pre-check SELECTs, transactional UPDATE statements for relevant B&P item rows, post-check SELECTs, commented COMMIT, and active ROLLBACK.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add rod parts 050-1120, 050-1121, and 050-1122 to the published Build and Price config for all EGAS 82 pump tops. If there is already a sensible pump top group, reuse it; otherwise create one. Write the SQL to /tmp for review.",
+      "expected_output": "Inspects current EGAS 82 pump tops, existing pump-top groups, build_rod rows, and build_pump_top_group_rod rows through mcp-postgres, resolves rod parts to latest revisions, chooses group applicability when appropriate, and writes transactional SQL with guarded inserts and verification queries.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Make pump-top option 050-0346 available for pump top 050-2200 only in Build and Price. This is a one-off, so don't create a group unless the existing data clearly shows one should be used. Generate the manual SQL file.",
+      "expected_output": "Uses mcp-postgres to inspect the relevant pump top, option part, existing build_pump_top_option row, and current applicability patterns; resolves latest revisions; prefers direct applies_to='pump_top'; writes /tmp SQL with pre-checks, guarded inserts into item/applicability tables, post-checks, commented COMMIT, and active ROLLBACK.",
+      "files": []
+    }
+  ]
+}

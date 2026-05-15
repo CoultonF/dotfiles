@@ -1,0 +1,23 @@
+{
+  "skill_name": "github-start",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "GitHub start. Add a Build and Price button that lets dealers create a quote from the current configuration. Parent feature is #2481.",
+      "expected_output": "Prompts only for missing/ambiguous information if needed, creates a GitHub User Story issue linked to parent #2481, adds it to IJACK Roadmap with defaults, creates a local branch named like ####-add-build-and-price-quote-button, and checks it out without pushing.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "start github issue for fixing the admin login redirect after session timeout.",
+      "expected_output": "Because no parent is provided, searches open Feature issues with label:\"📍 Feature\" -status:Done, asks the user to choose a parent or confirm none, then creates the GitHub User Story issue, adds it to IJACK Roadmap with defaults, creates a four-digit issue-number-prefixed branch from the generated title, and checks it out without pushing.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "github start: users need to be able to export the quote preview as a PDF, parent https://github.com/ijack-technologies/ijack/issues/3102",
+      "expected_output": "Extracts parent issue 3102 from the URL, creates a user story for PDF export, links it as a sub-issue, adds project fields, creates and checks out the matching four-digit issue branch.",
+      "files": []
+    }
+  ]
+}
