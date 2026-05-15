@@ -67,9 +67,6 @@ Build a Markdown issue body using this shape:
 ## Details
 <the user's original description, cleaned up into clear acceptance-oriented notes when helpful>
 
----
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
 ```
 
 If the user confirms no parent after the feature search, omit the `Parent Feature` line.
