@@ -48,8 +48,9 @@ That's it. Everything is installed and configured.
 │   ├── APPEND_SYSTEM.md   # System prompt extension (operator preferences)
 │   ├── keybindings.json   # Pi keybinding overrides
 │   ├── mcp.json           # MCP server scaffold
+│   ├── plannotator.json   # Plannotator plan-mode phase/tool overrides
 │   ├── skills/            # SKILL.md skills (auto-discovered)
-│   └── extensions/        # TypeScript extensions (plan-mode/, questionnaire, inline-bash, auto-commit-on-exit)
+│   └── extensions/        # TypeScript extensions (questionnaire, inline-bash, auto-commit-on-exit)
 ├── tmux/
 │   └── tmux.conf          # tmux keybindings and theme
 ├── nvim/
@@ -203,7 +204,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 
 | Extension                | Purpose                                                                                                                                                                                                 |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plan-mode/`             | Upstream plan mode — read-only tool gate, bash allowlist, `Plan:` extraction, `[DONE:n]` step tracking, status widget. Toggle with `Shift+Tab` or `/plan`. Adds `--plan` CLI flag and `/todos` command. |
+| `@plannotator/pi-extension` | Package-provided plan mode — browser plan review, markdown plan files, phase-specific tool overrides, and `[DONE:n]` execution progress. Toggle with `Ctrl+Alt+P` or `/plannotator`; `--plan` starts in planning mode. |
 | `vim-model-thinking.ts`  | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level.                                                                                                                 |
 | `nvim-ref.ts`            | `/nvim` or `Ctrl+Shift+G` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code.                 |
 | `questionnaire.ts`       | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode.                                                                    |
@@ -212,7 +213,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 
 #### Plan mode behavior
 
-- **In plan mode**: tools restricted to `read`, `bash` (read-only allowlist), `grep`, `find`, `ls`, `questionnaire`, `todo`. Bash commands like `rm`, `mv`, `git commit`, `npm install`, etc. are blocked. The agent is instructed to output `Proposed file references`, `Data schema references`, and a concrete numbered `Plan:` with specific actions instead of generic steps.
+- **In plan mode**: Plannotator keeps the current tools and adds planning tools from `pi/plannotator.json`, including `bash`, `mcp`, TanStack intent tools when present, and `plannotator_submit_plan`. Bash is for read-only exploration, including safe `bun`, `bunx`, and MCP CLI calls; destructive commands like `rm`, `git push`, `npm install`, `bun install`, and `bun add` remain off-limits.
 - **On exit from plan mode**: a select dialog offers Execute / Stay / Refine. Executing flips Pi to full tool access and tracks step completion via `[DONE:n]` tags from the agent.
 - **State persists** across `/reload` and session resumes. The status line shows `⏸ plan` while planning and `📋 n/m` during execution.
 

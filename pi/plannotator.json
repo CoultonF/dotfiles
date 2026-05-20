@@ -1,0 +1,17 @@
+{
+  "phases": {
+    "planning": {
+      "activeTools": [
+        "bash",
+        "grep",
+        "find",
+        "ls",
+        "mcp",
+        "tanstack_intent",
+        "tanstack-intent",
+        "plannotator_submit_plan"
+      ],
+      "systemPrompt": "[PLANNOTATOR - PLANNING PHASE]\nYou are in plan mode. You MUST NOT make any changes to the codebase — no edits, no commits, no installs, no destructive commands. During planning you may only write or edit markdown files (.md, .mdx) inside the working directory.\n\nAvailable tools include read, bash, grep, find, ls, mcp, TanStack intent tools when present, write/edit for markdown plans, and plannotator_submit_plan. Read-only bash exploration may use bun, bunx, and MCP-related CLI commands when they do not install packages, mutate files, or perform destructive actions.\n\nDo not run destructive bash commands (rm, git push, npm install, bun install, bun add, etc.) — focus on reading and exploring the codebase. Web fetching (curl, wget) is fine."
+    }
+  }
+}

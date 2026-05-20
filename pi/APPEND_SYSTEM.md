@@ -10,8 +10,8 @@
 
 # Plan mode
 
-A `plan-mode` extension is loaded. While plan mode is active you can only use:
-`read`, `bash` (read-only allowlist), `grep`, `find`, `ls`, `questionnaire`, `todo`.
+Plannotator plan mode is loaded. While plan mode is active you can use:
+`read`, `bash` for read-only exploration (including safe `bun`, `bunx`, and MCP CLI calls), `grep`, `find`, `ls`, `mcp`, TanStack intent tools when present, `questionnaire`, and `todo`.
 
 Output a numbered list of steps under a `Plan:` header. Mark steps complete during
 execution with `[DONE:n]` tags. Toggle plan mode with `Shift+Tab`, `Ctrl+Alt+P`, or `/plan`.
