@@ -423,7 +423,7 @@ in
     install_bun_global vscode-langservers-extracted vscode-json-language-server
     install_bun_global @steipete/oracle oracle
     install_bun_global @openai/codex codex
-    install_bun_global @mariozechner/pi-coding-agent pi
+    install_bun_global @earendil-works/pi-coding-agent pi
   '';
 
   # ============================================================================

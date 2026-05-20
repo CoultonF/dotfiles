@@ -11,7 +11,7 @@
     "enabled": true,
     "maxRetries": 3
   },
-  "lastChangelogVersion": "0.74.0",
+  "lastChangelogVersion": "0.75.4",
   "enabledModels": [
     "openai-codex/gpt-5.5",
     "openai-codex/gpt-5.4",
@@ -23,7 +23,9 @@
     "npm:pi-docparser",
     "npm:@kaiserlich-dev/pi-session-search",
     "npm:pi-mermaid",
-    "npm:@ifi/oh-pi-themes"
+    "npm:@ifi/oh-pi-themes",
+    "npm:context-mode",
+    "npm:pi-subagents"
   ],
   "quietStartup": true
 }

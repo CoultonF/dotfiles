@@ -154,7 +154,7 @@ On first run, open `opencode` and use `/connect` to authenticate a provider.
 
 ### Pi
 
-Pi is installed from `@mariozechner/pi-coding-agent` using Bun. The dotfiles repo manages everything Pi auto-discovers under `~/.pi/agent/` via out-of-store symlinks, so edits in `pi/` apply live (run `/reload` inside Pi to pick them up without restarting).
+Pi is installed from `@earendil-works/pi-coding-agent` using Bun. The dotfiles repo manages everything Pi auto-discovers under `~/.pi/agent/` via out-of-store symlinks, so edits in `pi/` apply live (run `/reload` inside Pi to pick them up without restarting).
 
 | Path                  | Purpose                                                        |
 | --------------------- | -------------------------------------------------------------- |

@@ -81,6 +81,7 @@ const SAFE_PATTERNS = [
 	/^\s*git\s+ls-/i,
 	/^\s*npm\s+(list|ls|view|info|search|outdated|audit)/i,
 	/^\s*yarn\s+(list|info|why|audit)/i,
+	/^\s*bunx\s+@tanstack\/intent(?:@[^\s]+)?\s+(list|search|show|info)\b/i,
 	/^\s*node\s+--version/i,
 	/^\s*python\s+--version/i,
 	/^\s*curl\s/i,

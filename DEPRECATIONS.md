@@ -1,6 +1,6 @@
 # Pi package deprecation warnings
 
-Current `pi install npm:...` warnings are from third-party package dependency trees, not this dotfiles repo.
+Current `pi install npm:...` warnings are from third-party package dependency trees, not this dotfiles repo. The dotfiles runtime install now uses `@earendil-works/pi-coding-agent`.
 
 ## Warnings observed
 

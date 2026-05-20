@@ -5,12 +5,12 @@
  * Toggle with `/plan` or `Shift+Tab`.
  */
 
-import type { AgentMessage } from "@mariozechner/pi-agent-core";
-import type { AssistantMessage, TextContent } from "@mariozechner/pi-ai";
+import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import type { AssistantMessage, TextContent } from "@earendil-works/pi-ai";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import {
 	extractTodoItems,
@@ -19,13 +19,14 @@ import {
 	type TodoItem,
 } from "./utils.js";
 
-// Tools — questionnaire and todo are intentionally allowed in plan mode
+// Tools — questionnaire, todo, and MCP discovery/query access are intentionally allowed in plan mode
 const PLAN_MODE_TOOLS = [
 	"read",
 	"bash",
 	"grep",
 	"find",
 	"ls",
+	"mcp",
 	"questionnaire",
 	"todo",
 ];

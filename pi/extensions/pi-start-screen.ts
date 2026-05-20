@@ -2,9 +2,9 @@ import type {
 	ExtensionAPI,
 	ExtensionContext,
 	Theme,
-} from "@mariozechner/pi-coding-agent";
-import { VERSION } from "@mariozechner/pi-coding-agent";
-import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
+} from "@earendil-works/pi-coding-agent";
+import { VERSION } from "@earendil-works/pi-coding-agent";
+import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 
 const LOGO_BITMAP = [
 	[1, 1, 1, 0],
