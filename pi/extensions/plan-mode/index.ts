@@ -30,7 +30,7 @@ const PLAN_MODE_TOOLS = [
 	"questionnaire",
 	"todo",
 ];
-const NORMAL_MODE_TOOLS = ["read", "bash", "edit", "write"];
+const NORMAL_MODE_TOOLS = ["read", "bash", "edit", "write", "plan_progress"];
 
 function isAssistantMessage(m: AgentMessage): m is AssistantMessage {
 	return m.role === "assistant" && Array.isArray(m.content);
