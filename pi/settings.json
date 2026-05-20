@@ -25,7 +25,8 @@
     "npm:pi-mermaid",
     "npm:@ifi/oh-pi-themes",
     "npm:context-mode",
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:@plannotator/pi-extension"
   ],
   "quietStartup": true
 }
