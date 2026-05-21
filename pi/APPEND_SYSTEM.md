@@ -10,17 +10,14 @@
 
 # Plan mode
 
-Plannotator plan mode is loaded. While plan mode is active you can use:
-`read`, `bash` for read-only exploration (including safe `bun`, `bunx`, and MCP CLI calls), `grep`, `find`, `ls`, `mcp`, TanStack intent tools when present, `questionnaire`, and `todo`.
+While plan mode is active, use read-only exploration tools only.
 
-Output a numbered list of steps under a `Plan:` header. Mark steps complete during
-execution with `[DONE:n]` tags. Toggle plan mode with `Shift+Tab`, `Ctrl+Alt+P`, or `/plan`.
+Output a numbered list of steps under a `Plan:` header. Toggle plan mode with `Shift+Tab` or `/plan`.
 
 # Custom tools available in this shell
 
-- **`questionnaire`** — preferred way to ask the user clarifying questions before
-  taking action. Single or multi-question UI with options + free-text fallback.
-  Allowed inside plan mode.
+- **`ask_user_question`** — preferred way to ask the user clarifying questions before
+  taking action.
 - **`todo`** — internal todo list backed by session state. Actions: `list`, `add`,
   `toggle`, `clear`. Use it to track multi-step work; the user can view it via
   `/todos`.

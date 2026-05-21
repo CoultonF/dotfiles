@@ -148,7 +148,6 @@ if [ -d "$DOTFILES_DIR" ]; then
     cp "$DOTFILES_DIR/pi/APPEND_SYSTEM.md" ~/.pi/agent/APPEND_SYSTEM.md
     cp "$DOTFILES_DIR/pi/keybindings.json" ~/.pi/agent/keybindings.json
     cp "$DOTFILES_DIR/pi/mcp.json" ~/.pi/agent/mcp.json
-    cp "$DOTFILES_DIR/pi/plannotator.json" ~/.pi/agent/plannotator.json
     cp -r "$DOTFILES_DIR/pi/skills/." ~/.pi/agent/skills/ 2>/dev/null || true
     cp -r "$DOTFILES_DIR/pi/extensions/." ~/.pi/agent/extensions/ 2>/dev/null || true
     

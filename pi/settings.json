@@ -26,7 +26,9 @@
     "npm:@ifi/oh-pi-themes",
     "npm:context-mode",
     "npm:pi-subagents",
-    "npm:@plannotator/pi-extension"
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:@juicesharp/rpiv-todo",
+    "npm:pi-lens"
   ],
   "quietStartup": true
 }

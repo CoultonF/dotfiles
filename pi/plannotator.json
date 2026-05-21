@@ -1,9 +1,0 @@
-{
-  "phases": {
-    "planning": {
-      "activeTools": ["grep", "find", "ls", "plannotator_submit_plan"],
-      "statusLabel": "⏸ plan",
-      "systemPrompt": null
-    }
-  }
-}

@@ -48,9 +48,8 @@ That's it. Everything is installed and configured.
 │   ├── APPEND_SYSTEM.md   # System prompt extension (operator preferences)
 │   ├── keybindings.json   # Pi keybinding overrides
 │   ├── mcp.json           # MCP server scaffold
-│   ├── plannotator.json   # Plannotator plan-mode phase/tool overrides
 │   ├── skills/            # SKILL.md skills (auto-discovered)
-│   └── extensions/        # TypeScript extensions (questionnaire, inline-bash, auto-commit-on-exit)
+│   └── extensions/        # TypeScript extensions (inline-bash, auto-commit-on-exit)
 ├── tmux/
 │   └── tmux.conf          # tmux keybindings and theme
 ├── nvim/
@@ -187,7 +186,7 @@ tmux passes modifier keys correctly thanks to `set -g extended-keys on` + `csi-u
 
 | Command                                         | Purpose                                                                                |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `/plan`                                         | Toggle plan mode (alternative to Shift+Tab / Ctrl+Alt+P)                               |
+| `/plan`                                         | Toggle plan mode (alternative to Shift+Tab)                                            |
 | `/todos`                                        | Show plan progress (steps + completion state)                                          |
 | `/model`                                        | Open model selector                                                                    |
 | `/nvim` / `/nvim-ref`                           | Open Neovim in the current project and append file/range/code references to the prompt |
@@ -202,20 +201,18 @@ tmux passes modifier keys correctly thanks to `set -g extended-keys on` + `csi-u
 
 All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 
-| Extension                | Purpose                                                                                                                                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@plannotator/pi-extension` | Package-provided plan mode — browser plan review, markdown plan files, phase-specific tool overrides, and `[DONE:n]` execution progress. Toggle with `Ctrl+Alt+P` or `/plannotator`; `--plan` starts in planning mode. |
-| `vim-model-thinking.ts`  | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level.                                                                                                                 |
-| `nvim-ref.ts`            | `/nvim` or `Ctrl+Shift+G` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code.                 |
-| `questionnaire.ts`       | Tool the LLM can call to ask the user single or multi-question prompts (with options + free-text). Stays available inside plan mode.                                                                    |
-| `inline-bash.ts`         | Expands `!{command}` patterns inside user prompts before they reach the agent. Example: `current branch is !{git branch --show-current}`. Whole-line `!command` syntax is preserved.                    |
-| `auto-commit-on-exit.ts` | On Pi shutdown inside a git repo with uncommitted changes, prompts the user to auto-commit using the last assistant message as the subject. Skipped silently in non-interactive sessions.               |
-
-#### Plan mode behavior
-
-- **In plan mode**: Plannotator keeps the current tools and adds planning tools from `pi/plannotator.json`, including `bash`, `mcp`, TanStack intent tools when present, and `plannotator_submit_plan`. Bash is for read-only exploration, including safe `bun`, `bunx`, and MCP CLI calls; destructive commands like `rm`, `git push`, `npm install`, `bun install`, and `bun add` remain off-limits.
-- **On exit from plan mode**: a select dialog offers Execute / Stay / Refine. Executing flips Pi to full tool access and tracks step completion via `[DONE:n]` tags from the agent.
-- **State persists** across `/reload` and session resumes. The status line shows `⏸ plan` while planning and `📋 n/m` during execution.
+| Extension                    | Purpose                                                                                                                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto-commit-on-exit.ts`     | On Pi shutdown inside a git repo with uncommitted changes, prompts the user to auto-commit using the last assistant message as the subject.                                             |
+| `clear.ts`                   | Adds a clear command for resetting the visible conversation.                                                                                                                            |
+| `codex-ui.ts`                | Codex-oriented UI adjustments.                                                                                                                                                          |
+| `file-changes.ts`            | Adds file-change command support.                                                                                                                                                       |
+| `git-status.ts`              | Shows git status information in the UI.                                                                                                                                                 |
+| `inline-bash.ts`             | Expands `!{command}` patterns inside user prompts before they reach the agent. Example: `current branch is !{git branch --show-current}`. Whole-line `!command` syntax is preserved.    |
+| `model-thinking-footer.ts`   | Displays model thinking information in the footer.                                                                                                                                      |
+| `nvim-ref.ts`                | `/nvim` or `Ctrl+Shift+G` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code. |
+| `pi-start-screen.ts`         | Customizes Pi's start screen.                                                                                                                                                           |
+| `vim-model-thinking.ts`      | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level.                                                                                                  |
 
 #### Adding a skill
 

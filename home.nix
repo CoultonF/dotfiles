@@ -381,8 +381,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/keybindings.json";
   home.file.".pi/agent/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/mcp.json";
-  home.file.".pi/agent/plannotator.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/plannotator.json";
   home.file.".pi/agent/skills".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/skills";
   home.file.".pi/agent/extensions".source =
