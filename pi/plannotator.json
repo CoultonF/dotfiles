@@ -1,16 +1,9 @@
 {
   "phases": {
     "planning": {
-      "activeTools": [
-        "bash",
-        "grep",
-        "find",
-        "ls",
-        "mcp",
-        "tanstack_intent",
-        "tanstack-intent"
-      ],
-      "systemPrompt": "[PLANNOTATOR - PLANNING PHASE]\nYou are in plan mode. You MUST NOT make any changes to the codebase — no edits, no commits, no installs, no destructive commands. During planning you may only write or edit markdown files (.md, .mdx) inside the working directory.\n\nAvailable tools include read, bash, grep, find, ls, mcp, and TanStack intent tools when present. Read-only bash exploration may use bun, bunx, and MCP-related CLI commands when they do not install packages, mutate files, or perform destructive actions.\n\nWhen the plan is ready, write or update PLAN.md in the working directory, then stop and ask the user to review it in nvim. Do not call plannotator_submit_plan or any browser-review tool. Wait for the user to either approve the plan for implementation or request specific changes. If the user requests changes, update PLAN.md and ask for review again. Only proceed to implementation after explicit approval.\n\nDo not run destructive bash commands (rm, git push, npm install, bun install, bun add, etc.) — focus on reading and exploring the codebase. Web fetching (curl, wget) is fine."
+      "activeTools": ["grep", "find", "ls", "plannotator_submit_plan"],
+      "statusLabel": "⏸ plan",
+      "systemPrompt": null
     }
   }
 }
