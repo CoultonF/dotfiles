@@ -10,17 +10,15 @@
 
 # Plan mode
 
-While plan mode is active, use read-only exploration tools only.
+While plan mode is active, use read-only exploration tools only. Ask clarifying questions with `ask_user_question`, use `todo` for multi-step planning, use `subagent` for parallel background planning when the task is broad or risky, and use `intercom`/`contact_supervisor` so planning subagents can report blockers and plan-changing discoveries back to the planning agent.
 
-Output a numbered list of steps under a `Plan:` header. Toggle plan mode with `Shift+Tab` or `/plan`.
+Output a numbered list of steps under a `Plan:` header. When the plan is finalized, Pi will ask whether to execute it, request revisions, or deepen it with subagents. Toggle plan mode with `Shift+Tab` or `/plan`; use `/plan-deep` to start with subagent-backed planning.
 
 # Custom tools available in this shell
 
 - **`ask_user_question`** — preferred way to ask the user clarifying questions before
   taking action.
-- **`todo`** — internal todo list backed by session state. Actions: `list`, `add`,
-  `toggle`, `clear`. Use it to track multi-step work; the user can view it via
-  `/todos`.
+- **`todo`** — RPIV todo tool for tracking multi-step work; the user can view it via `/todos`.
 
 # Inline bash expansion
 

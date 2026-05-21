@@ -172,7 +172,7 @@ On first run, open `pi` and use `/login` to authenticate a provider.
 
 | Key                 | Action                                         |
 | ------------------- | ---------------------------------------------- |
-| `Shift+Tab`         | Toggle plan / YOLO mode (custom extension)     |
+| `Shift+Tab`         | Toggle plan mode (custom extension)            |
 | `Ctrl+J` / `Ctrl+K` | Cycle model down/up; move down/up in selectors |
 | `Ctrl+H` / `Ctrl+L` | Decrease/increase thinking level               |
 | `Ctrl+Shift+L`      | Open model selector                            |
@@ -187,6 +187,7 @@ tmux passes modifier keys correctly thanks to `set -g extended-keys on` + `csi-u
 | Command                                         | Purpose                                                                                |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `/plan`                                         | Toggle plan mode (alternative to Shift+Tab)                                            |
+| `/plan-deep`                                    | Enable plan mode and ask subagents for background planning                             |
 | `/todos`                                        | Show plan progress (steps + completion state)                                          |
 | `/model`                                        | Open model selector                                                                    |
 | `/nvim` / `/nvim-ref`                           | Open Neovim in the current project and append file/range/code references to the prompt |
@@ -212,6 +213,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 | `model-thinking-footer.ts`   | Displays model thinking information in the footer.                                                                                                                                      |
 | `nvim-ref.ts`                | `/nvim` or `Ctrl+Shift+G` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code. |
 | `pi-start-screen.ts`         | Customizes Pi's start screen.                                                                                                                                                           |
+| `plan-mode.ts`               | Shift+Tab and `/plan` read-only planning mode with execute/revise/deepen approval, subagent-backed deep planning, intercom supervisor updates, RPIV `ask_user_question`/`todo`, and pi-lens tools. |
 | `vim-model-thinking.ts`      | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level.                                                                                                  |
 
 #### Adding a skill
