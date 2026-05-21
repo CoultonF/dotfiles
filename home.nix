@@ -130,12 +130,13 @@ in
       OPENCODE_DISABLE_CLAUDE_CODE = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_PROMPT = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_SKILLS = "1";
-      PLANNOTATOR_REMOTE = "1";
-      PLANNOTATOR_PORT = "19432";
     };
 
     # Environment setup in .zshenv (runs for all shells including non-interactive)
     envExtra = ''
+      export PLANNOTATOR_REMOTE="1"
+      export PLANNOTATOR_PORT="5174"
+
       # Source Nix profile (supports both single-user and multi-user installations)
       # Unset guard variable so nix-daemon.sh re-adds nix to PATH for this shell.
       # The parent process (e.g. bash in devcontainers) may have already sourced it,
