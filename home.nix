@@ -427,7 +427,7 @@ in
   # ============================================================================
   home.activation.bunGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     export BUN_INSTALL="${homeDirectory}/.bun"
-    export PATH="${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:${homeDirectory}/.bun/bin:$PATH"
+    export PATH="${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:${pkgs.unzip}/bin:${homeDirectory}/.bun/bin:$PATH"
     mkdir -p "${homeDirectory}/.bun/bin"
 
     install_bun_global() {

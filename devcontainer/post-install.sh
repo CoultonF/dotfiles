@@ -97,7 +97,7 @@ echo "Dev tools installed"
 
 # Install bun-managed CLIs from the npm registry
 export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$BUN_INSTALL/bin:$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
 mkdir -p "$BUN_INSTALL/bin"
 append_line_if_missing 'export PATH="$HOME/.bun/bin:$PATH"' ~/.bashrc
 
