@@ -216,27 +216,54 @@ if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 	success "Claude Code hooks applied"
 fi
 
-# Set zsh as default shell
-# Install zsh system-wide so SSH sessions can find it without nix profile resolution
-if ! command -v /usr/bin/zsh &>/dev/null; then
+# Set zsh as default shell.
+# Use a system-owned zsh path for login shells. Nix profile paths are generation
+# symlinks and can disappear after profile changes, which leaves new terminals
+# unable to start (for example: /home/vscode/.nix-profile/bin/zsh).
+SHELL_FIX_COMMAND=""
+case "$(uname -s)" in
+Darwin)
+	ZSH_PATH="/bin/zsh"
+	SHELL_FIX_COMMAND="sudo chsh -s /bin/zsh $USER"
+	;;
+Linux)
+	ZSH_PATH="/usr/bin/zsh"
+	SHELL_FIX_COMMAND="sudo usermod -s /usr/bin/zsh $USER"
+	;;
+*) ZSH_PATH="" ;;
+esac
+
+if [ "$(uname -s)" = "Linux" ] && [ -n "$ZSH_PATH" ] && [ ! -x "$ZSH_PATH" ] && command -v apt-get &>/dev/null; then
 	info "Installing zsh system-wide..."
-	sudo apt-get update -qq && sudo apt-get install -y -qq zsh >/dev/null 2>&1 || true
+	sudo apt-get update -qq && sudo apt-get install -y -qq zsh >/dev/null || true
 fi
-ZSH_PATH=$(command -v zsh 2>/dev/null || echo "/usr/bin/zsh")
-if [ -x "$ZSH_PATH" ]; then
-	CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+
+if [ -n "$ZSH_PATH" ] && [ -x "$ZSH_PATH" ]; then
+	CURRENT_SHELL="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7 || true)"
+	if [ -z "$CURRENT_SHELL" ]; then
+		CURRENT_SHELL="${SHELL:-}"
+	fi
 	if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
 		info "Setting zsh as default shell..."
-		if ! grep -q "$ZSH_PATH" /etc/shells 2>/dev/null; then
-			echo "$ZSH_PATH" | sudo tee -a /etc/shells >/dev/null 2>/dev/null || true
+		if ! grep -q "^$ZSH_PATH$" /etc/shells 2>/dev/null; then
+			echo "$ZSH_PATH" | sudo tee -a /etc/shells >/dev/null || true
 		fi
+		SHELL_CHANGED=0
 		if command -v chsh &>/dev/null; then
-			sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
-		else
-			sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
+			if sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || { command -v usermod &>/dev/null && sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null; }; then
+				SHELL_CHANGED=1
+			fi
+		elif command -v usermod &>/dev/null && sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null; then
+			SHELL_CHANGED=1
 		fi
-		success "Default shell set to zsh"
+		if [ "$SHELL_CHANGED" -eq 1 ]; then
+			success "Default shell set to $ZSH_PATH"
+		else
+			info "Could not change default shell automatically; run: $SHELL_FIX_COMMAND"
+		fi
 	fi
+else
+	info "System zsh not found; leaving default shell unchanged"
 fi
 
 echo ""
