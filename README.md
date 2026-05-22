@@ -55,7 +55,8 @@ That's it. Everything is installed and configured.
 │       ├── config.yml      # OMP global agent config (via PI_CONFIG_DIR/PI_CODING_AGENT_DIR)
 │       ├── APPEND_SYSTEM.md # OMP global context
 │       ├── keybindings.json # Runtime keybinding fallback
-│       └── extensions/      # OMP extension shortcuts
+│       ├── extensions/      # OMP extension shortcuts
+│       └── tools/           # OMP custom tools
 ├── tmux/
 │   └── tmux.conf          # tmux keybindings and theme
 ├── nvim/
@@ -173,6 +174,7 @@ Pi is installed from `@earendil-works/pi-coding-agent` using Bun. The dotfiles r
 | `omp/agent/APPEND_SYSTEM.md` | OMP global context file |
 | `omp/agent/keybindings.json` | Runtime keybinding fallback for current OMP builds |
 | `omp/agent/extensions/` | OMP extensions |
+| `omp/agent/tools/` | OMP custom tools |
 | `pi/extensions/`      | TypeScript extensions, auto-loaded                             |
 | `pi/themes/`          | Custom Pi themes, auto-discovered                              |
 
@@ -202,11 +204,18 @@ tmux passes modifier keys correctly thanks to `set -g extended-keys on` + `csi-u
 | `/model`                                        | Open model selector                                                                    |
 | `/nvim` / `/nvim-ref`                           | Open Neovim in the current project and append file/range/code references to the prompt |
 | `/login`                                        | Authenticate a provider                                                                |
-| `/reload`                                       | Reload extensions, keybindings, and context files                                      |
+| `/reload-plugins`                              | Reload plugin-discovered skills, commands, hooks, tools, agents, and MCP              |
 | `/skill:<name>`                                 | Invoke a skill from `pi/skills/`                                                       |
 | `/export <file>`                                | Write the session as HTML                                                              |
 | `/share`                                        | Upload session as a private GitHub gist                                                |
 | `/session`, `/new`, `/fork`, `/resume`, `/tree` | Session management                                                                     |
+
+
+#### OMP + TanStack Intent
+
+OMP reads project `AGENTS.md` files from the current directory upward, so repositories can provide TanStack Intent guidance in an `intent-skills` block. TanStack package skills are still loaded with Intent's CLI; they are not mirrored into OMP's native `skills/` directories.
+
+During normal execution, use `bunx @tanstack/intent@latest list` and `bunx @tanstack/intent@latest load <package>#<skill>` when project guidance asks for matching Intent skills. During OMP plan mode, bash is filtered, so raw `bunx` is unavailable while planning. This repo configures the read-only `tanstack_intent` custom tool under `omp/agent/tools/tanstack_intent/` for plan-safe `list` and `load`; mutating Intent commands are not exposed. After adding or changing that tool in a running OMP session, run `/reload-plugins` or restart OMP.
 
 #### Extensions
 
