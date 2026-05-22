@@ -50,6 +50,12 @@ That's it. Everything is installed and configured.
 │   ├── mcp.json           # MCP server scaffold
 │   ├── skills/            # SKILL.md skills (auto-discovered)
 │   └── extensions/        # TypeScript extensions (inline-bash, auto-commit-on-exit)
+├── omp/
+│   └── agent/
+│       ├── config.yml      # OMP global agent config (via PI_CONFIG_DIR/PI_CODING_AGENT_DIR)
+│       ├── APPEND_SYSTEM.md # OMP global context
+│       ├── keybindings.json # Runtime keybinding fallback
+│       └── extensions/      # OMP extension shortcuts
 ├── tmux/
 │   └── tmux.conf          # tmux keybindings and theme
 ├── nvim/
@@ -163,18 +169,22 @@ Pi is installed from `@earendil-works/pi-coding-agent` using Bun. The dotfiles r
 | `pi/keybindings.json` | Key remaps for vim-style model cycling and selector navigation |
 | `pi/mcp.json`         | MCP server scaffold (empty until populated)                    |
 | `pi/skills/`          | Drop-in `SKILL.md` skills, auto-discovered                     |
+| `omp/agent/config.yml` | OMP global config under `PI_CONFIG_DIR`; agent override via `PI_CODING_AGENT_DIR` |
+| `omp/agent/APPEND_SYSTEM.md` | OMP global context file |
+| `omp/agent/keybindings.json` | Runtime keybinding fallback for current OMP builds |
+| `omp/agent/extensions/` | OMP extensions |
 | `pi/extensions/`      | TypeScript extensions, auto-loaded                             |
 | `pi/themes/`          | Custom Pi themes, auto-discovered                              |
 
 On first run, open `pi` and use `/login` to authenticate a provider.
 
-#### Pi keybindings
+#### OMP keybindings
 
 | Key                 | Action                                         |
 | ------------------- | ---------------------------------------------- |
-| `Shift+Tab`         | Toggle plan mode (custom extension)            |
-| `Ctrl+J` / `Ctrl+K` | Cycle model down/up; move down/up in selectors |
-| `Ctrl+H` / `Ctrl+L` | Decrease/increase thinking level               |
+| `Shift+Tab`         | Toggle plan mode                              |
+| `Ctrl+H` / `Ctrl+L` | Cycle model roles backward/forward (`smol` > `default` > `slow`) |
+| `Ctrl+J` / `Ctrl+K` | Move down/up in selectors                      |
 | `Ctrl+Shift+L`      | Open model selector                            |
 | `Ctrl+Shift+G`      | Open Neovim reference picker                   |
 | `Ctrl+G`            | Open external editor                           |
@@ -182,11 +192,11 @@ On first run, open `pi` and use `/login` to authenticate a provider.
 
 tmux passes modifier keys correctly thanks to `set -g extended-keys on` + `csi-u` in `tmux/tmux.conf`. Inside Ghostty / Kitty / iTerm2 the Kitty keyboard protocol handles this natively.
 
-#### Pi slash commands
+#### OMP slash commands
 
 | Command                                         | Purpose                                                                                |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `/plan`                                         | Toggle plan mode (alternative to Shift+Tab)                                            |
+| `/plan`                                         | Toggle plan mode                                                                       |
 | `/plan-deep`                                    | Enable plan mode and ask subagents for background planning                             |
 | `/todos`                                        | Show plan progress (steps + completion state)                                          |
 | `/model`                                        | Open model selector                                                                    |
@@ -214,7 +224,7 @@ All TypeScript extensions live in `pi/extensions/` and are auto-loaded by Pi.
 | `nvim-ref.ts`                | `/nvim` or `Ctrl+Shift+G` bridge that opens Neovim in the current project; `<leader>af` tags a file, visual `<leader>ar` references a range, visual `<leader>aR` inserts selected code. |
 | `pi-start-screen.ts`         | Customizes Pi's start screen.                                                                                                                                                           |
 | `plan-mode.ts`               | Shift+Tab and `/plan` read-only planning mode with execute/revise/deepen approval, subagent-backed deep planning, intercom supervisor updates, RPIV `ask_user_question`/`todo`, and pi-lens tools. |
-| `vim-model-thinking.ts`      | Vim-style thinking shortcuts: `Ctrl+H` decreases and `Ctrl+L` increases thinking level.                                                                                                  |
+| `vim-model-thinking.ts`      | Provides direct `Ctrl+H`/`Ctrl+L` role cycling that distinguishes same-model roles by thinking level.                                                                                  |
 
 #### Adding a skill
 

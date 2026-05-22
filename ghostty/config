@@ -40,6 +40,9 @@ keybind = cmd+shift+n=new_window
 keybind = cmd+w=close_surface
 keybind = cmd+shift+,=reload_config
 
+
+# Send Ctrl+H as CSI-u so Pi can distinguish it from Backspace.
+keybind = ctrl+h=text:\x1b[104;5u
 # Copy/Paste
 clipboard-read = allow
 clipboard-write = allow

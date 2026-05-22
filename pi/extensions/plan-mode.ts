@@ -163,28 +163,17 @@ export default function planModeExtension(pi: ExtensionAPI): void {
 	}
 
 	function updateUi(ctx: ExtensionContext): void {
+		ctx.ui.setWidget("plan-mode", undefined);
+
 		if (executionMode && planSteps.length > 0) {
 			const completed = planSteps.filter((step) => step.completed).length;
 			ctx.ui.setStatus(
 				"plan-mode",
 				ctx.ui.theme.fg("accent", `📋 ${completed}/${planSteps.length}`),
 			);
-			ctx.ui.setWidget(
-				"plan-mode",
-				planSteps.map((step) => {
-					const checkbox = step.completed
-						? ctx.ui.theme.fg("success", "☑")
-						: ctx.ui.theme.fg("muted", "☐");
-					const text = step.completed
-						? ctx.ui.theme.fg("muted", ctx.ui.theme.strikethrough(step.text))
-						: step.text;
-					return `${checkbox} ${step.step}. ${text}`;
-				}),
-			);
 			return;
 		}
 
-		ctx.ui.setWidget("plan-mode", undefined);
 		ctx.ui.setStatus(
 			"plan-mode",
 			planModeEnabled ? ctx.ui.theme.fg("warning", "⏸ plan") : undefined,

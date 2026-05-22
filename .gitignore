@@ -13,3 +13,14 @@ Thumbs.db
 
 # Local overrides (optional)
 *.local
+
+# OMP runtime state and credentials
+omp/agent/*.db
+omp/agent/*.db-*
+omp/agent/sessions/
+omp/agent/blobs/
+omp/agent/terminal-sessions/
+omp/agent/memories/
+omp/agent/logs/
+omp/agent/*.log
+omp/logs/

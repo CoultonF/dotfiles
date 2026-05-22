@@ -4,10 +4,16 @@ let
   # Get from environment, with fallback for pure evaluation
   envUser = builtins.getEnv "USER";
   envHome = builtins.getEnv "HOME";
+  envDotfilesDir = builtins.getEnv "DOTFILES_DIR";
+  envPwd = builtins.getEnv "PWD";
   
   username = if envUser != "" then envUser else "cfraser";
   homeDirectory = if envHome != "" then envHome else
     (if isDarwin then "/Users/${username}" else "/home/${username}");
+  dotfilesDirectory =
+    if envDotfilesDir != "" then envDotfilesDir
+    else if envPwd != "" then envPwd
+    else "${homeDirectory}/dotfiles";
 in
 {
   # Home Manager configuration
@@ -117,6 +123,8 @@ in
 
     # Environment variables set in .zshenv
     sessionVariables = {
+      PI_CONFIG_DIR = "dotfiles/omp";
+      PI_CODING_AGENT_DIR = "${homeDirectory}/dotfiles/omp/agent";
       EDITOR = "nvim";
       COLORTERM = "truecolor";
       LANG = "en_US.UTF-8";
@@ -130,13 +138,11 @@ in
       OPENCODE_DISABLE_CLAUDE_CODE = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_PROMPT = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_SKILLS = "1";
+      PI_OAUTH_CALLBACK_HOST = "0.0.0.0";
     };
 
     # Environment setup in .zshenv (runs for all shells including non-interactive)
     envExtra = ''
-      export PLANNOTATOR_REMOTE="1"
-      export PLANNOTATOR_PORT="5174"
-
       # Source Nix profile (supports both single-user and multi-user installations)
       # Unset guard variable so nix-daemon.sh re-adds nix to PATH for this shell.
       # The parent process (e.g. bash in devcontainers) may have already sourced it,
@@ -155,6 +161,13 @@ in
       if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
         . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
       fi
+
+      # Keep OMP paths available even when this shell inherits Home Manager's
+      # zsh session guard from a parent shell. That guard can skip the generated
+      # sessionVariables block after `exec zsh`, so export these load-bearing
+      # variables outside the guard as well.
+      export PI_CONFIG_DIR="dotfiles/omp"
+      export PI_CODING_AGENT_DIR="$HOME/$PI_CONFIG_DIR/agent"
 
       # Point glibc to Nix-provided locale data (Linux containers only)
       if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -e "$HOME/.nix-profile/lib/locale/locale-archive" ]]; then
@@ -427,6 +440,10 @@ in
     install_bun_global @steipete/oracle oracle
     install_bun_global @openai/codex codex
     install_bun_global @earendil-works/pi-coding-agent pi
+    install_bun_global @oh-my-pi/pi-coding-agent omp
+
+    # nixpkgs bun lags; upgrade the user-space copy to meet tool version requirements
+    ${homeDirectory}/.bun/bin/bun upgrade || true
   '';
 
   # ============================================================================

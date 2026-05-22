@@ -1,0 +1,82 @@
+modelRoles: 
+  smol: openai-codex/gpt-5.5:low
+  default: openai-codex/gpt-5.5:medium
+  slow: openai-codex/gpt-5.4:xhigh
+cycleOrder: 
+  - smol
+  - default
+  - slow
+lastChangelogVersion: 15.2.1
+steeringMode: one-at-a-time
+followUpMode: one-at-a-time
+interruptMode: immediate
+statusLine: 
+  sessionAccent: true
+  showHookStatus: true
+  preset: nerd
+  separator: powerline
+tui: 
+  hyperlinks: always
+display: 
+  showTokenUsage: true
+showHardwareCursor: true
+defaultThinkingLevel: xhigh
+serviceTier: openai-only
+retry: 
+  maxRetries: 3
+autoResume: true
+doubleEscapeAction: tree
+treeFilterMode: all
+compaction: 
+  strategy: context-full
+  handoffSaveToDisk: true
+memory: 
+  backend: local
+edit: 
+  mode: hashline
+readLineNumbers: true
+lsp: 
+  formatOnWrite: true
+todo: 
+  eager: true
+renderMermaid: 
+  enabled: true
+calc: 
+  enabled: true
+inspect_image: 
+  enabled: true
+checkpoint: 
+  enabled: true
+github: 
+  enabled: true
+async: 
+  enabled: true
+tools: 
+  discoveryMode: mcp-only
+  intentTracing: false
+bash: 
+  autoBackground: 
+    enabled: true
+mcp: 
+  discoveryMode: true
+  notifications: true
+theme: 
+  dark: dark-catppuccin
+  light: dark-catppuccin
+symbolPreset: nerd
+providers: 
+  webSearch: auto
+  image: auto
+  kimiApiFormat: openai
+commands: 
+  enableOpencodeProject: false
+  enableOpencodeUser: false
+  enableClaudeProject: false
+  enableClaudeUser: false
+skills: 
+  enableSkillCommands: true
+task: 
+  isolation: 
+    merge: patch
+browser: 
+  headless: false

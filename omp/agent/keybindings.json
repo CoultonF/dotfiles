@@ -3,8 +3,8 @@
   "app.model.cycleForward": ["ctrl+l"],
   "app.model.cycleBackward": ["ctrl+h"],
   "app.model.select": ["ctrl+shift+l"],
+  "app.plan.toggle": ["shift+tab"],
   "tui.select.down": ["down", "ctrl+j"],
   "tui.select.up": ["up", "ctrl+k"],
-  "tui.editor.deleteToLineEnd": [],
-  "app.tree.filter.labeledOnly": []
+  "tui.editor.deleteToLineEnd": []
 }

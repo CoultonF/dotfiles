@@ -1,8 +1,8 @@
 import type {
 	ExtensionAPI,
 	ExtensionContext,
-} from "@earendil-works/pi-coding-agent";
-import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
+} from "@oh-my-pi/pi-coding-agent";
+import type { ThinkingLevel } from "@oh-my-pi/pi-agent-core";
 
 type Role = {
 	label: string;
