@@ -218,6 +218,7 @@ for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv ~/.zshrc; do
 	append_line_if_missing 'export PI_CODING_AGENT_DIR="$HOME/$PI_CONFIG_DIR/agent"' "$rcfile"
 	append_line_if_missing 'export PI_OAUTH_CALLBACK_HOST=0.0.0.0' "$rcfile"
 	append_line_if_missing 'export PUPPETEER_EXECUTABLE_PATH="$HOME/.nix-profile/bin/chromium"' "$rcfile"
+	append_line_if_missing 'export PI_FORCE_IMAGE_PROTOCOL="kitty"' "$rcfile"
 done
 
 # Setup direnv hook for all shells

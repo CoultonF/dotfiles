@@ -139,6 +139,7 @@ in
       OPENCODE_DISABLE_CLAUDE_CODE_PROMPT = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_SKILLS = "1";
       PI_OAUTH_CALLBACK_HOST = "0.0.0.0";
+      PI_FORCE_IMAGE_PROTOCOL = "kitty";
     } // lib.optionalAttrs (!isDarwin) {
       PUPPETEER_EXECUTABLE_PATH = "$HOME/.nix-profile/bin/chromium";
     };
@@ -170,6 +171,7 @@ in
       # variables outside the guard as well.
       export PI_CONFIG_DIR="dotfiles/omp"
       export PI_CODING_AGENT_DIR="$HOME/$PI_CONFIG_DIR/agent"
+      export PI_FORCE_IMAGE_PROTOCOL="kitty"
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         export PUPPETEER_EXECUTABLE_PATH="$HOME/.nix-profile/bin/chromium"
       fi
