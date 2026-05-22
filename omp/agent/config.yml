@@ -75,6 +75,9 @@ commands:
   enableClaudeUser: false
 skills: 
   enableSkillCommands: true
+  enableClaudeUser: false
+  enableClaudeProject: false
+  enableCodexUser: false
 task: 
   isolation: 
     merge: patch
