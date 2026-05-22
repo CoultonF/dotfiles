@@ -91,13 +91,12 @@ in
     curl
     wget
     unzip
-    chromium     # Native browser for Puppeteer on ARM Linux containers
     jq           # JSON processor
     awscli2      # AWS CLI
     direnv       # Per-directory environment variables
   ] ++ lib.optionals (!isDarwin) [
-    # Linux-only: locale data for containers (macOS has built-in locale support)
-    glibcLocales
+    chromium     # Native browser for Puppeteer in Linux containers
+    glibcLocales # Locale data for containers (macOS has built-in locale support)
     bubblewrap   # Sandbox utility required by Codex on Linux
   ] ++ lib.optionals isDarwin [
     # macOS-only: GUI apps and tools that need OrbStack
@@ -140,6 +139,7 @@ in
       OPENCODE_DISABLE_CLAUDE_CODE_PROMPT = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_SKILLS = "1";
       PI_OAUTH_CALLBACK_HOST = "0.0.0.0";
+    } // lib.optionalAttrs (!isDarwin) {
       PUPPETEER_EXECUTABLE_PATH = "$HOME/.nix-profile/bin/chromium";
     };
 
@@ -170,7 +170,9 @@ in
       # variables outside the guard as well.
       export PI_CONFIG_DIR="dotfiles/omp"
       export PI_CODING_AGENT_DIR="$HOME/$PI_CONFIG_DIR/agent"
-      export PUPPETEER_EXECUTABLE_PATH="$HOME/.nix-profile/bin/chromium"
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        export PUPPETEER_EXECUTABLE_PATH="$HOME/.nix-profile/bin/chromium"
+      fi
 
       # Point glibc to Nix-provided locale data (Linux containers only)
       if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -e "$HOME/.nix-profile/lib/locale/locale-archive" ]]; then
