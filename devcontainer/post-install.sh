@@ -90,6 +90,7 @@ nix profile install \
 	nixpkgs#direnv \
 	nixpkgs#opencode \
 	nixpkgs#bun \
+	nixpkgs#chromium \
 	nixpkgs#bubblewrap
 
 echo "Dev tools installed"
@@ -127,6 +128,14 @@ install_bun_global @oh-my-pi/pi-coding-agent omp
 
 # Nixpkgs bun lags; upgrade to latest to meet tool version requirements
 bun upgrade
+
+CHROMIUM_BIN="$(command -v chromium 2>/dev/null || true)"
+if [ -n "$CHROMIUM_BIN" ]; then
+	echo "Using Chromium for Puppeteer: $CHROMIUM_BIN"
+	export PUPPETEER_EXECUTABLE_PATH="$CHROMIUM_BIN"
+else
+	echo "WARNING: chromium not found; Puppeteer may fall back to its downloaded browser"
+fi
 
 # Ensure Nix is sourced in shell profiles
 for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv; do
@@ -208,6 +217,7 @@ for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv ~/.zshrc; do
 	append_line_if_missing 'export PI_CONFIG_DIR="dotfiles/omp"' "$rcfile"
 	append_line_if_missing 'export PI_CODING_AGENT_DIR="$HOME/$PI_CONFIG_DIR/agent"' "$rcfile"
 	append_line_if_missing 'export PI_OAUTH_CALLBACK_HOST=0.0.0.0' "$rcfile"
+	append_line_if_missing 'export PUPPETEER_EXECUTABLE_PATH="$HOME/.nix-profile/bin/chromium"' "$rcfile"
 done
 
 # Setup direnv hook for all shells

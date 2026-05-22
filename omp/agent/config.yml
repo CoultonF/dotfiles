@@ -1,6 +1,5 @@
-disabledProviders:
+disabledProviders: 
   - claude-plugins
-
 modelRoles: 
   smol: openai-codex/gpt-5.5:low
   default: openai-codex/gpt-5.5:medium
@@ -22,6 +21,7 @@ tui:
   hyperlinks: always
 display: 
   showTokenUsage: true
+  shimmer: disabled
 showHardwareCursor: true
 defaultThinkingLevel: xhigh
 serviceTier: openai-only
@@ -85,4 +85,4 @@ task:
   isolation: 
     merge: patch
 browser: 
-  headless: false
+  headless: true
