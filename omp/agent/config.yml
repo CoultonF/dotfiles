@@ -4,13 +4,18 @@ modelRoles:
   smol: openai-codex/gpt-5.5:low
   default: openai-codex/gpt-5.5:medium
   slow: openai-codex/gpt-5.4:xhigh
+  plan: openai-codex/gpt-5.5:medium
+  commit: openai-codex/gpt-5.3-codex-spark:xhigh
+  vision: openai-codex/gpt-5.4:xhigh
+  designer: openai-codex/gpt-5.5:xhigh
+  task: openai-codex/gpt-5.5:low
 cycleOrder: 
   - smol
   - default
   - slow
   - commit
-lastChangelogVersion: 15.2.1
-steeringMode: one-at-a-time
+lastChangelogVersion: 15.3.2
+steeringMode: all
 followUpMode: one-at-a-time
 interruptMode: immediate
 statusLine: 
@@ -22,18 +27,19 @@ tui:
   hyperlinks: always
 display: 
   showTokenUsage: true
-  shimmer: disabled
+  shimmer: classic
 showHardwareCursor: true
 defaultThinkingLevel: xhigh
-serviceTier: openai-only
+serviceTier: none
 retry: 
   maxRetries: 3
-autoResume: true
+autoResume: false
 doubleEscapeAction: tree
 treeFilterMode: all
 compaction: 
   strategy: context-full
   handoffSaveToDisk: true
+  enabled: true
 memory: 
   backend: local
 edit: 
@@ -41,6 +47,7 @@ edit:
 readLineNumbers: true
 lsp: 
   formatOnWrite: true
+  diagnosticsOnEdit: true
 todo: 
   eager: true
 renderMermaid: 
@@ -87,3 +94,8 @@ task:
     merge: patch
 browser: 
   headless: true
+clearOnShrink: false
+contextPromotion: 
+  enabled: true
+marketplace: 
+  autoUpdate: auto
