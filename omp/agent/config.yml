@@ -8,6 +8,7 @@ cycleOrder:
   - smol
   - default
   - slow
+  - commit
 lastChangelogVersion: 15.2.1
 steeringMode: one-at-a-time
 followUpMode: one-at-a-time
