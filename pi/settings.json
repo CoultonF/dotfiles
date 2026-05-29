@@ -1,34 +1,34 @@
 {
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "medium",
-  "theme": "catppuccin-mocha-readable",
-  "enableInstallTelemetry": false,
-  "compaction": {
-    "enabled": true
-  },
-  "retry": {
-    "enabled": true,
-    "maxRetries": 3
-  },
-  "lastChangelogVersion": "0.75.4",
-  "enabledModels": [
-    "openai-codex/gpt-5.5",
-    "openai-codex/gpt-5.4"
-  ],
-  "packages": [
-    "npm:pi-mcp-adapter",
-    "npm:pi-web-access",
-    "npm:pi-docparser",
-    "npm:@kaiserlich-dev/pi-session-search",
-    "npm:pi-mermaid",
-    "npm:@ifi/oh-pi-themes",
-    "npm:context-mode",
-    "npm:pi-subagents",
-    "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:@juicesharp/rpiv-todo",
-    "npm:pi-lens",
-    "npm:pi-intercom"
-  ],
-  "quietStartup": true
+   "defaultProvider": "openai-codex",
+   "defaultModel": "gpt-5.5",
+   "defaultThinkingLevel": "medium",
+   "theme": "catppuccin-mocha-readable",
+   "enableInstallTelemetry": false,
+   "compaction": {
+      "enabled": true
+   },
+   "retry": {
+      "enabled": true,
+      "maxRetries": 3
+   },
+   "lastChangelogVersion": "0.75.4",
+   "enabledModels": [
+      "openai-codex/gpt-5.5",
+      "openai-codex/gpt-5.3-codex-spark"
+   ],
+   "packages": [
+      "npm:pi-mcp-adapter",
+      "npm:pi-web-access",
+      "npm:pi-docparser",
+      "npm:@kaiserlich-dev/pi-session-search",
+      "npm:pi-mermaid",
+      "npm:@ifi/oh-pi-themes",
+      "npm:context-mode",
+      "npm:pi-subagents",
+      "npm:@juicesharp/rpiv-ask-user-question",
+      "npm:@juicesharp/rpiv-todo",
+      "npm:pi-lens",
+      "npm:pi-intercom"
+   ],
+   "quietStartup": true
 }

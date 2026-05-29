@@ -2,7 +2,7 @@ disabledProviders:
   - claude-plugins
 modelRoles: 
   smol: openai-codex/gpt-5.5:low
-  default: openai-codex/gpt-5.5:medium
+  default: openai-codex/gpt-5.4:medium
   slow: openai-codex/gpt-5.4:xhigh
   plan: openai-codex/gpt-5.5:medium
   commit: openai-codex/gpt-5.3-codex-spark:xhigh
@@ -14,7 +14,7 @@ cycleOrder:
   - default
   - slow
   - commit
-lastChangelogVersion: 15.3.2
+lastChangelogVersion: 15.5.10
 steeringMode: all
 followUpMode: one-at-a-time
 interruptMode: immediate
