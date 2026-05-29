@@ -185,7 +185,7 @@ On first run, open `pi` and use `/login` to authenticate a provider.
 | Key                 | Action                                         |
 | ------------------- | ---------------------------------------------- |
 | `Shift+Tab`         | Toggle plan mode                              |
-| `Ctrl+H` / `Ctrl+L` | Cycle model roles backward/forward (`smol` > `default` > `slow`) |
+| `Ctrl+H` / `Ctrl+L` | Cycle model roles backward/forward (`smol` > `default` > `slow` > `commit` > `thinking`) |
 | `Ctrl+J` / `Ctrl+K` | Move down/up in selectors                      |
 | `Ctrl+Shift+L`      | Open model selector                            |
 | `Ctrl+Shift+G`      | Open Neovim reference picker                   |

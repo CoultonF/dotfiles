@@ -15,8 +15,8 @@ const ROLES: readonly Role[] = [
    { label: "smol", provider: "openai-codex", model: "gpt-5.5", thinking: "low" },
    { label: "default", provider: "openai-codex", model: "gpt-5.5", thinking: "medium" },
    { label: "slow", provider: "openai-codex", model: "gpt-5.5", thinking: "high" },
-   { label: "thinking", provider: "openai-codex", model: "gpt-5.5", thinking: "xhigh" as ThinkingLevel },
    { label: "commit", provider: "openai-codex", model: "gpt-5.3-codex-spark", thinking: "xhigh" as ThinkingLevel },
+   { label: "thinking", provider: "openai-codex", model: "gpt-5.5", thinking: "xhigh" as ThinkingLevel },
 ];
 
 let activeRoleIndex = 1;

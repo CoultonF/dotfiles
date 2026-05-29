@@ -6,6 +6,7 @@ modelRoles:
   slow: openai-codex/gpt-5.4:xhigh
   plan: openai-codex/gpt-5.5:medium
   commit: openai-codex/gpt-5.3-codex-spark:xhigh
+  thinking: openai-codex/gpt-5.5:xhigh
   vision: openai-codex/gpt-5.4:xhigh
   designer: openai-codex/gpt-5.5:xhigh
   task: openai-codex/gpt-5.5:low
