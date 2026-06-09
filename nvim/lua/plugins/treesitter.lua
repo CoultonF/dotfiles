@@ -104,4 +104,14 @@ return {
       end
     end,
   },
+
+  -- Auto close / rename HTML & JSX/TSX tags.
+  -- Must call its own setup(); the old nvim-treesitter.configs module is dead on the main branch.
+  {
+    "windwp/nvim-ts-autotag",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      require("nvim-ts-autotag").setup()
+    end,
+  },
 }

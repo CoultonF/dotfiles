@@ -25,7 +25,7 @@ return {
     opts = {
       ensure_installed = {
         "lua_ls",
-        "ts_ls",
+        "vtsls",
         "html",
         "cssls",
         "jsonls",
@@ -34,6 +34,7 @@ return {
         "dockerls",
         "tailwindcss",
         "eslint",
+        "pyright",
         "ruff",
       },
       automatic_installation = true,
@@ -47,14 +48,11 @@ return {
     dependencies = {
       "mason.nvim",
       "mason-lspconfig.nvim",
-      "hrsh7th/cmp-nvim-lsp",
       { "folke/neodev.nvim", opts = {} }, -- Neovim Lua API completion
     },
     config = function()
-      local cmp_nvim_lsp = require("cmp_nvim_lsp")
-
-      -- LSP capabilities with completion
-      local capabilities = cmp_nvim_lsp.default_capabilities()
+      -- LSP capabilities with completion (blink.cmp)
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
       -- On attach: Set up keymaps when LSP attaches to buffer
       local on_attach = function(client, bufnr)
@@ -78,12 +76,15 @@ return {
         map("<leader>ca", vim.lsp.buf.code_action, "Code action")
 
         -- Workspace
-        map("<leader>ws", vim.lsp.buf.workspace_symbol, "Workspace symbols")
+        map("<leader>cs", vim.lsp.buf.workspace_symbol, "Workspace symbols")
 
-        -- Format
-        map("<leader>fm", function()
-          vim.lsp.buf.format({ async = true })
-        end, "Format buffer")
+        -- Inlay hints (nvim 0.12 native). Formatting is owned by conform.nvim (<leader>fm).
+        if client:supports_method("textDocument/inlayHint") then
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        end
+        map("<leader>ch", function()
+          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }), { bufnr = 0 })
+        end, "Toggle inlay hints")
       end
 
       -- Configure servers
@@ -99,7 +100,27 @@ return {
             },
           },
         },
-        ts_ls = {},
+        vtsls = {
+          settings = {
+            typescript = {
+              inlayHints = {
+                parameterNames = { enabled = "literals" },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+            },
+            javascript = {
+              inlayHints = {
+                parameterNames = { enabled = "literals" },
+                variableTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+              },
+            },
+          },
+        },
         html = {},
         cssls = {},
         jsonls = {},
@@ -127,6 +148,20 @@ return {
               end,
             })
           end,
+        },
+        pyright = {
+          settings = {
+            python = {
+              analysis = {
+                typeCheckingMode = "basic",
+                inlayHints = {
+                  variableTypes = true,
+                  functionReturnTypes = true,
+                  callArgumentNames = true,
+                },
+              },
+            },
+          },
         },
         ruff = {},
       }

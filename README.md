@@ -105,7 +105,7 @@ All installed automatically via `home.nix`:
 - **Search**: ripgrep (rg), fd, fzf, tree
 - **Git**: lazygit, git, delta
 - **Languages**: Node.js 22, Python 3.12, Lua 5.1
-- **LSP Servers**: TypeScript, HTML/CSS/JSON, Ruff, Lua
+- **LSP Servers**: TypeScript, HTML/CSS/JSON, Pyright, Ruff, Lua
 - **Terminal**: tmux
 - **Build Tools**: gcc, gnumake
 - **Utilities**: curl, wget, unzip, jq
@@ -154,7 +154,7 @@ OpenCode is configured via `~/.config/opencode/` with:
 
 - `catppuccin-macchiato` TUI theme
 - Space as the leader key
-- Ruff as the Python LSP
+- Pyright for Python definitions and Ruff for Python linting/formatting
 - Claude Code fallback support disabled via `OPENCODE_DISABLE_CLAUDE_CODE*`
 
 On first run, open `opencode` and use `/connect` to authenticate a provider.

@@ -7,7 +7,7 @@ modelRoles:
   plan: openai-codex/gpt-5.5:medium
   commit: openai-codex/gpt-5.3-codex-spark:xhigh
   thinking: openai-codex/gpt-5.5:xhigh
-  vision: openai-codex/gpt-5.4:xhigh
+  vision: gpt-5.3-codex-spark:xhigh
   designer: openai-codex/gpt-5.5:xhigh
   task: openai-codex/gpt-5.5:low
 cycleOrder: 
@@ -16,7 +16,7 @@ cycleOrder:
   - slow
   - commit
   - thinking
-lastChangelogVersion: 15.5.12
+lastChangelogVersion: 15.10.8
 steeringMode: all
 followUpMode: one-at-a-time
 interruptMode: immediate
@@ -26,7 +26,8 @@ statusLine:
   preset: nerd
   separator: powerline
 tui: 
-  hyperlinks: always
+  hyperlinks: "off"
+  textSizing: true
 display: 
   showTokenUsage: true
   shimmer: classic
@@ -75,7 +76,7 @@ mcp:
   notifications: true
 theme: 
   dark: dark-catppuccin
-  light: dark-catppuccin
+  light: light
 symbolPreset: nerd
 providers: 
   webSearch: auto
@@ -94,10 +95,14 @@ skills:
 task: 
   isolation: 
     merge: patch
+  showResolvedModelBadge: true
+  eager: true
+  enableLsp: true
 browser: 
   headless: true
 clearOnShrink: false
 contextPromotion: 
-  enabled: true
+  enabled: false
 marketplace: 
   autoUpdate: auto
+setupVersion: 1

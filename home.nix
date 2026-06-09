@@ -442,6 +442,7 @@ in
     }
 
     install_bun_global tree-sitter-cli tree-sitter
+    install_bun_global pyright pyright-langserver
     install_bun_global typescript-language-server typescript-language-server
     install_bun_global vscode-langservers-extracted vscode-json-language-server
     install_bun_global @steipete/oracle oracle

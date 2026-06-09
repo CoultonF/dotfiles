@@ -119,6 +119,7 @@ install_bun_global() {
 }
 
 install_bun_global tree-sitter-cli tree-sitter
+install_bun_global pyright pyright-langserver
 install_bun_global typescript-language-server typescript-language-server
 install_bun_global vscode-langservers-extracted vscode-json-language-server
 install_bun_global @steipete/oracle oracle
@@ -273,6 +274,7 @@ check_command direnv
 check_command opencode
 check_command pi
 check_command ruff
+check_command pyright-langserver
 
 echo ""
 echo "=========================================="

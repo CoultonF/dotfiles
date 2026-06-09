@@ -64,9 +64,9 @@ map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
 map("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
 map("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
--- Buffer navigation (cycle through buffer list)
-map("n", "<leader>bn", "<cmd>bnext<CR>", { desc = "Next buffer" })
-map("n", "<leader>bp", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
+-- Buffer navigation (cycle through buffer list; <leader>b is now subword-back via nvim-spider)
+map("n", "]b", "<cmd>bnext<CR>", { desc = "Next buffer" })
+map("n", "[b", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
 
 -- Close buffer
 map("n", "<C-q>", "<cmd>bd<CR>", { desc = "Close buffer" })
@@ -122,15 +122,27 @@ map("n", "<leader>qp", "<cmd>cprev<CR>", { desc = "Prev quickfix" })
 map("n", "<leader>qo", "<cmd>copen<CR>", { desc = "Open quickfix" })
 map("n", "<leader>qc", "<cmd>cclose<CR>", { desc = "Close quickfix" })
 
--- Navigate to breakpoints (like VS Code leader o/i)
-map("n", "<leader>o", function()
-  require("dap").step_over()
-end, { desc = "Debug: Step over" })
+-- Debug: step_into convenience map. <leader>o freed for the OMP prefix; the old
+-- <leader>o step_over duplicate is dropped (step_over already lives at <leader>ds).
 map("n", "<leader>i", function()
   require("dap").step_into()
 end, { desc = "Debug: Step into" })
 
+-- OMP ("oh my pi") integration
+map("x", "<leader>oa", function()
+  require("utils.omp").on_selection()
+end, { desc = "OMP: act on selection" })
+map("n", "<leader>of", function()
+  require("utils.omp").on_file()
+end, { desc = "OMP: act on file" })
+map("x", "<leader>or", function()
+  require("utils.omp").ask(require("utils.omp").current_range())
+end, { desc = "OMP: ask about selection" })
+map("n", "<leader>or", function()
+  require("utils.omp").ask()
+end, { desc = "OMP: ask about file" })
+
 -- Diagnostic navigation
 map("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic" })
 map("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic" })
-map("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic message" })
+map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Show diagnostic message" })

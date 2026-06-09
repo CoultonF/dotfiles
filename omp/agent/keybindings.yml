@@ -1,0 +1,20 @@
+tui.editor.deleteToLineEnd: 
+  []
+tui.select.up: 
+  - up
+  - ctrl+k
+tui.select.down: 
+  - down
+  - ctrl+j
+app.display.reset:
+  []
+app.thinking.cycle: 
+  []
+app.model.cycleForward: 
+  - ctrl+l
+app.model.cycleBackward: 
+  - ctrl+h
+app.model.select: 
+  - ctrl+shift+l
+app.plan.toggle: 
+  - shift+tab

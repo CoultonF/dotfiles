@@ -47,11 +47,10 @@ return {
         { "<leader>c", group = "Close/Code" },
         { "<leader>d", group = "Debug" },
         { "<leader>g", group = "Git" },
-        { "<leader>o", group = "Overseer" },
+        { "<leader>o", group = "OMP (AI)" },
         { "<leader>q", group = "Quickfix" },
         { "<leader>s", group = "Search" },
         { "<leader>t", group = "Test" },
-        { "<leader>w", group = "Window" },
       })
     end,
   },

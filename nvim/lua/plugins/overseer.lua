@@ -3,10 +3,8 @@
 return {
   {
     "stevearc/overseer.nvim",
-    keys = {
-      { "<leader>or", "<cmd>OverseerRun<cr>", desc = "Run task" },
-      { "<leader>ot", "<cmd>OverseerToggle<cr>", desc = "Toggle task list" },
-    },
+    -- <leader>o is now the OMP prefix; run Overseer via :OverseerRun / :OverseerToggle
+    cmd = { "OverseerRun", "OverseerToggle" },
     opts = {},
   },
 }
