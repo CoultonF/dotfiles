@@ -8,7 +8,7 @@ return {
       { "<leader>w", "<cmd>lua require('spider').motion('w')<CR>", mode = { "n", "o", "x" }, desc = "Subword forward" },
       { "<leader>e", "<cmd>lua require('spider').motion('e')<CR>", mode = { "n", "o", "x" }, desc = "Subword end" },
       { "<leader>b", "<cmd>lua require('spider').motion('b')<CR>", mode = { "n", "o", "x" }, desc = "Subword back" },
-      { "<leader>ge", "<cmd>lua require('spider').motion('ge')<CR>", mode = { "n", "o", "x" }, desc = "Subword prev end" },
+      { "<leader>E", "<cmd>lua require('spider').motion('ge')<CR>", mode = { "n", "o", "x" }, desc = "Subword prev end" },
     },
     opts = {
       skipInsignificantPunctuation = true,

@@ -37,8 +37,16 @@ return {
         "pyright",
         "ruff",
       },
-      automatic_installation = true,
+      -- servers are configured + enabled explicitly below via vim.lsp.config/enable
+      automatic_enable = false,
     },
+  },
+
+  -- Neovim Lua API completion (replaces archived neodev.nvim)
+  {
+    "folke/lazydev.nvim",
+    ft = "lua",
+    opts = {},
   },
 
   -- LSP Configuration
@@ -48,7 +56,6 @@ return {
     dependencies = {
       "mason.nvim",
       "mason-lspconfig.nvim",
-      { "folke/neodev.nvim", opts = {} }, -- Neovim Lua API completion
     },
     config = function()
       -- LSP capabilities with completion (blink.cmp)
@@ -132,6 +139,8 @@ return {
           on_attach = function(client, bufnr)
             on_attach(client, bufnr)
             vim.api.nvim_create_autocmd("BufWritePre", {
+              -- per-buffer group so LSP reattach replaces instead of stacking duplicates
+              group = vim.api.nvim_create_augroup("EslintFixAll." .. bufnr, { clear = true }),
               buffer = bufnr,
               callback = function()
                 local clients = vim.lsp.get_clients({ bufnr = bufnr, name = "eslint" })

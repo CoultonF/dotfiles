@@ -62,18 +62,15 @@ local function capture_visual()
   return { first = math.min(p1[2], p2[2]), last = math.max(p1[2], p2[2]) }
 end
 
--- public wrapper so a visual keymap can capture the range before vim.ui.input runs
-function M.current_range()
-  return capture_visual()
-end
-
--- "@ref (lines A-B): instruction", or "@ref: instruction" when range is nil
+-- omp wants the file as its own @-arg and the instruction as a separate arg
+-- (`omp @file.ts "do x"`). Returns { "@ref", "instruction" }, folding any line
+-- range into the instruction text since omp @-mentions attach the whole file.
 local function build_message(ref, range, instruction)
   local at = "@" .. ref
   if range then
-    return string.format("%s (lines %d-%d): %s", at, range.first, range.last, instruction)
+    return { at, string.format("lines %d-%d: %s", range.first, range.last, instruction) }
   end
-  return string.format("%s: %s", at, instruction)
+  return { at, instruction }
 end
 
 -- omp reads from disk, so flush the buffer first; false if the buffer has no file
@@ -113,8 +110,11 @@ local function reload_buffer(bufnr)
   end
 end
 
--- run omp interactively in a toggleterm float; reload the buffer on exit
-local function launch_float(root, message, src_bufnr)
+-- run omp interactively in a toggleterm float; reload the buffer on exit.
+-- omp without `-p` stays in an interactive REPL after the initial prompt, so the
+-- user can ask follow-ups in the terminal. `flags` are extra omp flags, e.g.
+-- {"--auto-approve"} to edit in place without per-tool approval prompts.
+local function launch_float(root, message, src_bufnr, flags)
   local bin = omp_bin()
   if not bin then
     return
@@ -128,12 +128,14 @@ local function launch_float(root, message, src_bufnr)
     return
   end
 
-  local cmd = table.concat({
-    vim.fn.shellescape(bin),
-    "--auto-approve",
-    "--cwd=" .. vim.fn.shellescape(root),
-    vim.fn.shellescape(message),
-  }, " ")
+  local parts = { vim.fn.shellescape(bin) }
+  for _, flag in ipairs(flags or {}) do
+    table.insert(parts, flag)
+  end
+  table.insert(parts, "--cwd=" .. vim.fn.shellescape(root))
+  table.insert(parts, vim.fn.shellescape(message[1])) -- @file mention
+  table.insert(parts, vim.fn.shellescape(message[2])) -- instruction
+  local cmd = table.concat(parts, " ")
 
   local term = terminal.Terminal:new({
     cmd = cmd,
@@ -149,55 +151,6 @@ local function launch_float(root, message, src_bufnr)
     end,
   })
   term:toggle()
-end
-
--- show omp's text answer in a read-only scratch split
-local function show_scratch(text)
-  vim.cmd("botright split")
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win(), buf)
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(text, "\n", { plain = true }))
-  vim.bo[buf].buftype = "nofile"
-  vim.bo[buf].bufhidden = "wipe"
-  vim.bo[buf].swapfile = false
-  vim.bo[buf].filetype = "markdown"
-  vim.bo[buf].modifiable = false
-  pcall(vim.api.nvim_buf_set_name, buf, "omp://answer")
-end
-
--- run omp headless (read-only, no tools) and dump the answer into a scratch split
-local function ask_scratch(root, message)
-  local bin = omp_bin()
-  if not bin then
-    return
-  end
-  local home = vim.env.HOME or uv.os_homedir()
-  -- vim.system does not source ~/.bashrc, so inject PATH + the dotfiles PI vars
-  local env = vim.tbl_extend("force", vim.fn.environ(), {
-    PATH = home .. "/.bun/bin:" .. (vim.env.PATH or ""),
-    PI_CONFIG_DIR = "dotfiles/omp",
-    PI_CODING_AGENT_DIR = home .. "/dotfiles/omp/agent",
-  })
-
-  notify("asking...")
-  vim.system(
-    { bin, "-p", "--no-tools", "--cwd=" .. root, message },
-    { cwd = root, text = true, env = env },
-    function(res)
-      vim.schedule(function()
-        if res.code ~= 0 then
-          notify("failed:\n" .. (res.stderr or ""), vim.log.levels.ERROR)
-          return
-        end
-        local out = res.stdout or ""
-        if out:gsub("%s", "") == "" then
-          notify("empty response", vim.log.levels.WARN)
-          return
-        end
-        show_scratch(out)
-      end)
-    end
-  )
 end
 
 -- prompt for an instruction, then run `action(target.root, message, bufnr)`
@@ -227,20 +180,16 @@ function M.on_selection()
     return
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  with_instruction(bufnr, range, "omp instruction: ", launch_float)
+  with_instruction(bufnr, range, "omp instruction: ", function(root, message, b)
+    launch_float(root, message, b, { "--auto-approve" })
+  end)
 end
 
 -- act on the whole current file (edit in place via float)
 function M.on_file()
   local bufnr = vim.api.nvim_get_current_buf()
-  with_instruction(bufnr, nil, "omp instruction (whole file): ", launch_float)
-end
-
--- ask/review (read-only) → scratch split. range from current_range() or nil (whole file)
-function M.ask(range)
-  local bufnr = vim.api.nvim_get_current_buf()
-  with_instruction(bufnr, range, "omp question: ", function(root, message)
-    ask_scratch(root, message)
+  with_instruction(bufnr, nil, "omp instruction (whole file): ", function(root, message, b)
+    launch_float(root, message, b, { "--auto-approve" })
   end)
 end
 

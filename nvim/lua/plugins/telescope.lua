@@ -77,7 +77,7 @@ return {
 
       -- Git
       { "<leader>gc", "<cmd>Telescope git_branches<CR>", desc = "Git branches (checkout)" },
-      { "<leader>gD", "<cmd>Telescope git_commits<CR>", desc = "Git commits (file history)" },
+      { "<leader>gl", "<cmd>Telescope git_commits<CR>", desc = "Git commits (log)" },
 
       -- LSP
       { "<leader>ss", "<cmd>Telescope lsp_document_symbols<CR>", desc = "Document symbols" },

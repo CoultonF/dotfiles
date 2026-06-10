@@ -8,7 +8,7 @@ augroup("YankHighlight", { clear = true })
 autocmd("TextYankPost", {
   group = "YankHighlight",
   callback = function()
-    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
+    vim.hl.on_yank({ higroup = "IncSearch", timeout = 200 })
   end,
 })
 
@@ -76,6 +76,17 @@ autocmd({ "BufRead", "BufNewFile" }, {
   group = "FileTypeDetect",
   pattern = { "*.mdx" },
   command = "setfiletype markdown",
+})
+
+-- Soft-wrap prose in markdown (global default is nowrap, see options.lua)
+augroup("MarkdownWrap", { clear = true })
+autocmd("FileType", {
+  group = "MarkdownWrap",
+  pattern = "markdown",
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+  end,
 })
 
 -- Enable treesitter highlighting and indentation (nvim 0.12+ native)
