@@ -202,15 +202,12 @@ if [ -d "$DOTFILES_DIR" ]; then
 	if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 		mkdir -p ~/.claude
 		CLAUDE_SETTINGS="$HOME/.claude/settings.json"
-		CLAUDE_SETTINGS_TMP="${CLAUDE_SETTINGS}.tmp.$$"
 		if [ -f "$CLAUDE_SETTINGS" ]; then
-			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"$CLAUDE_SETTINGS_TMP" &&
-				mv "$CLAUDE_SETTINGS_TMP" "$CLAUDE_SETTINGS"
+			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
+				cat "${CLAUDE_SETTINGS}.tmp" >"$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
 		else
-			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' >"$CLAUDE_SETTINGS_TMP" &&
-				mv "$CLAUDE_SETTINGS_TMP" "$CLAUDE_SETTINGS"
+			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
 		fi
-		rm -f "$CLAUDE_SETTINGS_TMP"
 	fi
 
 	echo "Configs copied"

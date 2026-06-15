@@ -203,21 +203,17 @@ for rcfile in ~/.bashrc ~/.bash_profile ~/.profile; do
 done
 
 # Apply Claude Code hooks
-# ~/.claude/settings.json may be a virtiofs bind-mount from the Mac host (OrbStack).
-# mv/rename fail on mount points (EBUSY), so we write in-place via tee instead.
 if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 	info "Applying Claude Code hooks..."
 	mkdir -p ~/.claude
 	CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 	if [ -f "$CLAUDE_SETTINGS" ]; then
-		jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" | tee "$CLAUDE_SETTINGS" >/dev/null \
-			&& success "Claude Code hooks applied" \
-			|| warn "Could not write $CLAUDE_SETTINGS (virtiofs mount missing host file?). On your Mac run: echo '{}' > ~/.claude/settings.json"
+		jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
+			cat "${CLAUDE_SETTINGS}.tmp" >"$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
 	else
-		jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' | tee "$CLAUDE_SETTINGS" >/dev/null \
-			&& success "Claude Code hooks applied" \
-			|| warn "Could not write $CLAUDE_SETTINGS (virtiofs mount missing host file?). On your Mac run: echo '{}' > ~/.claude/settings.json"
+		jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
 	fi
+	success "Claude Code hooks applied"
 fi
 
 # Set zsh as default shell.
