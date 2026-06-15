@@ -3,20 +3,20 @@ disabledProviders:
 modelRoles: 
   smol: openai-codex/gpt-5.5:low
   default: openai-codex/gpt-5.5:medium
-  slow: openai-codex/gpt-5.4:xhigh
-  plan: openai-codex/gpt-5.5:medium
-  commit: openai-codex/gpt-5.3-codex-spark:xhigh
+  slow: openai-codex/gpt-5.5:xhigh
+  plan: openai-codex/gpt-5.5:xhigh
+  commit: openai-codex/gpt-5.5:low
   thinking: openai-codex/gpt-5.5:xhigh
-  vision: gpt-5.3-codex-spark:xhigh
+  vision: openai-codex/gpt-5.5:xhigh
   designer: openai-codex/gpt-5.5:xhigh
-  task: openai-codex/gpt-5.5:low
+  task: openai-codex/gpt-5.5:xhigh
+  advisor: openai-codex/gpt-5.5:xhigh
 cycleOrder: 
   - smol
   - default
   - slow
   - commit
   - thinking
-lastChangelogVersion: 15.10.8
 steeringMode: all
 followUpMode: one-at-a-time
 interruptMode: immediate
@@ -52,7 +52,7 @@ lsp:
   formatOnWrite: true
   diagnosticsOnEdit: true
 todo: 
-  eager: true
+  eager: always
 renderMermaid: 
   enabled: true
 calc: 
@@ -96,7 +96,7 @@ task:
   isolation: 
     merge: patch
   showResolvedModelBadge: true
-  eager: true
+  eager: always
   enableLsp: true
 browser: 
   headless: true
