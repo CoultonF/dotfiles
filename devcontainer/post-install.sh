@@ -88,6 +88,7 @@ nix profile install \
 	nixpkgs#cairo \
 	nixpkgs#pango \
 	nixpkgs#direnv \
+	nixpkgs#open-policy-agent \
 	nixpkgs#opencode \
 	nixpkgs#bun \
 	nixpkgs#chromium \

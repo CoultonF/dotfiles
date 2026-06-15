@@ -94,6 +94,7 @@ in
     jq           # JSON processor
     awscli2      # AWS CLI
     direnv       # Per-directory environment variables
+    open-policy-agent # OPA policy engine (opa)
   ] ++ lib.optionals (!isDarwin) [
     chromium     # Native browser for Puppeteer in Linux containers
     glibcLocales # Locale data for containers (macOS has built-in locale support)
