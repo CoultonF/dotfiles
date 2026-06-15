@@ -127,6 +127,7 @@ install_bun_global @steipete/oracle oracle
 install_bun_global @openai/codex codex
 install_bun_global @earendil-works/pi-coding-agent pi
 install_bun_global @oh-my-pi/pi-coding-agent omp
+install_bun_global @termdraw/app termdraw
 
 # Nixpkgs bun lags; upgrade to latest to meet tool version requirements
 bun upgrade

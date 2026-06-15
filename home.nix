@@ -455,6 +455,7 @@ in
     install_bun_global @openai/codex codex
     install_bun_global @earendil-works/pi-coding-agent pi
     install_bun_global @oh-my-pi/pi-coding-agent omp
+    install_bun_global @termdraw/app termdraw
 
     # nixpkgs bun lags; upgrade the user-space copy to meet tool version requirements
     ${homeDirectory}/.bun/bin/bun upgrade || true
