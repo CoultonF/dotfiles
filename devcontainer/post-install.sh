@@ -195,16 +195,22 @@ if [ -d "$DOTFILES_DIR" ]; then
 	# Add to PATH
 	append_line_if_missing 'export PATH="$HOME/.dotfiles/bin:$PATH"' ~/.bashrc
 
+	# Claude Code global user instructions
+	cp "$DOTFILES_DIR/claude/CLAUDE.md" ~/.CLAUDE.md
+
 	# Claude Code hooks
 	if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 		mkdir -p ~/.claude
 		CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+		CLAUDE_SETTINGS_TMP="${CLAUDE_SETTINGS}.tmp.$$"
 		if [ -f "$CLAUDE_SETTINGS" ]; then
-			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
-				cat "${CLAUDE_SETTINGS}.tmp" >"$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
+			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"$CLAUDE_SETTINGS_TMP" &&
+				mv "$CLAUDE_SETTINGS_TMP" "$CLAUDE_SETTINGS"
 		else
-			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
+			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' >"$CLAUDE_SETTINGS_TMP" &&
+				mv "$CLAUDE_SETTINGS_TMP" "$CLAUDE_SETTINGS"
 		fi
+		rm -f "$CLAUDE_SETTINGS_TMP"
 	fi
 
 	echo "Configs copied"

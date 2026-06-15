@@ -408,6 +408,11 @@ in
   home.file.".pi/agent/themes".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/themes";
 
+  # Claude Code global user instructions
+  # Keep out of the Nix store so edits take effect without a Home Manager rebuild.
+  home.file.".CLAUDE.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/CLAUDE.md";
+
   # Keep npm global installs out of the immutable Nix store.
   home.file.".npmrc".text = ''
     prefix=${homeDirectory}/.npm-global
