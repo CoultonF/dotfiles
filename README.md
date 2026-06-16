@@ -83,7 +83,7 @@ Home Manager uses Nix to declaratively manage:
 After editing any config:
 
 ```bash
-home-manager switch --flake ~/.dotfiles
+home-manager switch --flake ~/.dotfiles#$(nix eval --impure --raw --expr builtins.currentSystem)
 ```
 
 ### Rolling Back
@@ -93,7 +93,7 @@ home-manager switch --flake ~/.dotfiles
 home-manager generations
 
 # Roll back to previous
-home-manager switch --flake ~/.dotfiles --rollback
+home-manager switch --flake ~/.dotfiles#$(nix eval --impure --raw --expr builtins.currentSystem) --rollback
 ```
 
 ## Tools Available
@@ -271,7 +271,7 @@ home.packages = with pkgs; [
 ];
 ```
 
-Then apply: `home-manager switch --flake ~/.dotfiles`
+Then apply: `home-manager switch --flake ~/.dotfiles#$(nix eval --impure --raw --expr builtins.currentSystem)`
 
 ### Adding Aliases
 
@@ -324,7 +324,7 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 ```bash
 cd ~/.dotfiles
 git pull
-home-manager switch --flake .
+home-manager switch --flake .#$(nix eval --impure --raw --expr builtins.currentSystem)
 ```
 
 In Neovim:

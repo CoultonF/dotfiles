@@ -72,13 +72,15 @@ echo "=========================================="
 echo ""
 info "Using dotfiles from: $DOTFILES_DIR"
 
-# Detect system
+# Detect system from the kernel first; after Nix is available, prefer Nix's
+# currentSystem so Home Manager cannot select an architecture this daemon cannot
+# build.
 SYSTEM=""
 case "$(uname -s)-$(uname -m)" in
 Darwin-arm64) SYSTEM="aarch64-darwin" ;;
 Darwin-x86_64) SYSTEM="x86_64-darwin" ;;
 Linux-x86_64) SYSTEM="x86_64-linux" ;;
-Linux-aarch64) SYSTEM="aarch64-linux" ;;
+Linux-aarch64 | Linux-arm64) SYSTEM="aarch64-linux" ;;
 Linux-armv7l) SYSTEM="armv7l-linux" ;;
 *) error "Unsupported system: $(uname -s)-$(uname -m)" ;;
 esac
@@ -132,6 +134,11 @@ if ! command -v nix &>/dev/null; then
 fi
 
 info "Using $(nix --version)"
+NIX_SYSTEM="$(nix eval --impure --raw --expr builtins.currentSystem 2>/dev/null || true)"
+if [ -n "$NIX_SYSTEM" ] && [ "$NIX_SYSTEM" != "$SYSTEM" ]; then
+	info "Using Nix system: $NIX_SYSTEM (kernel reported $SYSTEM)"
+	SYSTEM="$NIX_SYSTEM"
+fi
 
 # Ensure Nix daemon is running (containers without systemd need manual start)
 if [ "$(uname -s)" = "Linux" ] && ! pidof systemd >/dev/null 2>&1; then
