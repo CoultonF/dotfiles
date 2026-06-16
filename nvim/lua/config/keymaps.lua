@@ -143,6 +143,6 @@ map("n", "<leader>or", function()
 end, { desc = "OMP: ask about file" })
 
 -- Diagnostic navigation
-map("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic" })
-map("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic" })
+map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Go to previous diagnostic" })
+map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Go to next diagnostic" })
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Show diagnostic message" })

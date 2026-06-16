@@ -54,11 +54,20 @@ in
     cargo        # Rust package manager
 
     # LSP Servers
-    # Note: typescript-language-server and vscode-langservers-extracted installed via bun
+    # Note: vtsls, basedpyright, and vscode-langservers-extracted installed via bun
     # (nodePackages was removed from nixpkgs)
     # See home.activation.bunGlobalPackages below
     ruff         # Python LSP, linter, formatter
     lua-language-server
+    postgres-language-server  # SQL LSP for Postgres (binary: postgrestools)
+
+    # Linters & Formatters (conform.nvim + nvim-lint; deterministic via nix)
+    stylua           # Lua formatter
+    sqlfluff         # SQL lint + format (postgres dialect)
+    hadolint         # Dockerfile linter
+    shellcheck       # Shell linter
+    yamllint         # YAML linter
+    markdownlint-cli # Markdown linter (binary: markdownlint)
 
     # Build Tools
     gcc          # C compiler (treesitter parser compilation), includes g++
@@ -70,6 +79,7 @@ in
     # Database
     postgresql   # PostgreSQL client (psql) and libpq
     libpq        # PostgreSQL C client library
+    rainfrog     # PostgreSQL TUI (browse/run queries; <leader>D in nvim)
 
     # C/C++ Libraries for Python packages
     libffi       # Foreign function interface (required by cffi, etc.)
@@ -448,7 +458,7 @@ in
     }
 
     install_bun_global tree-sitter-cli tree-sitter
-    install_bun_global pyright pyright-langserver
+    install_bun_global basedpyright basedpyright-langserver
     install_bun_global typescript-language-server typescript-language-server
     install_bun_global vscode-langservers-extracted vscode-json-language-server
     install_bun_global @steipete/oracle oracle
@@ -456,6 +466,9 @@ in
     install_bun_global @earendil-works/pi-coding-agent pi
     install_bun_global @oh-my-pi/pi-coding-agent omp
     install_bun_global @termdraw/app termdraw
+    install_bun_global oxlint oxlint
+    install_bun_global oxfmt oxfmt
+    install_bun_global @vtsls/language-server vtsls
 
     # nixpkgs bun lags; upgrade the user-space copy to meet tool version requirements
     ${homeDirectory}/.bun/bin/bun upgrade || true

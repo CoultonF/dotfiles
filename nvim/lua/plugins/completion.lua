@@ -22,6 +22,17 @@ return {
       snippets = { preset = "luasnip" },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
+        -- Schema-aware completion in SQL buffers via vim-dadbod-completion
+        -- (installed in plugins/dadbod.lua). blink loads the provider module
+        -- lazily on the first SQL buffer.
+        per_filetype = {
+          sql = { "dadbod", "snippets", "buffer" },
+          mysql = { "dadbod", "snippets", "buffer" },
+          plsql = { "dadbod", "snippets", "buffer" },
+        },
+        providers = {
+          dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
+        },
       },
       signature = { enabled = true },
       fuzzy = { implementation = "prefer_rust_with_warning" },

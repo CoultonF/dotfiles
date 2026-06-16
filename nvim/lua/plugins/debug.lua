@@ -55,9 +55,10 @@ return {
           { "<leader>dPc", function() require("dap-python").test_class() end, desc = "Debug test class" },
         },
         config = function()
-          -- Use debugpy from Mason or system
-          local path = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
-          require("dap-python").setup(path)
+          -- Prefer the per-package venv (if it has debugpy), else Mason's debugpy.
+          local venv_python = require("utils.venv").find_python()
+          local mason_python = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
+          require("dap-python").setup(venv_python or mason_python)
         end,
       },
     },

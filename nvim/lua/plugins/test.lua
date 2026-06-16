@@ -33,18 +33,9 @@ return {
             dap = { justMyCode = false },
             args = { "--log-level", "DEBUG" },
             runner = "pytest",
+            -- Per-package venv detection (walks up from the test file).
             python = function()
-              -- Try to find project venv
-              local venv = vim.fn.getcwd() .. "/.venv/bin/python"
-              if vim.fn.filereadable(venv) == 1 then
-                return venv
-              end
-              -- Fallback to flask_app venv (for rcom)
-              venv = "/project/flask_app/.venv/bin/python"
-              if vim.fn.filereadable(venv) == 1 then
-                return venv
-              end
-              return "python"
+              return require("utils.venv").find_python() or "python"
             end,
           }),
           require("neotest-jest")({

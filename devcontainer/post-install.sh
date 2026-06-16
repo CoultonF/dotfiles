@@ -76,6 +76,7 @@ nix profile install \
 	nixpkgs#nodejs_22 \
 	nixpkgs#python312 \
 	nixpkgs#ruff \
+	nixpkgs#lua-language-server \
 	nixpkgs#gcc \
 	nixpkgs#gnumake \
 	nixpkgs#pkg-config \
@@ -84,6 +85,14 @@ nix profile install \
 	nixpkgs#unzip \
 	nixpkgs#postgresql \
 	nixpkgs#libpq \
+	nixpkgs#postgres-language-server \
+	nixpkgs#rainfrog \
+	nixpkgs#stylua \
+	nixpkgs#sqlfluff \
+	nixpkgs#hadolint \
+	nixpkgs#shellcheck \
+	nixpkgs#yamllint \
+	nixpkgs#markdownlint-cli \
 	nixpkgs#libffi \
 	nixpkgs#cairo \
 	nixpkgs#pango \
@@ -120,7 +129,7 @@ install_bun_global() {
 }
 
 install_bun_global tree-sitter-cli tree-sitter
-install_bun_global pyright pyright-langserver
+install_bun_global basedpyright basedpyright-langserver
 install_bun_global typescript-language-server typescript-language-server
 install_bun_global vscode-langservers-extracted vscode-json-language-server
 install_bun_global @steipete/oracle oracle
@@ -128,6 +137,9 @@ install_bun_global @openai/codex codex
 install_bun_global @earendil-works/pi-coding-agent pi
 install_bun_global @oh-my-pi/pi-coding-agent omp
 install_bun_global @termdraw/app termdraw
+install_bun_global oxlint oxlint
+install_bun_global oxfmt oxfmt
+install_bun_global @vtsls/language-server vtsls
 
 # Nixpkgs bun lags; upgrade to latest to meet tool version requirements
 bun upgrade
