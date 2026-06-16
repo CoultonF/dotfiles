@@ -445,40 +445,85 @@ in
   # ============================================================================
   home.activation.bunGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     export BUN_INSTALL="${homeDirectory}/.bun"
-    export PATH="${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:${pkgs.unzip}/bin:${homeDirectory}/.bun/bin:$PATH"
+    export PATH="${homeDirectory}/.bun/bin:${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:${pkgs.unzip}/bin:$PATH"
     mkdir -p "${homeDirectory}/.bun/bin"
+
+    bun_bin="${homeDirectory}/.bun/bin/bun"
+
+    # Bun's installer selects x64-baseline on Linux x86_64 CPUs without AVX2.
+    if [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && ! grep -qi avx2 /proc/cpuinfo; then
+      echo "Installing Bun x64-baseline build for CPU without AVX2..."
+      ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
+    elif [ -x "$bun_bin" ]; then
+      "$bun_bin" upgrade || true
+    else
+      ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
+    fi
+
+    set_omp_native_target() {
+      case "$(uname -s):$(uname -m)" in
+        Linux:x86_64)
+          omp_native_platform="linux-x64"
+          ;;
+        Darwin:x86_64)
+          omp_native_platform="darwin-x64"
+          ;;
+        *)
+          return 1
+          ;;
+      esac
+
+      if [ "''${PI_NATIVE_VARIANT:-}" = "modern" ] || [ "''${PI_NATIVE_VARIANT:-}" = "baseline" ]; then
+        omp_native_variant="$PI_NATIVE_VARIANT"
+      elif [ "$omp_native_platform" = "linux-x64" ]; then
+        if grep -qi avx2 /proc/cpuinfo 2>/dev/null; then
+          omp_native_variant="modern"
+        else
+          omp_native_variant="baseline"
+        fi
+      elif { sysctl -n machdep.cpu.leaf7_features 2>/dev/null | grep -qi avx2; } || { sysctl -n machdep.cpu.features 2>/dev/null | grep -qi avx2; }; then
+        omp_native_variant="modern"
+      else
+        omp_native_variant="baseline"
+      fi
+
+      omp_native_file="pi_natives.$omp_native_platform-$omp_native_variant.node"
+    }
+
+    omp_native_missing() {
+      set_omp_native_target || return 1
+      native_dir="${homeDirectory}/.bun/install/global/node_modules/@oh-my-pi/pi-natives/native"
+      leaf_dir="${homeDirectory}/.bun/install/global/node_modules/@oh-my-pi/pi-natives-$omp_native_platform"
+      [ ! -f "$native_dir/$omp_native_file" ] && [ ! -f "$leaf_dir/$omp_native_file" ]
+    }
 
     install_bun_global() {
       pkg="$1"
       bin="$2"
       if [ ! -x "${homeDirectory}/.bun/bin/$bin" ]; then
         echo "Installing $pkg via bun..."
-        ${pkgs.bun}/bin/bun add -g "$pkg" || echo "WARNING: Failed to install $pkg"
+        "$bun_bin" add -g "$pkg" || echo "WARNING: Failed to install $pkg"
+      elif [ "$bin" = "omp" ] && omp_native_missing; then
+        echo "Installing OMP native addon for $omp_native_platform..."
+        "$bun_bin" add -g "$pkg" @oh-my-pi/pi-natives "@oh-my-pi/pi-natives-$omp_native_platform" || echo "WARNING: Failed to install OMP native addon"
       fi
     }
 
-    install_bun_global tree-sitter-cli tree-sitter
-    install_bun_global basedpyright basedpyright-langserver
-    install_bun_global typescript-language-server typescript-language-server
-    install_bun_global vscode-langservers-extracted vscode-json-language-server
-    install_bun_global @steipete/oracle oracle
-    install_bun_global @openai/codex codex
-    install_bun_global @earendil-works/pi-coding-agent pi
-    install_bun_global @oh-my-pi/pi-coding-agent omp
-    install_bun_global @termdraw/app termdraw
-    install_bun_global oxlint oxlint
-    install_bun_global oxfmt oxfmt
-    install_bun_global @vtsls/language-server vtsls
-
-    # Keep a user-writable Bun current for global CLIs. On older x64 CPUs,
-    # use Bun's installer because it selects the x64-baseline build.
-    if [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && ! grep -qi avx2 /proc/cpuinfo; then
-      echo "Installing Bun x64-baseline build for CPU without AVX2..."
-      ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
-    elif [ -x "${homeDirectory}/.bun/bin/bun" ]; then
-      ${homeDirectory}/.bun/bin/bun upgrade || true
+    if [ -x "$bun_bin" ]; then
+      install_bun_global tree-sitter-cli tree-sitter
+      install_bun_global basedpyright basedpyright-langserver
+      install_bun_global typescript-language-server typescript-language-server
+      install_bun_global vscode-langservers-extracted vscode-json-language-server
+      install_bun_global @steipete/oracle oracle
+      install_bun_global @openai/codex codex
+      install_bun_global @earendil-works/pi-coding-agent pi
+      install_bun_global @oh-my-pi/pi-coding-agent omp
+      install_bun_global @termdraw/app termdraw
+      install_bun_global oxlint oxlint
+      install_bun_global oxfmt oxfmt
+      install_bun_global @vtsls/language-server vtsls
     else
-      ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
+      echo "WARNING: $bun_bin not found; skipping bun-managed global CLIs"
     fi
   '';
 

@@ -119,12 +119,68 @@ printf 'prefix=%s\n' "$NPM_CONFIG_PREFIX" >"$HOME/.npmrc"
 append_line_if_missing 'export NPM_CONFIG_PREFIX="$HOME/.npm-global"' ~/.bashrc
 append_line_if_missing 'export PATH="$HOME/.npm-global/bin:$PATH"' ~/.bashrc
 
+BUN_BIN="$BUN_INSTALL/bin/bun"
+
+# Bun's installer selects x64-baseline on Linux x86_64 CPUs without AVX2.
+if [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && ! grep -qi avx2 /proc/cpuinfo; then
+	echo "Installing Bun x64-baseline build for CPU without AVX2..."
+	curl -fsSL https://bun.com/install | bash
+elif [ -x "$BUN_BIN" ]; then
+	"$BUN_BIN" upgrade
+else
+	curl -fsSL https://bun.com/install | bash
+fi
+if [ ! -x "$BUN_BIN" ]; then
+	echo "ERROR: $BUN_BIN not found after Bun install/upgrade"
+	exit 1
+fi
+
+set_omp_native_target() {
+	case "$(uname -s):$(uname -m)" in
+		Linux:x86_64)
+			omp_native_platform="linux-x64"
+			;;
+		Darwin:x86_64)
+			omp_native_platform="darwin-x64"
+			;;
+		*)
+			return 1
+			;;
+	esac
+
+	if [ "${PI_NATIVE_VARIANT:-}" = "modern" ] || [ "${PI_NATIVE_VARIANT:-}" = "baseline" ]; then
+		omp_native_variant="$PI_NATIVE_VARIANT"
+	elif [ "$omp_native_platform" = "linux-x64" ]; then
+		if grep -qi avx2 /proc/cpuinfo 2>/dev/null; then
+			omp_native_variant="modern"
+		else
+			omp_native_variant="baseline"
+		fi
+	elif { sysctl -n machdep.cpu.leaf7_features 2>/dev/null | grep -qi avx2; } || { sysctl -n machdep.cpu.features 2>/dev/null | grep -qi avx2; }; then
+		omp_native_variant="modern"
+	else
+		omp_native_variant="baseline"
+	fi
+
+	omp_native_file="pi_natives.$omp_native_platform-$omp_native_variant.node"
+}
+
+omp_native_missing() {
+	set_omp_native_target || return 1
+	local native_dir="$BUN_INSTALL/install/global/node_modules/@oh-my-pi/pi-natives/native"
+	local leaf_dir="$BUN_INSTALL/install/global/node_modules/@oh-my-pi/pi-natives-$omp_native_platform"
+	[ ! -f "$native_dir/$omp_native_file" ] && [ ! -f "$leaf_dir/$omp_native_file" ]
+}
+
 install_bun_global() {
 	local pkg="$1"
 	local bin="$2"
 	if [ ! -x "$BUN_INSTALL/bin/$bin" ]; then
 		echo "Installing $pkg via bun..."
-		bun add -g "$pkg"
+		"$BUN_BIN" add -g "$pkg"
+	elif [ "$bin" = "omp" ] && omp_native_missing; then
+		echo "Installing OMP native addon for $omp_native_platform..."
+		"$BUN_BIN" add -g "$pkg" @oh-my-pi/pi-natives "@oh-my-pi/pi-natives-$omp_native_platform"
 	fi
 }
 
@@ -140,9 +196,6 @@ install_bun_global @termdraw/app termdraw
 install_bun_global oxlint oxlint
 install_bun_global oxfmt oxfmt
 install_bun_global @vtsls/language-server vtsls
-
-# Nixpkgs bun lags; upgrade to latest to meet tool version requirements
-bun upgrade
 
 CHROMIUM_BIN="$(command -v chromium 2>/dev/null || true)"
 if [ -n "$CHROMIUM_BIN" ]; then
