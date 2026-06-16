@@ -470,8 +470,16 @@ in
     install_bun_global oxfmt oxfmt
     install_bun_global @vtsls/language-server vtsls
 
-    # nixpkgs bun lags; upgrade the user-space copy to meet tool version requirements
-    ${homeDirectory}/.bun/bin/bun upgrade || true
+    # Keep a user-writable Bun current for global CLIs. On older x64 CPUs,
+    # use Bun's installer because it selects the x64-baseline build.
+    if [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && ! grep -qi avx2 /proc/cpuinfo; then
+      echo "Installing Bun x64-baseline build for CPU without AVX2..."
+      ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
+    elif [ -x "${homeDirectory}/.bun/bin/bun" ]; then
+      ${homeDirectory}/.bun/bin/bun upgrade || true
+    else
+      ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
+    fi
   '';
 
   # ============================================================================
