@@ -1,4 +1,4 @@
-{ config, pkgs, lib, isDarwin, ... }:
+{ config, pkgs, lib, isDarwin, bunPinned ? pkgs.bun, ... }:
 
 let
   # Get from environment, with fallback for pure evaluation
@@ -489,52 +489,64 @@ in
   # ============================================================================
   home.activation.bunGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     export BUN_INSTALL="${homeDirectory}/.bun"
-    export PATH="${homeDirectory}/.bun/bin:${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:${pkgs.unzip}/bin:$PATH"
+    export PATH="${homeDirectory}/.bun/bin:${bunPinned}/bin:${pkgs.nodejs_22}/bin:${pkgs.unzip}/bin:$PATH"
     mkdir -p "${homeDirectory}/.bun/bin"
 
     bun_bin="${homeDirectory}/.bun/bin/bun"
 
-    # Bun's default x64 build requires AVX2. On CPUs without it, bun crashes
-    # intermittently and warns "CPU lacks AVX support" at startup. The official
-    # installer is idempotent *by version*, so it will NOT swap a same-version
-    # default build for the baseline variant -- fetch the baseline zip directly.
-    install_bun_baseline() {
-      tag="$(${pkgs.curl}/bin/curl -fsSLI -o /dev/null -w '%{url_effective}' \
-            https://github.com/oven-sh/bun/releases/latest 2>/dev/null | sed 's#.*/tag/##')"
-      [ -n "$tag" ] || tag="bun-v$("$bun_bin" --version 2>/dev/null || echo "")"
-      [ "$tag" = "bun-v" ] && return 1
-      tmp="$(mktemp -d)"
-      if ${pkgs.curl}/bin/curl -fsSL \
-           "https://github.com/oven-sh/bun/releases/download/$tag/bun-linux-x64-baseline.zip" \
-           -o "$tmp/bun.zip" \
-         && ${pkgs.unzip}/bin/unzip -oq "$tmp/bun.zip" -d "$tmp"; then
-        mkdir -p "$(dirname "$bun_bin")"
-        install -m755 "$tmp/bun-linux-x64-baseline/bun" "$bun_bin"
-      fi
-      rm -rf "$tmp"
-    }
+    # Trust Nix for the native arch, never uname: under OrbStack this amd64-
+    # personality container reports uname -m=x86_64 even though the real VM is
+    # arm64. Nix evaluates this module as its true host system, so branch on it.
+    nix_system="${pkgs.stdenv.hostPlatform.system}"
 
-    # Detect the platform from bun itself, NOT uname: on emulated/OrbStack boxes
-    # the activation can see uname -m=aarch64 while the userland and bun build are
-    # linux-x64, which would misroute the logic below. /proc/cpuinfo still reflects
-    # the real CPU, so gate the baseline requirement on its AVX2 flag.
-    bun_arch=""
-    if [ -x "$bun_bin" ]; then
-      bun_arch="$("$bun_bin" -e 'process.stdout.write(process.platform + "-" + process.arch)' 2>/dev/null || true)"
-    fi
-
-    if [ ! -x "$bun_bin" ]; then
-      ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
-    elif [ "$bun_arch" = "linux-x64" ] && ! grep -qi avx2 /proc/cpuinfo; then
-      # No AVX2: must use the baseline build. Reinstall only when the current build
-      # is wrong (it warns "lacks AVX"). Never run "bun upgrade" here -- it can
-      # reintroduce a default build that crashes on this CPU.
-      if "$bun_bin" --revision 2>&1 | grep -qi "lacks AVX"; then
-        echo "Installing Bun x64-baseline build for CPU without AVX2..."
-        install_bun_baseline || true
-      fi
+    if [ "$nix_system" = "aarch64-linux" ]; then
+      # Native arm64: point bun at the Nix-built, loader-patched binary
+      # (bunPinned, >=1.3.14). A curl-installed or raw-prebuilt arm64 bun cannot
+      # run here -- the amd64 base image has no /lib/ld-linux-aarch64.so.1; only
+      # Nix's autoPatchelf'd binary resolves its interpreter. Running the x64
+      # build under emulation instead is what wedged OMP's event loop. arm64 has
+      # no AVX2 concept, so the x64 baseline/modern handling is skipped entirely.
+      ln -sfn "${bunPinned}/bin/bun" "$bun_bin"
     else
-      "$bun_bin" upgrade || true
+      # x86_64 (e.g. AWS EC2 amd64 devpods, which have AVX2). Bun's default x64
+      # build requires AVX2; on CPUs without it bun warns "CPU lacks AVX support"
+      # and crashes intermittently. The official installer is idempotent *by
+      # version*, so it will NOT swap a same-version default build for the
+      # baseline variant -- fetch the baseline zip directly.
+      install_bun_baseline() {
+        tag="$(${pkgs.curl}/bin/curl -fsSLI -o /dev/null -w '%{url_effective}' \
+              https://github.com/oven-sh/bun/releases/latest 2>/dev/null | sed 's#.*/tag/##')"
+        [ -n "$tag" ] || tag="bun-v$("$bun_bin" --version 2>/dev/null || echo "")"
+        [ "$tag" = "bun-v" ] && return 1
+        tmp="$(mktemp -d)"
+        if ${pkgs.curl}/bin/curl -fsSL \
+             "https://github.com/oven-sh/bun/releases/download/$tag/bun-linux-x64-baseline.zip" \
+             -o "$tmp/bun.zip" \
+           && ${pkgs.unzip}/bin/unzip -oq "$tmp/bun.zip" -d "$tmp"; then
+          mkdir -p "$(dirname "$bun_bin")"
+          install -m755 "$tmp/bun-linux-x64-baseline/bun" "$bun_bin"
+        fi
+        rm -rf "$tmp"
+      }
+
+      bun_arch=""
+      if [ -x "$bun_bin" ]; then
+        bun_arch="$("$bun_bin" -e 'process.stdout.write(process.platform + "-" + process.arch)' 2>/dev/null || true)"
+      fi
+
+      if [ ! -x "$bun_bin" ]; then
+        ${pkgs.curl}/bin/curl -fsSL https://bun.com/install | ${pkgs.bash}/bin/bash || true
+      elif [ "$bun_arch" = "linux-x64" ] && ! grep -qi avx2 /proc/cpuinfo; then
+        # No AVX2: must use the baseline build. Reinstall only when the current
+        # build is wrong (it warns "lacks AVX"). Never run "bun upgrade" here --
+        # it can reintroduce a default build that crashes on this CPU.
+        if "$bun_bin" --revision 2>&1 | grep -qi "lacks AVX"; then
+          echo "Installing Bun x64-baseline build for CPU without AVX2..."
+          install_bun_baseline || true
+        fi
+      else
+        "$bun_bin" upgrade || true
+      fi
     fi
 
     set_omp_native_target() {
@@ -543,14 +555,33 @@ in
         omp_native_platform="$("$bun_bin" -e 'process.stdout.write(process.platform + "-" + process.arch)' 2>/dev/null || true)"
       fi
       case "$omp_native_platform" in
-        linux-x64 | darwin-x64)
+        linux-x64 | darwin-x64 | linux-arm64 | darwin-arm64)
           ;;
         *)
-          case "$(uname -s):$(uname -m)" in
-            Linux:x86_64) omp_native_platform="linux-x64" ;;
-            Darwin:x86_64) omp_native_platform="darwin-x64" ;;
-            *) return 1 ;;
+          # Fallback when bun can't self-report: trust Nix's system, not uname
+          # (which lies under OrbStack's amd64 personality).
+          case "$nix_system" in
+            aarch64-linux) omp_native_platform="linux-arm64" ;;
+            x86_64-linux)  omp_native_platform="linux-x64" ;;
+            *)
+              case "$(uname -s):$(uname -m)" in
+                Linux:x86_64)  omp_native_platform="linux-x64" ;;
+                Linux:aarch64) omp_native_platform="linux-arm64" ;;
+                Darwin:x86_64) omp_native_platform="darwin-x64" ;;
+                Darwin:arm64)  omp_native_platform="darwin-arm64" ;;
+                *) return 1 ;;
+              esac
+              ;;
           esac
+          ;;
+      esac
+
+      # arm64 ships a single addon variant (no AVX2 tiers); the loader probes the
+      # bare "pi_natives.<platform>.node" name -- no -baseline/-modern suffix.
+      case "$omp_native_platform" in
+        linux-arm64 | darwin-arm64)
+          omp_native_file="pi_natives.$omp_native_platform.node"
+          return 0
           ;;
       esac
 
