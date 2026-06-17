@@ -497,6 +497,9 @@ in
       native_path="$native_dir/$omp_native_file"
       leaf_path="$leaf_dir/$omp_native_file"
 
+      # The loader probes @oh-my-pi/pi-natives/native, not the platform leaf package.
+      # Treat the leaf package as a staging source only.
+
       if [ -f "$native_path" ]; then
         return 0
       fi
@@ -521,17 +524,11 @@ in
     install_bun_global() {
       pkg="$1"
       bin="$2"
-      if [ ! -x "${homeDirectory}/.bun/bin/$bin" ]; then
+      if [ "$bin" = "omp" ] && set_omp_native_target; then
+        install_omp_with_native "$pkg"
+      elif [ ! -x "${homeDirectory}/.bun/bin/$bin" ]; then
         echo "Installing $pkg via bun..."
-        if "${homeDirectory}/.bun/bin/bun" add -g "$pkg"; then
-          if [ "$bin" = "omp" ]; then
-            ensure_omp_native_staged || install_omp_with_native "$pkg"
-          fi
-        else
-          echo "WARNING: Failed to install $pkg"
-        fi
-      elif [ "$bin" = "omp" ]; then
-        ensure_omp_native_staged || install_omp_with_native "$pkg"
+        "${homeDirectory}/.bun/bin/bun" add -g "$pkg" || echo "WARNING: Failed to install $pkg"
       fi
     }
 

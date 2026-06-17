@@ -172,6 +172,9 @@ ensure_omp_native_staged() {
 	local native_path="$native_dir/$omp_native_file"
 	local leaf_path="$leaf_dir/$omp_native_file"
 
+	# The loader probes @oh-my-pi/pi-natives/native, not the platform leaf package.
+	# Treat the leaf package as a staging source only.
+
 	if [ -f "$native_path" ]; then
 		return 0
 	fi
@@ -186,25 +189,18 @@ ensure_omp_native_staged() {
 install_omp_with_native() {
 	set_omp_native_target || return 0
 	echo "Installing OMP native addon for $omp_native_platform..."
-	if "$BUN_BIN" add -g "$1" @oh-my-pi/pi-natives "@oh-my-pi/pi-natives-$omp_native_platform"; then
-		ensure_omp_native_staged || echo "WARNING: Failed to stage OMP native addon"
-	else
-		echo "WARNING: Failed to install OMP native addon"
-	fi
+	"$BUN_BIN" add -g "$1" @oh-my-pi/pi-natives "@oh-my-pi/pi-natives-$omp_native_platform" || return 1
+	ensure_omp_native_staged || return 1
 }
 
 install_bun_global() {
 	local pkg="$1"
 	local bin="$2"
-	if [ ! -x "$BUN_INSTALL/bin/$bin" ]; then
+	if [ "$bin" = "omp" ] && set_omp_native_target; then
+		install_omp_with_native "$pkg"
+	elif [ ! -x "$BUN_INSTALL/bin/$bin" ]; then
 		echo "Installing $pkg via bun..."
-		if "$BUN_BIN" add -g "$pkg"; then
-			if [ "$bin" = "omp" ]; then
-				ensure_omp_native_staged || install_omp_with_native "$pkg"
-			fi
-		fi
-	elif [ "$bin" = "omp" ]; then
-		ensure_omp_native_staged || install_omp_with_native "$pkg"
+		"$BUN_BIN" add -g "$pkg"
 	fi
 }
 
