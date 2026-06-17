@@ -321,15 +321,19 @@ if [ -d "$DOTFILES_DIR" ]; then
 	# Claude Code global user instructions
 	cp "$DOTFILES_DIR/claude/CLAUDE.md" ~/.CLAUDE.md
 
-	# Claude Code hooks
+	# Claude Code keybindings
+	mkdir -p ~/.claude
+	cp "$DOTFILES_DIR/claude/keybindings.json" ~/.claude/keybindings.json
+
+	# Claude Code settings (hooks, default model, default mode)
 	if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 		mkdir -p ~/.claude
 		CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 		if [ -f "$CLAUDE_SETTINGS" ]; then
-			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
+			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" --slurpfile base "$DOTFILES_DIR/claude/settings.json" '. * $base[0] | .hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
 				cat "${CLAUDE_SETTINGS}.tmp" >"$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
 		else
-			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
+			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" --slurpfile base "$DOTFILES_DIR/claude/settings.json" '$base[0] + {hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
 		fi
 	fi
 

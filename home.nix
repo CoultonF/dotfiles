@@ -424,6 +424,10 @@ in
   home.file.".CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/CLAUDE.md";
 
+  # Claude Code keybindings. Out-of-store so edits apply without a rebuild.
+  home.file.".claude/keybindings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/keybindings.json";
+
   # Keep npm global installs out of the immutable Nix store.
   home.file.".npmrc".text = ''
     prefix=${homeDirectory}/.npm-global
