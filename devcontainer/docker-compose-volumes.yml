@@ -9,5 +9,11 @@
 #   - ${HOME}/.local-docker/share/nvim:/root/.local/share/nvim:cached
 #   # Nix store (persist installed packages)
 #   - ${HOME}/.nix-docker:/nix:cached
+#   # SSH agent socket (for Git SSH auth without mounting private keys)
+#   - ${SSH_AUTH_SOCK}:/tmp/ssh-agent
+
+# Under services.<service>.environment:
+# environment:
+#   - SSH_AUTH_SOCK=/tmp/ssh-agent
 
 # Then run: cd ~/.dotfiles && ./devcontainer/post-install.sh

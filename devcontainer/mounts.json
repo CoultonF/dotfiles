@@ -3,7 +3,11 @@
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.dotfiles,target=/root/.dotfiles,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.local-docker/share/nvim,target=/root/.local/share/nvim,type=bind",
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.nix-docker,target=/nix,type=bind"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.nix-docker,target=/nix,type=bind",
+    "source=${localEnv:SSH_AUTH_SOCK},target=/tmp/ssh-agent,type=bind"
   ],
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/tmp/ssh-agent"
+  },
   "_note": "Mount dotfiles directly, then run: cd ~/.dotfiles && ./devcontainer/post-install.sh"
 }
