@@ -36,6 +36,7 @@ in
     ripgrep      # Fast grep (rg)
     fd           # Fast find
     fzf          # Fuzzy finder
+    eza          # Modern ls (icons, git status) - aliased to ls/ll/la/lt below
     tree         # Directory tree
     lsof         # List open files/ports
 
@@ -126,7 +127,11 @@ in
     shellAliases = {
       python = "python3";
       pip = "pip3";
-      ll = "ls -alG";
+      # eza (modern ls). --group-directories-first puts dirs on top; --git shows status.
+      ls = "eza --icons=auto --group-directories-first";
+      ll = "eza -l --icons=auto --git --group-directories-first";
+      la = "eza -la --icons=auto --git --group-directories-first";
+      lt = "eza --tree --level=2 --icons=auto --group-directories-first";
       ts = "tmux-sessionizer";
       lg = "lazygit";
       v = "nvim";
@@ -215,6 +220,14 @@ in
         alias google-chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
       fi
       
+      # fzf-tab: replace zsh's completion menu with an fzf picker.
+      # Make sure completion is initialised (compinit) before sourcing the plugin,
+      # then load it. $realpath is provided by fzf-tab for previews.
+      (( $+functions[compdef] )) || { autoload -Uz compinit && compinit }
+      zstyle ':completion:*' menu no
+      source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+      zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto $realpath'
+
       # Auto-start tmux with default layout (skip if in IDE or already in tmux)
       if [[ "$TERM_PROGRAM" != "vscode" && -z "$INTELLIJ_ENVIRONMENT_READER" && -z "$VSCODE_PID" && -z "$VSCODE_INJECTION" ]]; then
         if command -v tmux &>/dev/null && [[ -z "$TMUX" ]]; then
@@ -370,6 +383,33 @@ in
   };
 
   # ============================================================================
+  # Modern CLI tools
+  # ============================================================================
+
+  # bat - syntax-highlighted cat/pager (acts like cat when piped)
+  programs.bat.enable = true;
+
+  # zoxide - frecency-based directory jumping (`z <dir>`, `zi` for interactive)
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  # atuin - SQLite-backed, searchable shell history. Ctrl-R opens the picker;
+  # Up-arrow is left as the normal line-history binding. Local-only by default
+  # (no account/sync required).
+  programs.atuin = {
+    enable = true;
+    enableZshIntegration = true;
+    flags = [ "--disable-up-arrow" ];
+    settings = {
+      auto_sync = false;
+      update_check = false;
+      style = "compact";
+    };
+  };
+
+  # ============================================================================
   # Config Files
   # ============================================================================
   
@@ -423,6 +463,10 @@ in
   # Keep out of the Nix store so edits take effect without a Home Manager rebuild.
   home.file.".CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/CLAUDE.md";
+
+  # Claude Code keybindings. Out-of-store so edits apply without a rebuild.
+  home.file.".claude/keybindings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/keybindings.json";
 
   # Keep npm global installs out of the immutable Nix store.
   home.file.".npmrc".text = ''

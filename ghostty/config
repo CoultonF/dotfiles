@@ -13,13 +13,32 @@ font-feature = -liga
 font-feature = -dlig
 
 # Window
+# Zen mode: open at a readable width instead of spanning the whole monitor.
+# window-width/window-height are measured in CELLS (columns x rows), not pixels,
+# and apply to each new window. 120 columns is a comfortable reading/coding
+# measure -- tune to taste. This takes effect when the window opens normally;
+# let Ghostty open at this size rather than hitting the green full-screen button.
+window-width = 120
+window-height = 40
+
 window-padding-x = 10
 window-padding-y = 10
+# Center the grid so any leftover padding is split evenly side to side.
+window-padding-balance = true
 window-decoration = true
 window-theme = ghostty
-window-save-state = always
+# Don't restore previous geometry -- otherwise a window that was once
+# full-screened reopens full-screen and ignores window-width above. Switch back
+# to "always" if you'd rather macOS restore the exact previous size/position.
+window-save-state = never
 window-inherit-working-directory = true
 window-inherit-font-size = true
+
+# Alternative if you prefer to KEEP Ghostty full-screen: comment out the
+# window-width/window-height lines above and instead add large symmetric side
+# padding to center the text. Note this is resolution-dependent and will not
+# hard-cap the column count on very wide monitors:
+#   window-padding-x = 400
 
 # Cursor
 cursor-style = block

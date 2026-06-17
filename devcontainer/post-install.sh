@@ -70,6 +70,11 @@ nix profile install \
 	nixpkgs#ripgrep \
 	nixpkgs#fd \
 	nixpkgs#fzf \
+	nixpkgs#eza \
+	nixpkgs#bat \
+	nixpkgs#zoxide \
+	nixpkgs#atuin \
+	nixpkgs#zsh-fzf-tab \
 	nixpkgs#lazygit \
 	nixpkgs#git \
 	nixpkgs#delta \
@@ -360,15 +365,19 @@ if [ -d "$DOTFILES_DIR" ]; then
 	# Claude Code global user instructions
 	cp "$DOTFILES_DIR/claude/CLAUDE.md" ~/.CLAUDE.md
 
-	# Claude Code hooks
+	# Claude Code keybindings
+	mkdir -p ~/.claude
+	cp "$DOTFILES_DIR/claude/keybindings.json" ~/.claude/keybindings.json
+
+	# Claude Code settings (hooks, default model, default mode)
 	if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 		mkdir -p ~/.claude
 		CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 		if [ -f "$CLAUDE_SETTINGS" ]; then
-			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '.hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
+			jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" --slurpfile base "$DOTFILES_DIR/claude/settings.json" '. * $base[0] | .hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
 				cat "${CLAUDE_SETTINGS}.tmp" >"$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
 		else
-			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" '{hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
+			jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" --slurpfile base "$DOTFILES_DIR/claude/settings.json" '$base[0] + {hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
 		fi
 	fi
 
@@ -391,11 +400,31 @@ done
 append_line_if_missing 'eval "$(direnv hook bash)"' ~/.bashrc
 append_line_if_missing 'eval "$(direnv hook zsh)"' ~/.zshrc
 
+# Modern CLI tools: shell integration (mirrors the full home.nix setup)
+# zoxide (smart `z` cd) for both shells
+append_line_if_missing 'eval "$(zoxide init bash)"' ~/.bashrc
+append_line_if_missing 'eval "$(zoxide init zsh)"' ~/.zshrc
+# atuin (Ctrl-R history search); keep the normal Up-arrow binding
+append_line_if_missing 'eval "$(atuin init bash --disable-up-arrow)"' ~/.bashrc
+append_line_if_missing 'eval "$(atuin init zsh --disable-up-arrow)"' ~/.zshrc
+# eza aliases (modern ls); bat is available directly as `bat`
+for rcfile in ~/.bashrc ~/.zshrc; do
+	append_line_if_missing "alias ls='eza --icons=auto --group-directories-first'" "$rcfile"
+	append_line_if_missing "alias ll='eza -l --icons=auto --git --group-directories-first'" "$rcfile"
+	append_line_if_missing "alias la='eza -la --icons=auto --git --group-directories-first'" "$rcfile"
+	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
+done
+# fzf-tab (zsh only): load after compinit, replace the completion menu with fzf
+append_line_if_missing 'autoload -Uz compinit && compinit' ~/.zshrc
+append_line_if_missing "zstyle ':completion:*' menu no" ~/.zshrc
+append_line_if_missing 'source "$HOME/.nix-profile/share/fzf-tab/fzf-tab.plugin.zsh"' ~/.zshrc
+append_line_if_missing "zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto \$realpath'" ~/.zshrc
+
 # Verify installations
 echo ""
 echo "Verifying installations..."
 
-for cmd in nvim tmux lazygit rg fd fzf opencode pi ruff; do
+for cmd in nvim tmux lazygit rg fd fzf eza bat zoxide atuin opencode pi ruff; do
 	if command -v "$cmd" &>/dev/null; then
 		echo "  $cmd: $(command -v $cmd)"
 	else
@@ -440,6 +469,10 @@ check_command lazygit
 check_command rg
 check_command fd
 check_command fzf
+check_command eza
+check_command bat
+check_command zoxide
+check_command atuin
 check_command direnv
 check_command opencode
 check_command pi
