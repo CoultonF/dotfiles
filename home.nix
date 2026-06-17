@@ -461,15 +461,19 @@ in
     fi
 
     set_omp_native_target() {
-      case "$(uname -s):$(uname -m)" in
-        Linux:x86_64)
-          omp_native_platform="linux-x64"
-          ;;
-        Darwin:x86_64)
-          omp_native_platform="darwin-x64"
+      omp_native_platform=""
+      if [ -x "$bun_bin" ]; then
+        omp_native_platform="$("$bun_bin" -e 'process.stdout.write(process.platform + "-" + process.arch)' 2>/dev/null || true)"
+      fi
+      case "$omp_native_platform" in
+        linux-x64 | darwin-x64)
           ;;
         *)
-          return 1
+          case "$(uname -s):$(uname -m)" in
+            Linux:x86_64) omp_native_platform="linux-x64" ;;
+            Darwin:x86_64) omp_native_platform="darwin-x64" ;;
+            *) return 1 ;;
+          esac
           ;;
       esac
 
