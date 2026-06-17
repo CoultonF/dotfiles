@@ -225,6 +225,14 @@ in
       # then load it. $realpath is provided by fzf-tab for previews.
       (( $+functions[compdef] )) || { autoload -Uz compinit && compinit }
       zstyle ':completion:*' menu no
+      # Pre-load fzf-tab's prebuilt native module from its known-good Nix path.
+      # Otherwise, when the plugin's own module_path probe misses the .so, it
+      # prompts "fzftab module needs to be rebuild?" on every interactive shell
+      # and the rebuild fails against the read-only Nix store. Loading it here
+      # means the plugin's `zmodload -e` check (fzf-tab.zsh:507) sees it already
+      # loaded as the expected version (0.2.2), so the rebuild branch never runs.
+      module_path+=("${pkgs.zsh-fzf-tab}/share/fzf-tab/modules/Src")
+      zmodload aloxaf/fzftab 2>/dev/null
       source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
       zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto $realpath'
 
