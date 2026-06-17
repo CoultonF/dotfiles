@@ -106,3 +106,6 @@ contextPromotion:
 marketplace: 
   autoUpdate: auto
 setupVersion: 1
+dev: 
+  autoqa: 
+    consent: granted
