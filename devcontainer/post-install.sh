@@ -140,18 +140,27 @@ install_bun_baseline() {
 	rm -rf "$tmp"
 }
 
-if [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && ! grep -qi avx2 /proc/cpuinfo; then
-	# No AVX2: reinstall baseline only when bun is missing or is the wrong
-	# (AVX-requiring) build. Never run "bun upgrade" here -- it can reintroduce a
-	# default build. The wrong build reports itself via a startup warning.
-	if [ ! -x "$BUN_BIN" ] || "$BUN_BIN" --revision 2>&1 | grep -qi "lacks AVX"; then
+# Detect the platform from bun itself, NOT uname: on emulated/OrbStack boxes the
+# activation can see uname -m=aarch64 while the userland and bun build are
+# linux-x64, which would misroute the logic below. /proc/cpuinfo still reflects
+# the real CPU, so gate the baseline requirement on its AVX2 flag.
+bun_arch=""
+if [ -x "$BUN_BIN" ]; then
+	bun_arch="$("$BUN_BIN" -e 'process.stdout.write(process.platform + "-" + process.arch)' 2>/dev/null || true)"
+fi
+
+if [ ! -x "$BUN_BIN" ]; then
+	curl -fsSL https://bun.com/install | bash
+elif [ "$bun_arch" = "linux-x64" ] && ! grep -qi avx2 /proc/cpuinfo; then
+	# No AVX2: must use the baseline build. Reinstall only when the current build
+	# is wrong (it warns "lacks AVX"). Never run "bun upgrade" here -- it can
+	# reintroduce a default build that crashes on this CPU.
+	if "$BUN_BIN" --revision 2>&1 | grep -qi "lacks AVX"; then
 		echo "Installing Bun x64-baseline build for CPU without AVX2..."
 		install_bun_baseline || true
 	fi
-elif [ -x "$BUN_BIN" ]; then
-	"$BUN_BIN" upgrade
 else
-	curl -fsSL https://bun.com/install | bash
+	"$BUN_BIN" upgrade
 fi
 if [ ! -x "$BUN_BIN" ]; then
 	echo "ERROR: $BUN_BIN not found after Bun install/upgrade"
