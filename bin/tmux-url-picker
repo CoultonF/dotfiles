@@ -2,23 +2,34 @@
 # tmux URL picker: extract URLs from pane, select with fzf, open or copy.
 # Replaces fzf-tmux-url plugin to handle URLs that wrap across lines.
 
-# Capture pane content, joining soft-wrapped lines (-J) and stripping escapes (no -e)
-content="$(tmux capture-pane -J -p)"
-joined=$(echo "$content" | tr -d '\n')
+# Capture the visible pane and rebuild URLs that were wrapped across rows. tmux paints each
+# wrapped row as an independent line (TUIs like the Codex/omp login screen also re-indent
+# every row), so -J cannot rejoin them. Strip each line's surrounding whitespace, then
+# concatenate a line onto the previous one only when it has no internal spaces and does not
+# start a new URL -- i.e. it is the no-space tail of a wrapped URL. URLs never contain
+# spaces, so this rejoins a split URL without gluing on trailing prose (e.g. "Click here to
+# login"), and works regardless of the wrap column. The final awk splits any
+# directly-adjacent URLs back apart.
+content=$(tmux capture-pane -p |
+    awk '{ s=$0; sub(/^[ \t]+/,"",s); sub(/[ \t]+$/,"",s)
+           if (acc!="" && s!="" && s !~ /[ \t]/ && s !~ /^(https?|ftp|file):\/\//) acc=acc s
+           else { if (acc!="") print acc; acc=s } }
+         END { if (acc!="") print acc }' |
+    awk '{gsub(/(https?|ftp|file):\/\//,"\n&");print}')
 
 url_regex='(https?|ftp|file):/?//[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'
 
-# Extract from original first, then joined (newlines removed)
-urls_orig=$(echo "$content" | grep -oE "$url_regex")
-urls_joined=$(echo "$joined" | grep -oE "$url_regex")
-urls=$(printf '%s\n%s' "$urls_orig" "$urls_joined")
+urls=$(echo "$content" | grep -oE "$url_regex")
 wwws=$(echo "$content" | grep -oE '(https?://)?www\.[a-zA-Z](-?[a-zA-Z0-9])+\.[a-zA-Z]{2,}(/\S+)*' | grep -vE '^https?://' | sed 's/^\(.*\)$/http:\/\/\1/')
 ips=$(echo "$content" | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(:[0-9]{1,5})?(/\S+)*' | sed 's/^\(.*\)$/http:\/\/\1/')
 gits=$(echo "$content" | grep -oE '(ssh://)?git@\S*' | sed 's/:/\//g' | sed 's/^\(ssh\/\/\/\)\{0,1\}git@\(.*\)$/https:\/\/\2/')
 
-items=$(printf '%s\n' "${urls[@]}" "${wwws[@]}" "${ips[@]}" "${gits[@]}" |
+items=$(printf '%s\n' "$urls" "$wwws" "$ips" "$gits" |
     grep -v '^$' |
     awk '!seen[$0]++' |
+    # Drop any candidate that is a strict prefix of a longer one, so a truncated
+    # fragment (e.g. from a mis-measured multibyte row) never shadows the full URL.
+    awk '{l[NR]=$0} END{for(i=1;i<=NR;i++){k=1;for(j=1;j<=NR;j++)if(i!=j&&length(l[j])>length(l[i])&&substr(l[j],1,length(l[i]))==l[i]){k=0;break}if(k)print l[i]}}' |
     nl -w3 -s '  '
 )
 
