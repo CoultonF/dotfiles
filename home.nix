@@ -115,7 +115,10 @@ in
     jq           # JSON processor
     awscli2      # AWS CLI
     direnv       # Per-directory environment variables
-    open-policy-agent # OPA policy engine (opa)
+    # OPA policy engine (opa). No prebuilt binary in the cache for
+    # aarch64-darwin, so it builds from source; skip the giant Go test suite
+    # (checkPhase) which otherwise stalls the install for many minutes.
+    (open-policy-agent.overrideAttrs (_: { doCheck = false; }))
   ] ++ lib.optionals (!isDarwin) [
     chromium     # Native browser for Puppeteer in Linux containers
     glibcLocales # Locale data for containers (macOS has built-in locale support)
