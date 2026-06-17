@@ -165,11 +165,32 @@ set_omp_native_target() {
 	omp_native_file="pi_natives.$omp_native_platform-$omp_native_variant.node"
 }
 
-omp_native_missing() {
-	set_omp_native_target || return 1
+ensure_omp_native_staged() {
+	set_omp_native_target || return 0
 	local native_dir="$BUN_INSTALL/install/global/node_modules/@oh-my-pi/pi-natives/native"
 	local leaf_dir="$BUN_INSTALL/install/global/node_modules/@oh-my-pi/pi-natives-$omp_native_platform"
-	[ ! -f "$native_dir/$omp_native_file" ] && [ ! -f "$leaf_dir/$omp_native_file" ]
+	local native_path="$native_dir/$omp_native_file"
+	local leaf_path="$leaf_dir/$omp_native_file"
+
+	if [ -f "$native_path" ]; then
+		return 0
+	fi
+
+	if [ ! -f "$leaf_path" ]; then
+		return 1
+	fi
+
+	mkdir -p "$native_dir" && rm -f "$native_path" && cp -f "$leaf_path" "$native_path"
+}
+
+install_omp_with_native() {
+	set_omp_native_target || return 0
+	echo "Installing OMP native addon for $omp_native_platform..."
+	if "$BUN_BIN" add -g "$1" @oh-my-pi/pi-natives "@oh-my-pi/pi-natives-$omp_native_platform"; then
+		ensure_omp_native_staged || echo "WARNING: Failed to stage OMP native addon"
+	else
+		echo "WARNING: Failed to install OMP native addon"
+	fi
 }
 
 install_bun_global() {
@@ -177,10 +198,13 @@ install_bun_global() {
 	local bin="$2"
 	if [ ! -x "$BUN_INSTALL/bin/$bin" ]; then
 		echo "Installing $pkg via bun..."
-		"$BUN_BIN" add -g "$pkg"
-	elif [ "$bin" = "omp" ] && omp_native_missing; then
-		echo "Installing OMP native addon for $omp_native_platform..."
-		"$BUN_BIN" add -g "$pkg" @oh-my-pi/pi-natives "@oh-my-pi/pi-natives-$omp_native_platform"
+		if "$BUN_BIN" add -g "$pkg"; then
+			if [ "$bin" = "omp" ]; then
+				ensure_omp_native_staged || install_omp_with_native "$pkg"
+			fi
+		fi
+	elif [ "$bin" = "omp" ]; then
+		ensure_omp_native_staged || install_omp_with_native "$pkg"
 	fi
 }
 
