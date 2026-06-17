@@ -414,10 +414,21 @@ for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing "alias la='eza -la --icons=auto --git --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
 done
-# fzf-tab (zsh only): load after compinit, replace the completion menu with fzf
+# fzf-tab (zsh only): load after compinit, replace the completion menu with fzf.
+# Stage a copy with the prebuilt binary module stripped out: its RUNPATH targets
+# glibc 2.42, so on glibc 2.41 hosts it fails to load and fzf-tab nags to rebuild
+# it. Without the module fzf-tab uses its working pure-zsh fallback.
+FZF_TAB_NOMOD="$HOME/.local/share/fzf-tab-no-module"
+if [ -d "$HOME/.nix-profile/share/fzf-tab" ]; then
+	rm -rf "$FZF_TAB_NOMOD"
+	mkdir -p "$(dirname "$FZF_TAB_NOMOD")"
+	cp -rL "$HOME/.nix-profile/share/fzf-tab" "$FZF_TAB_NOMOD"
+	chmod -R u+w "$FZF_TAB_NOMOD"
+	rm -rf "$FZF_TAB_NOMOD/modules"
+fi
 append_line_if_missing 'autoload -Uz compinit && compinit' ~/.zshrc
 append_line_if_missing "zstyle ':completion:*' menu no" ~/.zshrc
-append_line_if_missing 'source "$HOME/.nix-profile/share/fzf-tab/fzf-tab.plugin.zsh"' ~/.zshrc
+append_line_if_missing 'source "$HOME/.local/share/fzf-tab-no-module/fzf-tab.plugin.zsh"' ~/.zshrc
 append_line_if_missing "zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto \$realpath'" ~/.zshrc
 
 # Verify installations

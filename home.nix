@@ -14,6 +14,16 @@ let
     if envDotfilesDir != "" then envDotfilesDir
     else if envPwd != "" then envPwd
     else "${homeDirectory}/dotfiles";
+
+  # fzf-tab ships a prebuilt binary module whose RUNPATH points at glibc 2.42.
+  # Hosts on glibc 2.41 can't load it, so fzf-tab nags to rebuild it (which also
+  # fails on the read-only Nix store). Strip the module so fzf-tab falls back to
+  # its pure-zsh implementation, which works without the native accelerator.
+  fzfTabNoModule = pkgs.runCommand "fzf-tab-no-module" { } ''
+    cp -r ${pkgs.zsh-fzf-tab} $out
+    chmod -R u+w $out
+    rm -rf $out/share/fzf-tab/modules
+  '';
 in
 {
   # Home Manager configuration
@@ -225,7 +235,7 @@ in
       # then load it. $realpath is provided by fzf-tab for previews.
       (( $+functions[compdef] )) || { autoload -Uz compinit && compinit }
       zstyle ':completion:*' menu no
-      source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+      source ${fzfTabNoModule}/share/fzf-tab/fzf-tab.plugin.zsh
       zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto $realpath'
 
       # Auto-start tmux with default layout (skip if in IDE or already in tmux)
