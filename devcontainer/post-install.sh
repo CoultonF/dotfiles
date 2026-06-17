@@ -121,10 +121,33 @@ append_line_if_missing 'export PATH="$HOME/.npm-global/bin:$PATH"' ~/.bashrc
 
 BUN_BIN="$BUN_INSTALL/bin/bun"
 
-# Bun's installer selects x64-baseline on Linux x86_64 CPUs without AVX2.
+# Bun's default x64 build requires AVX2. On CPUs without it, bun crashes
+# intermittently and warns "CPU lacks AVX support" at startup. The official
+# installer is idempotent by version, so it will NOT swap a same-version default
+# build for the baseline variant -- fetch the baseline zip directly.
+install_bun_baseline() {
+	tag="$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
+		https://github.com/oven-sh/bun/releases/latest 2>/dev/null | sed 's#.*/tag/##')"
+	[ -n "$tag" ] || tag="bun-v$("$BUN_BIN" --version 2>/dev/null || echo "")"
+	[ "$tag" = "bun-v" ] && return 1
+	tmp="$(mktemp -d)"
+	if curl -fsSL \
+		"https://github.com/oven-sh/bun/releases/download/$tag/bun-linux-x64-baseline.zip" \
+		-o "$tmp/bun.zip" && unzip -oq "$tmp/bun.zip" -d "$tmp"; then
+		mkdir -p "$(dirname "$BUN_BIN")"
+		install -m755 "$tmp/bun-linux-x64-baseline/bun" "$BUN_BIN"
+	fi
+	rm -rf "$tmp"
+}
+
 if [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ] && ! grep -qi avx2 /proc/cpuinfo; then
-	echo "Installing Bun x64-baseline build for CPU without AVX2..."
-	curl -fsSL https://bun.com/install | bash
+	# No AVX2: reinstall baseline only when bun is missing or is the wrong
+	# (AVX-requiring) build. Never run "bun upgrade" here -- it can reintroduce a
+	# default build. The wrong build reports itself via a startup warning.
+	if [ ! -x "$BUN_BIN" ] || "$BUN_BIN" --revision 2>&1 | grep -qi "lacks AVX"; then
+		echo "Installing Bun x64-baseline build for CPU without AVX2..."
+		install_bun_baseline || true
+	fi
 elif [ -x "$BUN_BIN" ]; then
 	"$BUN_BIN" upgrade
 else
