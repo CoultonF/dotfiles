@@ -414,6 +414,11 @@ for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing "alias la='eza -la --icons=auto --git --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
 done
+# Launch Claude Code at max effort (self-alias is safe; not re-expanded). /effort still switches it.
+for rcfile in ~/.bashrc ~/.zshrc; do
+	append_line_if_missing "alias cc='claude --effort max'" "$rcfile"
+	append_line_if_missing "alias claude='claude --effort max'" "$rcfile"
+done
 # fzf-tab (zsh only): load after compinit, replace the completion menu with fzf.
 # Stage a copy with the prebuilt binary module stripped out: its RUNPATH targets
 # glibc 2.42, so on glibc 2.41 hosts it fails to load and fzf-tab nags to rebuild

@@ -148,6 +148,9 @@ in
       ts = "tmux-sessionizer";
       lg = "lazygit";
       v = "nvim";
+      # Launch Claude Code at max effort (self-alias is safe; not re-expanded). /effort still switches it.
+      cc = "claude --effort max";
+      claude = "claude --effort max";
     };
 
     # Environment variables set in .zshenv
