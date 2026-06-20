@@ -148,9 +148,6 @@ in
       ts = "tmux-sessionizer";
       lg = "lazygit";
       v = "nvim";
-      # Launch Claude Code at max effort (self-alias is safe; not re-expanded). /effort still switches it.
-      cc = "claude --effort max";
-      claude = "claude --effort max";
     };
 
     # Environment variables set in .zshenv
@@ -235,6 +232,17 @@ in
       if [[ "$OSTYPE" == "darwin"* ]]; then
         alias google-chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
       fi
+
+      # Claude Code: always max effort. In /workspace, load user-scope config only
+      # (ignores that repo's agents/settings/commands/CLAUDE.md); elsewhere unchanged.
+      claude() {
+        local args=(--effort max)
+        case "$PWD" in
+          /workspace|/workspace/*) args+=(--setting-sources user) ;;
+        esac
+        command claude "''${args[@]}" "$@"
+      }
+      cc() { claude "$@"; }
       
       # fzf-tab: replace zsh's completion menu with an fzf picker.
       # Make sure completion is initialised (compinit) before sourcing the plugin,
@@ -483,6 +491,10 @@ in
   # Claude Code keybindings. Out-of-store so edits apply without a rebuild.
   home.file.".claude/keybindings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/keybindings.json";
+
+  # Claude Code user-scope agents. Out-of-store so edits apply without a rebuild.
+  home.file.".claude/agents".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/agents";
 
   # Keep npm global installs out of the immutable Nix store.
   home.file.".npmrc".text = ''

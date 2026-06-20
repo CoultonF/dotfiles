@@ -369,6 +369,10 @@ if [ -d "$DOTFILES_DIR" ]; then
 	mkdir -p ~/.claude
 	cp "$DOTFILES_DIR/claude/keybindings.json" ~/.claude/keybindings.json
 
+	# Claude Code user-scope agents
+	mkdir -p ~/.claude/agents
+	cp "$DOTFILES_DIR/claude/agents/"*.md ~/.claude/agents/
+
 	# Claude Code settings (hooks, default model, default mode)
 	if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 		mkdir -p ~/.claude
@@ -414,10 +418,11 @@ for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing "alias la='eza -la --icons=auto --git --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
 done
-# Launch Claude Code at max effort (self-alias is safe; not re-expanded). /effort still switches it.
+# Claude Code: always max effort. In /workspace, load user-scope config only
+# (ignores that repo's agents/settings/commands/CLAUDE.md); elsewhere unchanged.
 for rcfile in ~/.bashrc ~/.zshrc; do
-	append_line_if_missing "alias cc='claude --effort max'" "$rcfile"
-	append_line_if_missing "alias claude='claude --effort max'" "$rcfile"
+	append_line_if_missing 'claude() { local a=(--effort max); case "$PWD" in /workspace|/workspace/*) a+=(--setting-sources user);; esac; command claude "${a[@]}" "$@"; }' "$rcfile"
+	append_line_if_missing 'cc() { claude "$@"; }' "$rcfile"
 done
 # fzf-tab (zsh only): load after compinit, replace the completion menu with fzf.
 # Stage a copy with the prebuilt binary module stripped out: its RUNPATH targets
