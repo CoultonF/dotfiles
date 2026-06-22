@@ -17,6 +17,10 @@ Thumbs.db
 # OMP runtime state and credentials
 omp/agent/*.db
 omp/agent/*.db-*
+omp/*.db
+omp/*.db-*
+omp/cache/
+omp/install-id
 omp/agent/sessions/
 omp/agent/blobs/
 omp/agent/terminal-sessions/
