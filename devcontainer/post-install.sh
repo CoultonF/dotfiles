@@ -418,11 +418,11 @@ for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing "alias la='eza -la --icons=auto --git --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
 done
-# Claude Code: always max effort. In /workspace, load user-scope config only
-# (ignores that repo's agents/settings/commands/CLAUDE.md); elsewhere unchanged.
+# Claude Code: always max effort. claude() uses user-scope config only under /workspace
+# (ignores that repo's .claude); cc() always uses user-scope config only, everywhere.
 for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing 'claude() { local a=(--effort max); case "$PWD" in /workspace|/workspace/*) a+=(--setting-sources user);; esac; command claude "${a[@]}" "$@"; }' "$rcfile"
-	append_line_if_missing 'cc() { claude "$@"; }' "$rcfile"
+	append_line_if_missing 'cc() { command claude --effort max --setting-sources user "$@"; }' "$rcfile"
 done
 # fzf-tab (zsh only): load after compinit, replace the completion menu with fzf.
 # Stage a copy with the prebuilt binary module stripped out: its RUNPATH targets

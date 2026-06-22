@@ -233,8 +233,8 @@ in
         alias google-chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
       fi
 
-      # Claude Code: always max effort. In /workspace, load user-scope config only
-      # (ignores that repo's agents/settings/commands/CLAUDE.md); elsewhere unchanged.
+      # Claude Code: always max effort. claude() uses user-scope config only when
+      # under /workspace (ignores that repo's .claude); normal project config elsewhere.
       claude() {
         local args=(--effort max)
         case "$PWD" in
@@ -242,7 +242,8 @@ in
         esac
         command claude "''${args[@]}" "$@"
       }
-      cc() { claude "$@"; }
+      # cc(): always user-scope config only (never reads any project .claude), max effort.
+      cc() { command claude --effort max --setting-sources user "$@"; }
       
       # fzf-tab: replace zsh's completion menu with an fzf picker.
       # Make sure completion is initialised (compinit) before sourcing the plugin,
