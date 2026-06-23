@@ -236,14 +236,14 @@ in
       # Claude Code: always max effort. claude() uses user-scope config only when
       # under /workspace (ignores that repo's .claude); normal project config elsewhere.
       claude() {
-        local args=(--effort max)
+        local args=(--effort max --model claude-opus-4-8)
         case "$PWD" in
           /workspace|/workspace/*) args+=(--setting-sources user) ;;
         esac
         command claude "''${args[@]}" "$@"
       }
       # cc(): always user-scope config only (never reads any project .claude), max effort.
-      cc() { command claude --effort max --setting-sources user "$@"; }
+      cc() { command claude --effort max --model claude-opus-4-8 --setting-sources user "$@"; }
       
       # fzf-tab: replace zsh's completion menu with an fzf picker.
       # Make sure completion is initialised (compinit) before sourcing the plugin,

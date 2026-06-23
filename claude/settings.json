@@ -1,6 +1,10 @@
 {
   "model": "claude-opus-4-8",
   "effortLevel": "xhigh",
+  "statusLine": {
+    "type": "command",
+    "command": "jq -r '[.effort.level // \"?\", .model // \"?\"] | join(\" · \")'"
+  },
   "permissions": {
     "defaultMode": "plan"
   }
