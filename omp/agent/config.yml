@@ -1,27 +1,17 @@
-disabledProviders:
+disabledProviders: 
   - claude-plugins
-modelRoles:
-  #smol: openai-codex/gpt-5.5:low
-  #default: openai-codex/gpt-5.5:medium
-  #slow: openai-codex/gpt-5.5:xhigh
-  #plan: openai-codex/gpt-5.5:xhigh
-  #commit: openai-codex/gpt-5.5:low
-  #thinking: openai-codex/gpt-5.5:xhigh
-  #vision: openai-codex/gpt-5.5:xhigh
-  #designer: openai-codex/gpt-5.5:xhigh
-  #task: openai-codex/gpt-5.5:xhigh
-  #advisor: openai-codex/gpt-5.5:xhigh
-  smol: anthropic/claude-opus-4-8 :high
-  default: anthropic/claude-opus-4-8:xhigh
-  slow: anthropic/claude-opus-4-8 :max
-  plan: anthropic/claude-opus-4-8 :max
-  commit: anthropic/claude-sonnet-4-6:high
-  thinking: anthropic/claude-opus-4-8:max
-  vision: anthropic/claude-opus-4-8:max
-  designer: anthropic/claude-opus-4-8:max
-  task: anthropic/claude-opus-4-8:max
+modelRoles: 
+  smol: anthropic/claude-fable-5:high
+  default: anthropic/claude-fable-5:high
+  slow: anthropic/claude-fable-5:max
+  plan: anthropic/claude-fable-5:max
+  commit: anthropic/claude-sonnet-5:high
+  thinking: anthropic/claude-fable-5:max
+  vision: anthropic/claude-fable-5:max
+  designer: anthropic/claude-fable-5:max
+  task: anthropic/claude-fable-5:max
   advisor: openai-codex/gpt-5.5:xhigh
-cycleOrder:
+cycleOrder: 
   - smol
   - default
   - slow
@@ -30,93 +20,91 @@ cycleOrder:
 steeringMode: all
 followUpMode: one-at-a-time
 interruptMode: immediate
-statusLine:
+statusLine: 
   sessionAccent: true
   showHookStatus: true
   preset: nerd
   separator: powerline
-tui:
+tui: 
   hyperlinks: "off"
   textSizing: true
-display:
+display: 
   showTokenUsage: true
   shimmer: classic
 showHardwareCursor: true
 defaultThinkingLevel: xhigh
-serviceTier: none
-retry:
+retry: 
   maxRetries: 3
 autoResume: false
 doubleEscapeAction: tree
 treeFilterMode: all
-compaction:
+compaction: 
   strategy: context-full
   handoffSaveToDisk: true
   enabled: true
-memory:
+memory: 
   backend: local
-edit:
+edit: 
   mode: hashline
 readLineNumbers: true
-lsp:
+lsp: 
   formatOnWrite: true
   diagnosticsOnEdit: true
-todo:
+todo: 
   eager: always
-renderMermaid:
+renderMermaid: 
   enabled: true
-calc:
+calc: 
   enabled: true
-inspect_image:
+inspect_image: 
   enabled: true
-checkpoint:
+checkpoint: 
   enabled: true
-github:
+github: 
   enabled: true
-async:
+async: 
   enabled: true
-tools:
+tools: 
   discoveryMode: mcp-only
   intentTracing: false
-bash:
-  autoBackground:
+bash: 
+  autoBackground: 
     enabled: true
-mcp:
+mcp: 
   discoveryMode: true
   notifications: true
-theme:
+theme: 
   dark: dark-catppuccin
   light: light
 symbolPreset: nerd
-providers:
+providers: 
   webSearch: auto
   image: auto
   kimiApiFormat: openai
-commands:
+commands: 
   enableOpencodeProject: false
   enableOpencodeUser: false
   enableClaudeProject: false
   enableClaudeUser: false
-skills:
+skills: 
   enableSkillCommands: true
   enableClaudeUser: false
   enableClaudeProject: false
   enableCodexUser: false
-task:
-  isolation:
+task: 
+  isolation: 
     merge: patch
   showResolvedModelBadge: true
   eager: always
   enableLsp: true
-browser:
+browser: 
   headless: true
 clearOnShrink: false
-contextPromotion:
+contextPromotion: 
   enabled: false
-marketplace:
+marketplace: 
   autoUpdate: auto
 setupVersion: 1
-dev:
-  autoqa:
+dev: 
+  autoqa: 
     consent: granted
-
