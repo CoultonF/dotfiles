@@ -1,15 +1,23 @@
 disabledProviders: 
   - claude-plugins
 modelRoles: 
-  smol: anthropic/claude-fable-5:high
-  default: anthropic/claude-fable-5:high
-  slow: anthropic/claude-fable-5:max
-  plan: anthropic/claude-fable-5:max
-  commit: anthropic/claude-sonnet-5:high
-  thinking: anthropic/claude-fable-5:max
-  vision: anthropic/claude-fable-5:max
-  designer: anthropic/claude-fable-5:max
-  task: anthropic/claude-fable-5:max
+  # smol: anthropic/claude-fable-5:high
+  smol: openai-codex/gpt-5.5:high
+  default: openai-codex/gpt-5.5:xhigh
+  # slow: anthropic/claude-fable-5:max
+  slow: openai-codex/gpt-5.5:xhigh
+  # plan: anthropic/claude-fable-5:max
+  plan: openai-codex/gpt-5.5:xhigh
+  # commit: anthropic/claude-sonnet-5:high
+  commit: openai-codex/gpt-5.5:high
+  # thinking: anthropic/claude-fable-5:max
+  thinking: openai-codex/gpt-5.5:xhigh
+  # vision: anthropic/claude-fable-5:max
+  vision: openai-codex/gpt-5.5:xhigh
+  # designer: anthropic/claude-fable-5:max
+  designer: openai-codex/gpt-5.5:xhigh
+  # task: anthropic/claude-fable-5:max
+  task: openai-codex/gpt-5.5:xhigh
   advisor: openai-codex/gpt-5.5:xhigh
 cycleOrder: 
   - smol
