@@ -233,17 +233,19 @@ in
         alias google-chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
       fi
 
-      # Claude Code: always max effort. claude() uses user-scope config only when
-      # under /workspace (ignores that repo's .claude); normal project config elsewhere.
+      # Claude Code: always max effort, fullscreen TUI (CLAUDE_CODE_NO_FLICKER=1 ==
+      # tui: fullscreen, but survives a broken/absent settings.json). claude() uses
+      # user-scope config only when under /workspace (ignores that repo's .claude);
+      # normal project config elsewhere.
       claude() {
-        local args=(--effort max --model claude-opus-4-8)
+        local args=(--effort max --model claude-fable-5)
         case "$PWD" in
           /workspace|/workspace/*) args+=(--setting-sources user) ;;
         esac
-        command claude "''${args[@]}" "$@"
+        CLAUDE_CODE_NO_FLICKER=1 command claude "''${args[@]}" "$@"
       }
       # cc(): always user-scope config only (never reads any project .claude), max effort.
-      cc() { command claude --effort max --model claude-opus-4-8 --setting-sources user "$@"; }
+      cc() { CLAUDE_CODE_NO_FLICKER=1 command claude --effort max --model claude-fable-5 --setting-sources user "$@"; }
       
       # fzf-tab: replace zsh's completion menu with an fzf picker.
       # Make sure completion is initialised (compinit) before sourcing the plugin,

@@ -1,6 +1,7 @@
 {
-  "model": "claude-opus-4-8",
+  "model": "claude-fable-5",
   "effortLevel": "xhigh",
+  "tui": "fullscreen",
   "statusLine": {
     "type": "command",
     "command": "jq -r '[.effort.level // \"?\", .model // \"?\"] | join(\" · \")'"
