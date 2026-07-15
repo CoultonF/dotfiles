@@ -1,25 +1,17 @@
-disabledProviders:
+disabledProviders: 
   - claude-plugins
-modelRoles:
-  # smol: anthropic/claude-fable-5:high
+modelRoles: 
   smol: openai-codex/gpt-5.6-luna:max
   default: openai-codex/gpt-5.6-terra:high
-  # slow: anthropic/claude-fable-5:max
   slow: openai-codex/gpt-5.6-sol:max
-  # plan: anthropic/claude-fable-5:max
   plan: openai-codex/gpt-5.6-sol:max
-  # commit: anthropic/claude-sonnet-5:high
   commit: openai-codex/gpt-5.6-luna:high
-  # thinking: anthropic/claude-fable-5:max
-  thinking: openai-codex/gpt-5.6-sol:max
-  # vision: anthropic/claude-fable-5:max
   vision: openai-codex/gpt-5.6-terra:high
-  # designer: anthropic/claude-fable-5:max
   designer: openai-codex/gpt-5.6-luna:max
-  # task: anthropic/claude-fable-5:max
   task: openai-codex/gpt-5.6-terra:high
   advisor: openai-codex/gpt-5.6-luna:max
-cycleOrder:
+  thinking: openai-codex/gpt-5.6-sol:high
+cycleOrder: 
   - smol
   - default
   - slow
@@ -28,91 +20,91 @@ cycleOrder:
 steeringMode: all
 followUpMode: one-at-a-time
 interruptMode: immediate
-statusLine:
+statusLine: 
   sessionAccent: true
   showHookStatus: true
   preset: nerd
   separator: powerline
-tui:
+tui: 
   hyperlinks: "off"
   textSizing: true
-display:
+display: 
   showTokenUsage: true
   shimmer: classic
 showHardwareCursor: true
 defaultThinkingLevel: xhigh
-retry:
+retry: 
   maxRetries: 3
 autoResume: false
 doubleEscapeAction: tree
 treeFilterMode: all
-compaction:
+compaction: 
   strategy: context-full
   handoffSaveToDisk: true
   enabled: true
-memory:
+memory: 
   backend: local
-edit:
+edit: 
   mode: hashline
 readLineNumbers: true
-lsp:
+lsp: 
   formatOnWrite: true
   diagnosticsOnEdit: true
-todo:
+todo: 
   eager: always
-renderMermaid:
+renderMermaid: 
   enabled: true
-calc:
+calc: 
   enabled: true
-inspect_image:
+inspect_image: 
   enabled: true
-checkpoint:
+checkpoint: 
   enabled: true
-github:
+github: 
   enabled: true
-async:
+async: 
   enabled: true
-tools:
+tools: 
   discoveryMode: mcp-only
   intentTracing: false
-bash:
-  autoBackground:
+bash: 
+  autoBackground: 
     enabled: true
-mcp:
+mcp: 
   discoveryMode: true
   notifications: true
-theme:
+theme: 
   dark: dark-catppuccin
   light: light
 symbolPreset: nerd
-providers:
+providers: 
   webSearch: auto
   image: auto
   kimiApiFormat: openai
-commands:
+commands: 
   enableOpencodeProject: false
   enableOpencodeUser: false
   enableClaudeProject: false
   enableClaudeUser: false
-skills:
+skills: 
   enableSkillCommands: true
   enableClaudeUser: false
   enableClaudeProject: false
   enableCodexUser: false
-task:
-  isolation:
+task: 
+  isolation: 
     merge: patch
   showResolvedModelBadge: true
   eager: always
   enableLsp: true
-browser:
+browser: 
   headless: true
 clearOnShrink: false
-contextPromotion:
+contextPromotion: 
   enabled: false
-marketplace:
+marketplace: 
   autoUpdate: auto
 setupVersion: 1
-dev:
-  autoqa:
+dev: 
+  autoqa: 
     consent: granted
