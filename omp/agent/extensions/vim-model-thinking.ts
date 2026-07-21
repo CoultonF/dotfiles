@@ -70,6 +70,16 @@ async function switchRole(
 	ctx.ui.notify(`Model role: ${next.label} (${next.model}, ${next.thinking})`, "info");
 }
 
+
+function installLegacyCtrlHNormalization(ctx: ExtensionContext): void {
+	if (!ctx.hasUI) return;
+
+	ctx.ui.onTerminalInput((data) => {
+		if (data === "\x08") return { data: "\x1b[104;5u" };
+		return undefined;
+	});
+}
+
 export default function vimModelThinking(pi: ExtensionAPI): void {
 	pi.registerCommand("role-prev", {
 		description: "Cycle model role backward",
@@ -83,6 +93,7 @@ export default function vimModelThinking(pi: ExtensionAPI): void {
 
 	pi.on("session_start", (_event, ctx) => {
 		syncActiveRole(ctx, pi);
+		installLegacyCtrlHNormalization(ctx);
 	});
 
 	pi.on("model_select", (_event, ctx) => syncActiveRole(ctx, pi));
