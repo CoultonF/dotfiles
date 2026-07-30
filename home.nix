@@ -163,7 +163,6 @@ in
       LIBRARY_PATH = "$HOME/.nix-profile/lib";
       C_INCLUDE_PATH = "$HOME/.nix-profile/include";
       CPLUS_INCLUDE_PATH = "$HOME/.nix-profile/include";
-      LD_LIBRARY_PATH = "$HOME/.nix-profile/lib";
       OPENCODE_DISABLE_CLAUDE_CODE = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_PROMPT = "1";
       OPENCODE_DISABLE_CLAUDE_CODE_SKILLS = "1";
