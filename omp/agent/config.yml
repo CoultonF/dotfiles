@@ -2,7 +2,7 @@ disabledProviders:
   - claude-plugins
 modelRoles: 
   smol: openai-codex/gpt-5.6-luna:high
-  default: openai-codex/gpt-5.6-sol:medium
+  default: openai-codex/gpt-5.6-luna:max
   slow: openai-codex/gpt-5.6-sol:high
   plan: openai-codex/gpt-5.6-sol:xhigh
   commit: openai-codex/gpt-5.6-sol:low
@@ -18,7 +18,7 @@ cycleOrder:
   - commit
   - thinking
 steeringMode: all
-followUpMode: one-at-a-time
+followUpMode: all
 interruptMode: immediate
 statusLine: 
   sessionAccent: true
@@ -28,6 +28,7 @@ statusLine:
 tui: 
   hyperlinks: "off"
   textSizing: true
+  codexResetFireworks: true
 display: 
   showTokenUsage: true
   shimmer: classic
@@ -39,7 +40,7 @@ autoResume: false
 doubleEscapeAction: tree
 treeFilterMode: all
 compaction: 
-  strategy: context-full
+  strategy: snapcompact
   handoffSaveToDisk: true
   enabled: true
 memory: 
@@ -51,13 +52,15 @@ lsp:
   formatOnWrite: true
   diagnosticsOnEdit: true
 todo: 
-  eager: always
+  eager: default
+  remindersMax: 2
+  reminders: true
 renderMermaid: 
   enabled: true
 calc: 
   enabled: true
 inspect_image: 
-  enabled: true
+  mode: "on"
 checkpoint: 
   enabled: true
 github: 
@@ -66,9 +69,11 @@ async:
   enabled: true
 tools: 
   intentTracing: false
+  outputMaxColumns: 0
 bash: 
   autoBackground: 
     enabled: true
+  direnv: auto
 mcp: 
   notifications: true
 theme: 
@@ -76,8 +81,6 @@ theme:
   light: light
 symbolPreset: nerd
 providers: 
-  webSearch: auto
-  image: auto
   kimiApiFormat: openai
 commands: 
   enableOpencodeProject: false
@@ -92,9 +95,18 @@ skills:
 task: 
   isolation: 
     merge: patch
+    mode: auto
+    apply: true
+    commits: ai
   showResolvedModelBadge: true
-  eager: always
-  enableLsp: true
+  eager: default
+  enableLsp: false
+  batch: true
+  enableEffort: true
+  maxConcurrency: 16
+  maxRecursionDepth: 3
+  softRequestBudget: 200
+  maxEffort: max
 browser: 
   headless: true
 clearOnShrink: false
@@ -104,5 +116,32 @@ marketplace:
   autoUpdate: auto
 setupVersion: 1
 dev: 
-  autoqa: 
-    consent: granted
+  autoqaConsent: granted
+generate_image: 
+  enabled: true
+astGrep: 
+  enabled: true
+security: 
+  enabled: true
+startup: 
+  showSplash: true
+  changelogMode: hidden
+proseOnlyThinking: false
+textVerbosity: high
+inlineToolDescriptors: "on"
+personality: pragmatic
+bashInterceptor: 
+  enabled: true
+shellMinimizer: 
+  enabled: false
+eval: 
+  js: true
+python: 
+  kernelMode: session
+grep: 
+  contextBefore: 3
+  contextAfter: 5
+plan: 
+  defaultOnStartup: true
+codexResets: 
+  autoRedeem: "yes"
