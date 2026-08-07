@@ -7,6 +7,7 @@
 - Avoid backwards-compatibility shims, unused re-exports, or removed-code comments. Delete dead code outright.
 - Confirm before risky or irreversible operations: data deletion, force-pushes, and shared infrastructure changes.
 - File references in chat use `path/to/file.ext:line` so the user can jump to them.
+- Avoid the word “canonical” in prose, plans, artifacts, code comments, and commit messages. Use a precise alternative such as “authoritative,” “primary,” “standard,” “normalized,” or “single source of truth.” Preserve it only in exact quotations, existing identifiers, or established technical terms where changing it would be inaccurate.
 
 # TanStack Intent
 
