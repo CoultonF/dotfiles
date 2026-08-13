@@ -1,5 +1,4 @@
 -- Treesitter: Parser management for nvim 0.12+ native tree-sitter
--- Highlighting and indentation are handled via autocmd (see config/autocmds.lua)
 -- Requires tree-sitter CLI (installed via bun, see home.nix)
 
 return {
@@ -7,8 +6,8 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     branch = "main",
+    lazy = false,
     build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
     main = "nvim-treesitter",
     config = function()
       local langs = {
@@ -38,18 +37,37 @@ return {
         "vimdoc",
         "xml",
         "yaml",
+        "htmldjango",
+        "rego",
       }
 
-      local installed = require("nvim-treesitter.config").get_installed()
-      local to_install = vim.iter(langs)
-        :filter(function(lang)
-          return not vim.tbl_contains(installed, lang)
-        end)
-        :totable()
+      local treesitter = require("nvim-treesitter")
+      local installed = treesitter.get_installed()
+      local missing = vim.tbl_filter(function(lang)
+        return not vim.tbl_contains(installed, lang)
+      end, langs)
 
-      if #to_install > 0 then
-        require("nvim-treesitter").install(to_install)
+      if #missing > 0 then
+        local ok, installed_all = pcall(function()
+          return treesitter.install(missing):wait(300000)
+        end)
+        if not ok then
+          vim.notify("nvim-treesitter parser installation failed: " .. tostring(installed_all), vim.log.levels.WARN)
+        elseif not installed_all then
+          vim.notify("nvim-treesitter did not install every requested parser", vim.log.levels.WARN)
+        end
       end
+
+      local group = vim.api.nvim_create_augroup("TreesitterHighlight", { clear = true })
+      vim.api.nvim_create_autocmd("FileType", {
+        group = group,
+        callback = function(event)
+          local ok = pcall(vim.treesitter.start, event.buf)
+          if ok and vim.bo[event.buf].buftype == "" then
+            vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
     end,
   },
 
@@ -58,6 +76,7 @@ return {
     "nvim-treesitter/nvim-treesitter-textobjects",
     branch = "main",
     event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
     config = function()
       require("nvim-treesitter-textobjects").setup({
         select = {

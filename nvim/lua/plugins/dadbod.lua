@@ -15,8 +15,6 @@ return {
     ft = { "sql", "mysql", "plsql" },
   },
 
-  -- Load DATABASE_URL (and friends) from a project .env for :DB
-  { "tpope/vim-dotenv", lazy = true },
 
   -- rainfrog launcher: augment the existing toggleterm spec with a keymap so
   -- toggleterm is loaded on first use. <leader>db is taken by dap (breakpoint),

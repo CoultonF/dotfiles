@@ -9,7 +9,6 @@ return {
       "antoinemadec/FixCursorHold.nvim",
       -- Test adapters
       "nvim-neotest/neotest-python",
-      "nvim-neotest/neotest-jest",
       "marilari88/neotest-vitest",
     },
     keys = {
@@ -23,27 +22,17 @@ return {
       { "<leader>to", function() require("neotest").output.open({ enter = true, auto_close = true }) end, desc = "Test output" },
       { "<leader>tO", function() require("neotest").output_panel.toggle() end, desc = "Toggle output panel" },
       { "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, desc = "Debug nearest test" },
-      { "[t", function() require("neotest").jump.prev({ status = "failed" }) end, desc = "Prev failed test" },
-      { "]t", function() require("neotest").jump.next({ status = "failed" }) end, desc = "Next failed test" },
+      { "[T", function() require("neotest").jump.prev({ status = "failed" }) end, desc = "Prev failed test" },
+      { "]T", function() require("neotest").jump.next({ status = "failed" }) end, desc = "Next failed test" },
     },
     opts = function()
       return {
         adapters = {
           require("neotest-python")({
             dap = { justMyCode = false },
-            args = { "--log-level", "DEBUG" },
             runner = "pytest",
-            -- Per-package venv detection (walks up from the test file).
-            python = function()
-              return require("utils.venv").find_python() or "python"
-            end,
-          }),
-          require("neotest-jest")({
-            jestCommand = "npm test --",
-            jestConfigFile = "jest.config.js",
-            env = { CI = true },
-            cwd = function()
-              return vim.fn.getcwd()
+            python = function(root)
+              return require("utils.venv").find_python(root) or "python"
             end,
           }),
           require("neotest-vitest"),

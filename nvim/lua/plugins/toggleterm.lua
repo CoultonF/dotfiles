@@ -6,9 +6,9 @@ return {
     version = "*",
     keys = {
       { "<C-t>", "<cmd>ToggleTerm<CR>", desc = "Toggle terminal" },
-      { "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", desc = "Float terminal" },
-      { "<leader>th", "<cmd>ToggleTerm direction=horizontal<CR>", desc = "Horizontal terminal" },
-      { "<leader>tv", "<cmd>ToggleTerm direction=vertical<CR>", desc = "Vertical terminal" },
+      { "<leader>Tf", "<cmd>ToggleTerm direction=float<CR>", desc = "Float terminal" },
+      { "<leader>Th", "<cmd>ToggleTerm direction=horizontal<CR>", desc = "Horizontal terminal" },
+      { "<leader>Tv", "<cmd>ToggleTerm direction=vertical<CR>", desc = "Vertical terminal" },
     },
     opts = {
       size = function(term)
@@ -18,7 +18,6 @@ return {
           return vim.o.columns * 0.4
         end
       end,
-      open_mapping = [[<C-t>]],
       hide_numbers = true,
       shade_filetypes = {},
       shade_terminals = true,
@@ -30,12 +29,6 @@ return {
       persist_mode = true,
       direction = "float",
       close_on_exit = true,
-      shell = vim.fn.executable('bash') == 1 and 'bash -i' or vim.o.shell,
-      on_open = function(term)
-        -- Ensure bashrc is sourced when terminal opens
-        vim.api.nvim_chan_send(term.job_id, "source ~/.bashrc 2>/dev/null || true\n")
-        vim.api.nvim_chan_send(term.job_id, "clear\n")
-      end,
       float_opts = {
         border = "curved",
         winblend = 0,
@@ -48,17 +41,19 @@ return {
     config = function(_, opts)
       require("toggleterm").setup(opts)
 
-      -- Terminal mode mappings
-      function _G.set_terminal_keymaps()
-        local term_opts = { buffer = 0 }
-        vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], term_opts)
-        vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], term_opts)
-        vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], term_opts)
-        vim.keymap.set("t", "<C-k>", [[<Cmd>wincmd k<CR>]], term_opts)
-        vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], term_opts)
-      end
-
-      vim.cmd("autocmd! TermOpen term://* lua set_terminal_keymaps()")
+      local group = vim.api.nvim_create_augroup("ToggleTermMappings", { clear = true })
+      vim.api.nvim_create_autocmd("TermOpen", {
+        group = group,
+        pattern = "term://*",
+        callback = function(event)
+          local term_opts = { buffer = event.buf, silent = true }
+          vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], term_opts)
+          vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], term_opts)
+          vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], term_opts)
+          vim.keymap.set("t", "<C-k>", [[<Cmd>wincmd k<CR>]], term_opts)
+          vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], term_opts)
+        end,
+      })
     end,
   },
 }

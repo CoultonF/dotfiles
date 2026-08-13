@@ -65,9 +65,9 @@ in
     cargo        # Rust package manager
 
     # LSP Servers
-    # Note: vtsls, basedpyright, and vscode-langservers-extracted installed via bun
+    # Note: TypeScript 7 native LSP, basedpyright, and vscode-langservers-extracted
+    # are installed via bun. See home.activation.bunGlobalPackages below.
     # (nodePackages was removed from nixpkgs)
-    # See home.activation.bunGlobalPackages below
     ruff         # Python LSP, linter, formatter
     lua-language-server
     postgres-language-server  # SQL LSP for Postgres (binary: postgrestools)
@@ -674,10 +674,24 @@ in
       fi
     }
 
+    ensure_typescript7() {
+      tsc="${homeDirectory}/.bun/bin/tsc"
+      version=""
+      if [ -x "$tsc" ]; then
+        version="$("$tsc" --version 2>/dev/null || true)"
+      fi
+      case "$version" in
+        "Version: 7."*) return 0 ;;
+      esac
+      echo "Installing typescript@^7 via bun..."
+      "${homeDirectory}/.bun/bin/bun" add -g "typescript@^7" || echo "WARNING: Failed to install typescript@^7"
+    }
+
+
     if [ -x "$bun_bin" ]; then
       install_bun_global tree-sitter-cli tree-sitter
       install_bun_global basedpyright basedpyright-langserver
-      install_bun_global typescript-language-server typescript-language-server
+      ensure_typescript7
       install_bun_global vscode-langservers-extracted vscode-json-language-server
       install_bun_global @steipete/oracle oracle
       install_bun_global @openai/codex codex
@@ -686,7 +700,6 @@ in
       install_bun_global @termdraw/app termdraw
       install_bun_global oxlint oxlint
       install_bun_global oxfmt oxfmt
-      install_bun_global @vtsls/language-server vtsls
     else
       echo "WARNING: $bun_bin not found; skipping bun-managed global CLIs"
     fi

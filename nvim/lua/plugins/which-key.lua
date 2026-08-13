@@ -29,13 +29,12 @@ return {
       },
       win = {
         border = "rounded",
-        padding = { 2, 2, 2, 2 },
+        padding = { 1, 2 },
+        height = { min = 4, max = 25 },
       },
       layout = {
-        height = { min = 4, max = 25 },
         width = { min = 20, max = 50 },
         spacing = 3,
-        align = "left",
       },
     },
     config = function(_, opts)
@@ -47,9 +46,10 @@ return {
         { "<leader>c", group = "Close/Code" },
         { "<leader>d", group = "Debug" },
         { "<leader>g", group = "Git" },
-        { "<leader>o", group = "OMP (AI)" },
+        { "<leader>o", group = "OMP / Tasks" },
         { "<leader>q", group = "Quickfix" },
         { "<leader>s", group = "Search" },
+        { "<leader>T", group = "Terminal" },
         { "<leader>t", group = "Test" },
       })
     end,

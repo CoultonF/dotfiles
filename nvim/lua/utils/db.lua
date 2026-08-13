@@ -16,8 +16,17 @@ function M.url_from_dotenv()
   if not start or start == "" then
     start = vim.fn.getcwd()
   end
+
+  local absolute = vim.fn.fnamemodify(start, ":p")
+  local from
+  if vim.fn.isdirectory(absolute) == 1 then
+    from = absolute
+  else
+    from = vim.fs.dirname(absolute)
+  end
+
   local envs = vim.fs.find({ ".env", ".env.local", ".env.development" }, {
-    path = vim.fn.fnamemodify(start, ":p:h"),
+    path = from,
     upward = true,
     limit = math.huge,
   })

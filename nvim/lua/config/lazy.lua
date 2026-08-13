@@ -35,13 +35,16 @@ require("lazy").setup({
     colorscheme = { "catppuccin", "habamax" },
   },
   checker = {
-    enabled = true,
-    notify = false,
+    enabled = false,
+  },
+  rocks = {
+    enabled = false,
   },
   performance = {
     rtp = {
       disabled_plugins = {
         "gzip",
+        "netrwPlugin",
         "tarPlugin",
         "tohtml",
         "tutor",

@@ -40,7 +40,7 @@ return {
         dependencies = "mason.nvim",
         cmd = { "DapInstall", "DapUninstall" },
         opts = {
-          automatic_installation = true,
+          automatic_installation = false,
           ensure_installed = {
             "python",
             "js",
@@ -55,10 +55,12 @@ return {
           { "<leader>dPc", function() require("dap-python").test_class() end, desc = "Debug test class" },
         },
         config = function()
-          -- Prefer the per-package venv (if it has debugpy), else Mason's debugpy.
-          local venv_python = require("utils.venv").find_python()
           local mason_python = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
-          require("dap-python").setup(venv_python or mason_python)
+          require("dap-python").setup(mason_python, {
+            pythonPath = function()
+              return require("utils.venv").find_python(vim.api.nvim_buf_get_name(0)) or "python"
+            end,
+          })
         end,
       },
     },
@@ -133,8 +135,18 @@ return {
       -- Highlight for stopped line
       vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
 
+      -- VS Code accepts trailing commas; Neovim's JSON decoder does not.
+      local vscode = require("dap.ext.vscode")
+      local json_decode = vscode.json_decode
+      vscode.json_decode = function(contents, opts)
+        contents = contents
+          :gsub(",%s*//[^\n]*%s*([}%]])", "%1")
+          :gsub(",%s*([}%]])", "%1")
+        return json_decode(contents, opts)
+      end
+
       -- JavaScript/TypeScript configuration
-      dap.adapters["pwa-node"] = {
+      local js_debug_adapter = {
         type = "server",
         host = "localhost",
         port = "${port}",
@@ -146,8 +158,11 @@ return {
           },
         },
       }
+      for _, adapter in ipairs({ "pwa-node", "pwa-chrome", "node", "chrome" }) do
+        dap.adapters[adapter] = js_debug_adapter
+      end
 
-      for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
+      for _, language in ipairs({ "typescript", "javascript" }) do
         dap.configurations[language] = {
           {
             type = "pwa-node",
@@ -166,12 +181,6 @@ return {
         }
       end
 
-      -- Load project-specific debug configs from .vscode/launch.json
-      -- Maps VSCode's "debugpy" type to nvim-dap's "python" adapter
-      local vscode_ok, vscode_dap = pcall(require, "dap.ext.vscode")
-      if vscode_ok then
-        vscode_dap.load_launchjs(nil, { debugpy = "python" })
-      end
     end,
   },
 }

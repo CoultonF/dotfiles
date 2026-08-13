@@ -1,6 +1,19 @@
 -- Extra utilities and quality of life plugins
 
 return {
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    opts = {
+      bigfile = {
+        enabled = true,
+        size = 1.5 * 1024 * 1024,
+        line_length = 1000,
+      },
+    },
+  },
+
   -- Comment.nvim: Easy commenting
   {
     "numToStr/Comment.nvim",
@@ -38,7 +51,16 @@ return {
           "mason",
           "notify",
           "toggleterm",
+          "bigfile",
+          "neo-tree",
+          "oil",
+          "TelescopePrompt",
+          "TelescopeResults",
+          "Trouble",
+          "aerial",
+          "qf",
         },
+        buftypes = { "terminal" },
       },
     },
   },
@@ -106,25 +128,11 @@ return {
     opts = {},
   },
 
-  -- Better UI for vim.ui.select and vim.ui.input
-  {
-    "stevearc/dressing.nvim",
-    lazy = true,
-    init = function()
-      vim.ui.select = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.select(...)
-      end
-      vim.ui.input = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.input(...)
-      end
-    end,
-  },
 
   -- Notifications
   {
     "rcarriga/nvim-notify",
+    event = "VeryLazy",
     opts = {
       timeout = 3000,
       max_height = function()
@@ -136,8 +144,10 @@ return {
       render = "compact",
       stages = "fade",
     },
-    init = function()
-      vim.notify = require("notify")
+    config = function(_, opts)
+      local notify = require("notify")
+      notify.setup(opts)
+      vim.notify = notify
     end,
   },
 

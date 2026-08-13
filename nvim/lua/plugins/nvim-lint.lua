@@ -6,7 +6,7 @@
 return {
   {
     "mfussenegger/nvim-lint",
-    event = { "BufReadPost", "BufWritePost", "InsertLeave" },
+    event = { "BufReadPost", "BufWritePost" },
     config = function()
       local lint = require("lint")
 
@@ -19,20 +19,22 @@ return {
         markdown = { "markdownlint" },
       }
 
-      -- Default sqlfluff to the postgres dialect. A project .sqlfluff /
-      -- pyproject.toml [tool.sqlfluff] overrides this. The filename is appended
+      -- The explicit Postgres CLI dialect wins over project .sqlfluff /
+      -- pyproject.toml [tool.sqlfluff] settings. The filename is appended
       -- automatically by nvim-lint (append_fname).
       if lint.linters.sqlfluff then
         lint.linters.sqlfluff.args = { "lint", "--format=json", "--dialect=postgres" }
       end
 
       local grp = vim.api.nvim_create_augroup("NvimLint", { clear = true })
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
         group = grp,
-        callback = function()
-          -- Only lint normal, modifiable buffers.
-          if vim.bo.buftype == "" then
-            require("lint").try_lint()
+        callback = function(event)
+          local bufnr = event.buf
+          if vim.bo[bufnr].buftype == "" and vim.bo[bufnr].modifiable then
+            vim.api.nvim_buf_call(bufnr, function()
+              lint.try_lint()
+            end)
           end
         end,
       })

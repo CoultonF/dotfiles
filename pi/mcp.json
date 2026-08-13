@@ -1,3 +1,9 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "mcp-postgres": {
+      "type": "http",
+      "url": "http://localhost:5015/mcp/",
+      "directTools": true
+    }
+  }
 }

@@ -12,13 +12,6 @@ autocmd("TextYankPost", {
   end,
 })
 
--- Remove trailing whitespace on save
-augroup("TrimWhitespace", { clear = true })
-autocmd("BufWritePre", {
-  group = "TrimWhitespace",
-  pattern = "*",
-  command = [[%s/\s\+$//e]],
-})
 
 -- Restore cursor position
 augroup("RestoreCursor", { clear = true })
@@ -54,14 +47,6 @@ autocmd("FileType", {
   end,
 })
 
--- Auto resize splits when window is resized
-augroup("ResizeSplits", { clear = true })
-autocmd("VimResized", {
-  group = "ResizeSplits",
-  callback = function()
-    vim.cmd("tabdo wincmd =")
-  end,
-})
 
 -- Check if file changed outside of Neovim
 augroup("CheckTime", { clear = true })
@@ -78,13 +63,16 @@ autocmd({ "BufRead", "BufNewFile" }, {
   command = "setfiletype markdown",
 })
 
--- Enable treesitter highlighting and indentation (nvim 0.12+ native)
-augroup("TreesitterHighlight", { clear = true })
+-- Python follows the workspace's four-space indentation policy.
+augroup("PythonIndent", { clear = true })
 autocmd("FileType", {
-  group = "TreesitterHighlight",
-  callback = function()
-    pcall(vim.treesitter.start)
-    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  group = "PythonIndent",
+  pattern = "python",
+  callback = function(event)
+    vim.bo[event.buf].tabstop = 4
+    vim.bo[event.buf].shiftwidth = 4
+    vim.bo[event.buf].softtabstop = -1
+    vim.bo[event.buf].expandtab = true
   end,
 })
 

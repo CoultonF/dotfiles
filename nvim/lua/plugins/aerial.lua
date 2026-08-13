@@ -15,14 +15,14 @@ return {
       { "<leader>cn", "<cmd>AerialNavToggle<cr>", desc = "Outline nav (Aerial)" },
     },
     opts = {
-      -- Prefer LSP symbols; fall back to treesitter where no LSP is attached.
-      backends = { "lsp", "treesitter", "markdown", "man" },
+      -- Prefer Treesitter symbols before LSP for responsive local navigation.
+      backends = { "treesitter", "lsp", "markdown", "man" },
       layout = {
         default_direction = "right",
         min_width = 30,
         max_width = { 40, 0.25 },
       },
-      attach_mode = "global",
+      attach_mode = "window",
       show_guides = true,
       filter_kind = false, -- show every symbol kind
       keymaps = {

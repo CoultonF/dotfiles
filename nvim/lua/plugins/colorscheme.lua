@@ -39,7 +39,7 @@ return {
           ["@lsp.type.decorator.python"] = { fg = colors.yellow, style = { "italic" } },
 
           -- === TSX / TypeScript ===
-          -- Parameters at usage sites via ts_ls semantic tokens
+          -- Parameters at usage sites via tsc semantic tokens
           ["@lsp.type.parameter.typescript"] = { fg = colors.maroon, style = { "italic" } },
           ["@lsp.type.parameter.typescriptreact"] = { fg = colors.maroon, style = { "italic" } },
           -- Interfaces: italic to distinguish from classes
@@ -54,7 +54,7 @@ return {
         }
       end,
       integrations = {
-        cmp = true,
+        blink_cmp = true,
         gitsigns = true,
         harpoon = true,
         indent_blankline = { enabled = true },
@@ -70,7 +70,7 @@ return {
           },
         },
         notify = true,
-        nvimtree = true,
+        neotree = true,
         telescope = { enabled = true },
         treesitter = true,
         which_key = true,

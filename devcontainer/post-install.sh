@@ -284,9 +284,22 @@ install_bun_global() {
 	fi
 }
 
+ensure_typescript7() {
+	local tsc="$BUN_INSTALL/bin/tsc"
+	local version=""
+	if [ -x "$tsc" ]; then
+		version="$("$tsc" --version 2>/dev/null || true)"
+	fi
+	case "$version" in
+		"Version: 7."*) return 0 ;;
+	esac
+	echo "Installing typescript@^7 via bun..."
+	"$BUN_BIN" add -g "typescript@^7"
+}
+
 install_bun_global tree-sitter-cli tree-sitter
 install_bun_global basedpyright basedpyright-langserver
-install_bun_global typescript-language-server typescript-language-server
+ensure_typescript7
 install_bun_global vscode-langservers-extracted vscode-json-language-server
 install_bun_global @steipete/oracle oracle
 install_bun_global @openai/codex codex
@@ -295,7 +308,6 @@ install_bun_global @oh-my-pi/pi-coding-agent omp
 install_bun_global @termdraw/app termdraw
 install_bun_global oxlint oxlint
 install_bun_global oxfmt oxfmt
-install_bun_global @vtsls/language-server vtsls
 
 CHROMIUM_BIN="$(command -v chromium 2>/dev/null || true)"
 if [ -n "$CHROMIUM_BIN" ]; then

@@ -9,12 +9,19 @@ opt.relativenumber = true
 -- Tabs & Indentation
 opt.tabstop = 2
 opt.shiftwidth = 2
+opt.softtabstop = -1
 opt.expandtab = true
 opt.autoindent = true
 opt.smartindent = true
 
 -- Line wrapping
-opt.wrap = false
+opt.wrap = true
+opt.linebreak = true
+opt.breakindent = true
+opt.breakindentopt = "shift:2,min:20,sbr"
+opt.showbreak = "↳ "
+opt.smoothscroll = true
+
 
 -- Search
 opt.ignorecase = true
@@ -75,4 +82,4 @@ opt.swapfile = false
 opt.backup = false
 
 -- Session options
-opt.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+opt.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
