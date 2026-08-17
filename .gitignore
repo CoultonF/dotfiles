@@ -30,3 +30,9 @@ omp/agent/*.log
 omp/logs/
 omp/run/
 omp/security/
+
+# OMP local metadata and generated files
+omp/agent/last-changelog-version
+omp/gpu_cache.json
+omp/puppeteer/
+omp/remote-host/*
