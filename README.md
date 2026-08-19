@@ -43,6 +43,7 @@ That's it. Everything is installed and configured.
 ├── opencode/
 │   ├── opencode.json      # OpenCode runtime config
 │   └── tui.json           # OpenCode TUI theme + keybinds
+├── agent-skills/          # Shared OMP/Zed Agent Skills
 ├── pi/
 │   ├── settings.json      # Pi global agent settings
 │   ├── APPEND_SYSTEM.md   # System prompt extension (operator preferences)
@@ -158,6 +159,10 @@ OpenCode is configured via `~/.config/opencode/` with:
 - Claude Code fallback support disabled via `OPENCODE_DISABLE_CLAUDE_CODE*`
 
 On first run, open `opencode` and use `/connect` to authenticate a provider.
+
+### Agent Skills
+
+Home Manager links `agent-skills/` to `~/.agents/skills`, the global discovery path shared by OMP and Zed. Use `/coultonf-mode` to enter cstack explicitly; the individual skills remain available by name. Zed needs no additional skill-path setting.
 
 ### Pi
 

@@ -468,6 +468,11 @@ in
   home.file.".oracle/config.json".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/oracle/config.json";
 
+  # Shared Agent Skills for OMP and Zed
+  # Keep this out of the Nix store so skill edits apply immediately.
+  home.file.".agents/skills".source =
+    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/agent-skills";
+
   # Pi coding agent config
   # Keep this out of the Nix store so Pi sees dotfiles updates immediately.
   home.file.".pi/agent/settings.json".source =
