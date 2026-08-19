@@ -452,56 +452,12 @@ in
   # Lazygit config
   xdg.configFile."lazygit/config.yml".source = ./lazygit/config.yml;
 
-  # OpenCode config
-  xdg.configFile."opencode" = {
-    source = ./opencode;
-    recursive = true;
-  };
-
-  # Codex CLI config
-  # Keep this out of the Nix store so the CLI can persist model changes.
-  home.file.".codex/config.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/codex/config.toml";
-
-  # Oracle config
-  # Keep this out of the Nix store so Oracle sees dotfiles updates immediately.
-  home.file.".oracle/config.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/oracle/config.json";
 
   # Shared Agent Skills for OMP and Zed
   # Keep this out of the Nix store so skill edits apply immediately.
   home.file.".agents/skills".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/agent-skills";
 
-  # Pi coding agent config
-  # Keep this out of the Nix store so Pi sees dotfiles updates immediately.
-  home.file.".pi/agent/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/settings.json";
-  home.file.".pi/agent/APPEND_SYSTEM.md".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/APPEND_SYSTEM.md";
-  home.file.".pi/agent/keybindings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/keybindings.json";
-  home.file.".pi/agent/mcp.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/mcp.json";
-  home.file.".pi/agent/skills".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/skills";
-  home.file.".pi/agent/extensions".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/extensions";
-  home.file.".pi/agent/themes".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/pi/themes";
-
-  # Claude Code global user instructions
-  # Keep out of the Nix store so edits take effect without a Home Manager rebuild.
-  home.file.".CLAUDE.md".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/CLAUDE.md";
-
-  # Claude Code keybindings. Out-of-store so edits apply without a rebuild.
-  home.file.".claude/keybindings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/keybindings.json";
-
-  # Claude Code user-scope agents. Out-of-store so edits apply without a rebuild.
-  home.file.".claude/agents".source =
-    config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/claude/agents";
 
   # Keep npm global installs out of the immutable Nix store.
   home.file.".npmrc".text = ''
