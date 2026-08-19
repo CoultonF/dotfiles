@@ -39,6 +39,7 @@ retry:
 autoResume: false
 doubleEscapeAction: tree
 treeFilterMode: all
+autocompleteMaxVisible: 15
 compaction: 
   strategy: snapcompact
   handoffSaveToDisk: true
