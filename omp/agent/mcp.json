@@ -3,7 +3,7 @@
   "mcpServers": {
     "mcp-postgres": {
       "type": "http",
-      "url": "http://mcp-postgres:5005/mcp/"
+      "url": "http://mcp-postgres:5015/mcp/"
     }
   }
 }
