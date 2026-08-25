@@ -3,18 +3,35 @@
 # Replaces fzf-tmux-url plugin to handle URLs that wrap across lines.
 
 # Capture the visible pane and rebuild URLs that were wrapped across rows. tmux paints each
-# wrapped row as an independent line (TUIs like the Codex/omp login screen also re-indent
-# every row), so -J cannot rejoin them. Strip each line's surrounding whitespace, then
-# concatenate a line onto the previous one only when it has no internal spaces and does not
-# start a new URL -- i.e. it is the no-space tail of a wrapped URL. URLs never contain
-# spaces, so this rejoins a split URL without gluing on trailing prose (e.g. "Click here to
-# login"), and works regardless of the wrap column. The final awk splits any
-# directly-adjacent URLs back apart.
+# wrapped row as an independent line (TUIs like the OMP login screen also put every row
+# inside box-drawing borders), so -J cannot rejoin them. Remove paired vertical borders
+# before testing whether a row is the no-space continuation of a URL.
 content=$(tmux capture-pane -p |
-    awk '{ s=$0; sub(/^[ \t]+/,"",s); sub(/[ \t]+$/,"",s)
-           if (acc!="" && s!="" && s !~ /[ \t]/ && s !~ /^(https?|ftp|file):\/\//) acc=acc s
-           else { if (acc!="") print acc; acc=s } }
-         END { if (acc!="") print acc }' |
+    awk '
+        function emit() {
+            if (url != "") print url
+            url = ""
+        }
+        {
+            s = $0
+            if (s ~ /^[[:space:]]*(│|┃|║|\|)/ && s ~ /(│|┃|║|\|)[[:space:]]*$/) {
+                sub(/^[[:space:]]*(│|┃|║|\|)[[:space:]]?/, "", s)
+                sub(/[[:space:]]?(│|┃|║|\|)[[:space:]]*$/, "", s)
+            }
+            sub(/^[[:space:]]+/, "", s)
+            sub(/[[:space:]]+$/, "", s)
+
+            if (s ~ /^(https?|ftp|file):\/\//) {
+                emit()
+                url = s
+            } else if (url != "" && s != "" && s !~ /[[:space:]]/) {
+                url = url s
+            } else {
+                emit()
+            }
+        }
+        END { emit() }
+    ' |
     awk '{gsub(/(https?|ftp|file):\/\//,"\n&");print}')
 
 url_regex='(https?|ftp|file):/?//[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'
