@@ -3,10 +3,15 @@
 # Replaces fzf-tmux-url plugin to handle URLs that wrap across lines.
 
 # Capture the visible pane and rebuild URLs that were wrapped across rows. tmux paints each
-# wrapped row as an independent line (TUIs like the OMP login screen also put every row
-# inside box-drawing borders), so -J cannot rejoin them. Remove paired vertical borders
-# before testing whether a row is the no-space continuation of a URL.
-content=$(tmux capture-pane -p |
+# wrapped row as an independent line (TUIs like OMP also put every row inside box-drawing
+# borders), so -J cannot rejoin them. Keep each complete row for ordinary inline URLs, and
+# also emit a joined candidate when a URL continues on the next row without whitespace.
+capture_args=(-p)
+if [ -n "${1:-}" ]; then
+    capture_args+=(-t "$1")
+fi
+
+content=$(tmux capture-pane "${capture_args[@]}" |
     awk '
         function emit() {
             if (url != "") print url
@@ -21,9 +26,12 @@ content=$(tmux capture-pane -p |
             sub(/^[[:space:]]+/, "", s)
             sub(/[[:space:]]+$/, "", s)
 
-            if (s ~ /^(https?|ftp|file):\/\//) {
+            print s
+
+            if (match(s, /(https?|ftp|file):\/\//)) {
                 emit()
-                url = s
+                url = substr(s, RSTART)
+                sub(/[[:space:]].*$/, "", url)
             } else if (url != "" && s != "" && s !~ /[[:space:]]/) {
                 url = url s
             } else {
