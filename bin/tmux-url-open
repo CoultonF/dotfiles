@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Open URLs locally, or copy to clipboard via OSC 52 for remote sessions (mosh/SSH).
+# Used as @fzf-url-open for the fzf-tmux-url plugin.
+url="$1"
+[ -z "$url" ] && exit 1
+
+if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_TTY" ]; then
+    # Remote session: copy to client clipboard via tmux's native OSC 52.
+    # The -w flag syncs the buffer to the terminal clipboard (same as yank in copy-mode).
+    tmux set-buffer -w "$url"
+    tmux display-message "Copied URL to clipboard"
+else
+    # Local session: open in default browser
+    open "$url"
+fi

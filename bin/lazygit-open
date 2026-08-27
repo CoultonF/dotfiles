@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ -n "$NVIM" ]; then
+  nvr --remote-silent "$@"
+else
+  xdg-open "$@" 2>/dev/null || open "$@" 2>/dev/null
+fi
