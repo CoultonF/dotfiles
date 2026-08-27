@@ -3,9 +3,9 @@ disabledProviders:
 modelRoles:
   smol: openai-codex/gpt-5.6-sol:low
   default: openai-codex/gpt-5.6-sol:medium
-  slow: openai-codex/gpt-5.6-sol:max
+  slow: openai-codex/gpt-5.6-sol:high
   plan: openai-codex/gpt-5.6-sol:xhigh
-  commit: openai-codex/gpt-5.6-sol:low
+  commit: openai-codex/gpt-5.6-sol:off
   vision: openai-codex/gpt-5.6-sol:medium
   designer: openai-codex/gpt-5.6-luna:max
   task: openai-codex/gpt-5.6-sol:high
@@ -41,10 +41,13 @@ doubleEscapeAction: tree
 treeFilterMode: all
 autocompleteMaxVisible: 15
 compaction:
-  strategy: snapcompact
   handoffSaveToDisk: true
   enabled: true
   thresholdPercent: 90
+  methodOrder:
+    - snapcompact
+    - remote
+    - soft
 memory:
   backend: local
 edit:
@@ -113,10 +116,10 @@ browser:
   headless: true
 clearOnShrink: false
 contextPromotion:
-  enabled: false
+  enabled: true
 marketplace:
   autoUpdate: auto
-setupVersion: 1
+setupVersion: 2
 dev:
   autoqaConsent: granted
 generate_image:
@@ -147,4 +150,5 @@ plan:
   defaultOnStartup: true
 codexResets:
   autoRedeem: "yes"
-
+composer:
+  shape: box
