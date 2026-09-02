@@ -4,6 +4,10 @@
     "mcp-postgres": {
       "type": "http",
       "url": "http://mcp-postgres:5015/mcp/"
+    },
+    "posthog": {
+      "type": "http",
+      "url": "https://mcp.posthog.com/mcp"
     }
   }
 }

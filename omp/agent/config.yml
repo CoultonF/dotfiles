@@ -51,7 +51,7 @@ compaction:
     - remote
     - soft
 memory:
-  backend: local
+  backend: "off"
 edit:
   mode: hashline
 readLineNumbers: true
