@@ -131,7 +131,7 @@ astGrep:
 security:
   enabled: true
 startup:
-  showSplash: true
+  showSplash: false
   changelogMode: hidden
 proseOnlyThinking: false
 textVerbosity: high
