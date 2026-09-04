@@ -48,7 +48,14 @@
       # Helper to create a home configuration for a given system
       mkHomeConfig = system:
         let
-          pkgs = nixpkgs.legacyPackages.${system};
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfreePredicate = pkg:
+              builtins.elem (nixpkgs.lib.getName pkg) [
+                "claude-code"
+                "terraform"
+              ];
+          };
           isDarwin = pkgs.stdenv.isDarwin;
         in
         home-manager.lib.homeManagerConfiguration {

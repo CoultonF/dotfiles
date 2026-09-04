@@ -41,6 +41,7 @@ in
     # Editor
     neovim
     opencode
+    claude-code
 
     # Search & Navigation
     ripgrep      # Fast grep (rg)
@@ -63,6 +64,9 @@ in
     python312    # For debugpy
     lua5_1       # For Neovim plugins
     cargo        # Rust package manager
+
+    # Infrastructure as Code
+    terraform
 
     # LSP Servers
     # Note: TypeScript 7 native LSP, basedpyright, and vscode-langservers-extracted

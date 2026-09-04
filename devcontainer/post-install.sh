@@ -64,7 +64,7 @@ fi
 
 # Install packages using nix profile (flakes-native, works with Determinate Nix)
 echo "Installing dev tools..."
-nix profile install \
+NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure \
 	nixpkgs#neovim \
 	nixpkgs#tmux \
 	nixpkgs#ripgrep \
@@ -104,6 +104,8 @@ nix profile install \
 	nixpkgs#direnv \
 	nixpkgs#open-policy-agent \
 	nixpkgs#opencode \
+	nixpkgs#claude-code \
+	nixpkgs#terraform \
 	nixpkgs#bun \
 	nixpkgs#chromium \
 	nixpkgs#bubblewrap

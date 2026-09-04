@@ -28,7 +28,9 @@ That's it. Everything is installed and configured.
 | **tmux**         | Terminal multiplexer with vim keybindings and Catppuccin theme      |
 | **Neovim**       | Full IDE setup with LSP, completion, debugging                      |
 | **OpenCode**     | Terminal AI coding agent with Catppuccin Macchiato and Space leader |
+| **Claude Code**  | Anthropic's terminal coding agent                                   |
 | **Pi**           | Coding agent CLI installed with Bun and managed global settings     |
+| **Terraform**    | Declarative infrastructure provisioning                             |
 | **Zsh**          | Shell with autosuggestions, syntax highlighting, starship prompt    |
 
 ## Directory Structure
@@ -77,7 +79,7 @@ Home Manager uses Nix to declaratively manage:
 - **Dotfiles** - Configs symlinked to `~/.config/`
 - **Shell** - Zsh with aliases, env vars, plugins
 - **Programs** - tmux, git, fzf, starship with native config
-- **AI Tools** - OpenCode and Pi with managed config
+- **AI Tools** - OpenCode, Claude Code, and Pi with managed shell integration
 
 ### Applying Changes
 
@@ -102,10 +104,11 @@ home-manager switch --flake ~/.dotfiles#$(nix eval --impure --raw --expr builtin
 All installed automatically via `home.nix`:
 
 - **Editor**: Neovim
-- **AI**: OpenCode, Pi
+- **AI**: OpenCode, Claude Code, Pi
 - **Search**: ripgrep (rg), fd, fzf, tree
 - **Git**: lazygit, git, delta
 - **Languages**: Node.js 22, Python 3.12, Lua 5.1
+- **Infrastructure**: Terraform
 - **LSP Servers**: TypeScript, HTML/CSS/JSON, Pyright, Ruff, Lua
 - **Terminal**: tmux
 - **Build Tools**: gcc, gnumake
