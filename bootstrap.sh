@@ -223,6 +223,24 @@ if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
 	success "Claude Code settings applied"
 fi
 
+# Register OMP's MCP servers with Claude Code. User-scope MCP servers live in
+# ~/.claude.json under the top-level "mcpServers" key; ${VAR} references (e.g.
+# in headers) are expanded by Claude Code at load time, so copy them verbatim.
+# Merge so servers added outside dotfiles survive; same-named servers are
+# replaced wholesale so keys removed from omp/agent/mcp.json don't linger.
+if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/omp/agent/mcp.json" ]; then
+	info "Syncing OMP MCP servers into Claude Code user scope..."
+	CLAUDE_JSON="$HOME/.claude.json"
+	if [ -f "$CLAUDE_JSON" ]; then
+		jq --slurpfile omp "$DOTFILES_DIR/omp/agent/mcp.json" '.mcpServers = ((.mcpServers // {}) + $omp[0].mcpServers)' "$CLAUDE_JSON" >"${CLAUDE_JSON}.tmp" &&
+			cat "${CLAUDE_JSON}.tmp" >"$CLAUDE_JSON" && rm -f "${CLAUDE_JSON}.tmp"
+	else
+		jq -n --slurpfile omp "$DOTFILES_DIR/omp/agent/mcp.json" '{mcpServers: $omp[0].mcpServers}' >"$CLAUDE_JSON"
+		chmod 600 "$CLAUDE_JSON"
+	fi
+	success "Claude Code MCP servers synced"
+fi
+
 # Set zsh as default shell.
 # Use a system-owned zsh path for login shells. Nix profile paths are generation
 # symlinks and can disappear after profile changes, which leaves new terminals
