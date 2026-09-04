@@ -2,6 +2,7 @@
 
 - Prefer concise responses. Skip preamble and trailing summaries.
 - Do not write tests by default. Write them only when explicitly asked. If transient tests are needed to validate a change, remove them before finishing.
+- Do not write documentation unless explicitly asked.
 - Editing existing files beats creating new ones.
 - Do not add comments that restate what the code does. Only document non-obvious why.
 - Avoid backwards-compatibility shims, unused re-exports, or removed-code comments. Delete dead code outright.
