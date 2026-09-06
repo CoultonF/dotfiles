@@ -1,13 +1,13 @@
 import { realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { CustomToolFactory } from "@oh-my-pi/pi-coding-agent";
-import { RpcClient } from "@oh-my-pi/pi-coding-agent/modes/rpc/rpc-client";
+import type { CustomToolAPI, CustomToolFactory } from "@oh-my-pi/pi-coding-agent";
 
 type WorkerMode = "inspect" | "implement";
+type RpcClientConstructor = CustomToolAPI["pi"]["RpcClient"];
 
 type Worker = {
-	client: RpcClient;
+	client: InstanceType<RpcClientConstructor>;
 	queue: Promise<void>;
 	root: string;
 	mode: WorkerMode;
@@ -64,6 +64,7 @@ async function resolveAdditionalDirectories(
 }
 
 async function startWorker(
+	RpcClient: RpcClientConstructor,
 	root: string,
 	additionalDirectories: readonly string[],
 	mode: WorkerMode,
@@ -102,6 +103,7 @@ async function startWorker(
 }
 
 function getOrStartWorker(
+	RpcClient: RpcClientConstructor,
 	root: string,
 	additionalDirectories: readonly string[],
 	mode: WorkerMode,
@@ -110,7 +112,7 @@ function getOrStartWorker(
 	const existing = workers.get(key);
 	if (existing) return { key, promise: existing, reused: true };
 
-	const promise = startWorker(root, additionalDirectories, mode);
+	const promise = startWorker(RpcClient, root, additionalDirectories, mode);
 	workers.set(key, promise);
 	void promise.catch(() => {
 		if (workers.get(key) === promise) workers.delete(key);
@@ -289,7 +291,7 @@ const factory: CustomToolFactory = (pi) => {
 				};
 			}
 
-			const entry = getOrStartWorker(root, additionalDirectories, mode);
+			const entry = getOrStartWorker(pi.pi.RpcClient, root, additionalDirectories, mode);
 			const visibleRoot = path.relative(workspaceRoot, root) || ".";
 			onUpdate?.({
 				content: [
