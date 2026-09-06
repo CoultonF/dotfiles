@@ -27,7 +27,7 @@ const INSPECT_GUARD_PATH = fileURLToPath(new URL("./inspect-guard.ts", import.me
 async function canonicalDirectory(
 	workspaceRoot: string,
 	requested: string,
-	label: string,
+	label: "root" | "additional directory",
 ): Promise<string> {
 	if (path.isAbsolute(requested)) {
 		throw new Error(`${label} must be relative to the current OMP workspace`);
@@ -36,6 +36,7 @@ async function canonicalDirectory(
 	const resolved = await realpath(path.resolve(workspaceRoot, requested));
 	const relative = path.relative(workspaceRoot, resolved);
 	if (
+		label === "root" &&
 		relative !== "" &&
 		(relative.startsWith(`..${path.sep}`) || relative === ".." || path.isAbsolute(relative))
 	) {
@@ -253,7 +254,7 @@ const factory: CustomToolFactory = (pi) => {
 				.array(z.string().min(1))
 				.optional()
 				.describe(
-					"Optional existing directories relative to the coordinator workspace. Pass only when the child must directly read, search, or edit files outside the leaf root. Omit when shared paths are needed only for LSP resolution or the task stays inside the leaf root.",
+					"Optional existing directories relative to the coordinator workspace, including paths outside it such as ../packages. Each explicitly grants the child OMP file access through --add-dir. Pass only when the child must directly read, search, or edit these files; LSP import configuration alone does not grant access.",
 				),
 			timeoutSeconds: z
 				.number()
