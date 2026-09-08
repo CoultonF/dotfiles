@@ -24,14 +24,13 @@ error() {
 	exit 1
 }
 
-append_line_if_missing() {
-	local line="$1"
-	local file="$2"
+set_export() {
+	local name="$1"
+	local value="$2"
+	local file="$3"
+	local line="export $name=$value"
 
 	if [ -e "$file" ]; then
-		if grep -qxF "$line" "$file" 2>/dev/null; then
-			return 0
-		fi
 		if [ ! -w "$file" ]; then
 			info "Skipping $file (not writable)"
 			return 0
@@ -41,7 +40,15 @@ append_line_if_missing() {
 		return 0
 	fi
 
-	echo "$line" >>"$file" || info "Skipping $file (append failed)"
+	local tmp
+	tmp="$(mktemp)"
+	if sed "/^export $name=/d" "$file" >"$tmp" && printf '%s\n' "$line" >>"$tmp"; then
+		cat "$tmp" >"$file"
+	else
+		rm -f "$tmp"
+		return 1
+	fi
+	rm -f "$tmp"
 }
 
 # Ensure USER is set (required by home-manager, may not be set in containers)
@@ -204,9 +211,9 @@ nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 success "Home Manager configuration applied!"
 # Home Manager owns ~/.zshenv, which is often a read-only Nix store symlink.
 for rcfile in ~/.bashrc ~/.bash_profile ~/.profile; do
-	append_line_if_missing 'export PI_CONFIG_DIR="dotfiles/omp"' "$rcfile"
-	append_line_if_missing 'export PI_CODING_AGENT_DIR="$HOME/$PI_CONFIG_DIR/agent"' "$rcfile"
-	append_line_if_missing 'export PI_OAUTH_CALLBACK_HOST=0.0.0.0' "$rcfile"
+	set_export PI_CONFIG_DIR '"dotfiles/omp"' "$rcfile"
+	set_export PI_CODING_AGENT_DIR '"$HOME/$PI_CONFIG_DIR/agent"' "$rcfile"
+	set_export PI_OAUTH_CALLBACK_HOST '0.0.0.0' "$rcfile"
 done
 
 # Apply Claude Code settings (hooks, default model, default mode)

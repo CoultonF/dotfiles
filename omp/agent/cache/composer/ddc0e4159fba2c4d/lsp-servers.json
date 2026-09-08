@@ -1,0 +1,1 @@
+{"version":1,"servers":[{"name":"vscode-html-language-server","status":"connecting","fileTypes":[".html",".htm"]},{"name":"vscode-css-language-server","status":"connecting","fileTypes":[".css",".scss",".sass",".less"]},{"name":"vscode-json-language-server","status":"connecting","fileTypes":[".json",".jsonc"]}]}

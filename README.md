@@ -188,6 +188,16 @@ Pi is installed from `@earendil-works/pi-coding-agent` using Bun. The dotfiles r
 
 On first run, open `pi` and use `/login` to authenticate a provider.
 
+OMP uses `PI_CONFIG_DIR="dotfiles/omp"` and
+`PI_CODING_AGENT_DIR="$HOME/dotfiles/omp/agent"`. Keep the checkout at
+`~/dotfiles` for both local installs and devcontainers. The bootstrap creates
+`~/.dotfiles` as a symlink for shell scripts and shared skills.
+Run `~/dotfiles/install.sh` to apply changes, then restart OMP from a new
+terminal or run `exec zsh` first.
+The installer cannot change the environment of an already-running shell.
+Use `omp config path` to check the active agent directory and
+`omp config get theme.dark` to check a loaded setting.
+
 #### OMP keybindings
 
 | Key                 | Action                                         |
