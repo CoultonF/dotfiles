@@ -1,7 +1,6 @@
 disabledProviders:
   - claude-plugins
 modelRoles:
-  smol: openai-codex/gpt-6-astra:medium
   default: openai-codex/gpt-6-astra
   slow: openai-codex/gpt-6-astra:xhigh
   plan: openai-codex/gpt-6-astra:xhigh
@@ -42,6 +41,7 @@ autoResume: false
 doubleEscapeAction: tree
 treeFilterMode: all
 autocompleteMaxVisible: 15
+extendedContext: true
 compaction:
   handoffSaveToDisk: true
   enabled: true
@@ -66,8 +66,6 @@ renderMermaid:
   enabled: true
 calc:
   enabled: true
-inspect_image:
-  mode: "on"
 checkpoint:
   enabled: true
 github:
@@ -102,9 +100,9 @@ skills:
 task:
   isolation:
     merge: patch
-    mode: auto
     apply: true
     commits: ai
+    enabled: true
   showResolvedModelBadge: true
   eager: default
   enableLsp: false
@@ -154,3 +152,5 @@ codexResets:
   autoRedeem: "yes"
 composer:
   shape: box
+isolation:
+  backend: auto
