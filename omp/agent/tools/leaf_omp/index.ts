@@ -35,9 +35,13 @@ async function canonicalDirectory(
 
 	const resolved = await realpath(path.resolve(workspaceRoot, requested));
 	const relative = path.relative(workspaceRoot, resolved);
+	if (label === "root" && relative === "") {
+		throw new Error(
+			"root must be a proper subdirectory of the current OMP workspace; work directly in the coordinator for workspace-root tasks",
+		);
+	}
 	if (
 		label === "root" &&
-		relative !== "" &&
 		(relative.startsWith(`..${path.sep}`) || relative === ".." || path.isAbsolute(relative))
 	) {
 		throw new Error(`${label} must stay inside the current OMP workspace`);
@@ -134,7 +138,7 @@ async function withWorkerLock<T>(worker: Worker, operation: () => Promise<T>): P
 }
 
 function leafPrompt(task: string, workspaceRoot: string, worker: Worker): string {
-	const visibleRoot = path.relative(workspaceRoot, worker.root) || ".";
+	const visibleRoot = path.relative(workspaceRoot, worker.root);
 	const visibleAdditional = worker.additionalDirectories.map((directory) =>
 		path.relative(workspaceRoot, directory),
 	);
@@ -236,13 +240,13 @@ const factory: CustomToolFactory = (pi) => {
 		hidden: isLeafWorker,
 		loadMode: "essential",
 		description:
-			"Delegate work to a persistent OMP RPC child rooted in one nested project. In parent plan mode, it automatically runs a mechanically read-only inspector with leaf-local LSP. Outside plan mode, it runs an auto-approved implementation worker. Use it when that project's cwd-scoped LSP, package-manager dependencies, or Python virtual environment must be selected. Pass additionalDirectories only when the child must directly access paths outside the leaf root. LSP import configuration does not make those paths OMP workspace roots. Calls for the same mode and root are serialized.",
+			"Delegate work to a persistent OMP RPC child rooted in one nested project. The root must resolve to a proper subdirectory of the coordinator workspace, never \".\" or an equivalent path. Handle workspace-root tasks directly in the coordinator; use ordinary subagents only for genuinely independent slices. In parent plan mode, it automatically runs a mechanically read-only inspector with leaf-local LSP. Outside plan mode, it runs an auto-approved implementation worker. Use it when that project's cwd-scoped LSP, package-manager dependencies, or Python virtual environment must be selected. Pass additionalDirectories only when the child must directly access paths outside the leaf root. LSP import configuration does not make those paths OMP workspace roots. Calls for the same mode and root are serialized.",
 		parameters: z.object({
 			root: z
 				.string()
 				.min(1)
 				.describe(
-					"Existing leaf project directory relative to the coordinator workspace. It becomes the child process cwd and sole LSP workspace root.",
+					"Existing leaf project directory relative to the coordinator workspace that resolves to a proper subdirectory, never \".\" or an equivalent path. It becomes the child process cwd and sole LSP workspace root.",
 				),
 			task: z
 				.string()
@@ -293,7 +297,7 @@ const factory: CustomToolFactory = (pi) => {
 			}
 
 			const entry = getOrStartWorker(pi.pi.RpcClient, root, additionalDirectories, mode);
-			const visibleRoot = path.relative(workspaceRoot, root) || ".";
+			const visibleRoot = path.relative(workspaceRoot, root);
 			onUpdate?.({
 				content: [
 					{
