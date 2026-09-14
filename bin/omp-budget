@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exec omp --config "${PI_CODING_AGENT_DIR:-$HOME/dotfiles/omp/agent}/budget.yml" "$@"
