@@ -1,8 +1,7 @@
 # Ghostty Terminal Configuration
 # https://ghostty.org/docs/config
 
-# Theme - Catppuccin Mocha (matches VS Code theme)
-theme = Catppuccin Mocha
+theme = light:Catppuccin Latte,dark:Catppuccin Mocha
 
 # Font
 font-family = JetBrainsMono Nerd Font

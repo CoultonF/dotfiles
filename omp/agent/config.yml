@@ -83,7 +83,7 @@ mcp:
   notifications: true
 theme:
   dark: dark-catppuccin
-  light: light
+  light: light-catppuccin
 symbolPreset: nerd
 providers:
   kimiApiFormat: openai
