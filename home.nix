@@ -236,33 +236,6 @@ in
         alias google-chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
       fi
 
-      # Claude Code: always max effort. Fullscreen TUI (CLAUDE_CODE_NO_FLICKER=1 ==
-      # tui: fullscreen) only OUTSIDE tmux -- the fullscreen renderer garbles the
-      # transcript under (nested) tmux (stale interleaved characters when
-      # scrolling), so inside tmux the env var is left unset and settings.json's
-      # "tui": "default" picks the classic renderer. claude() uses user-scope
-      # config only when under /workspace (ignores that repo's .claude); normal
-      # project config elsewhere.
-      claude() {
-        local args=(--effort max --model claude-fable-5)
-        case "$PWD" in
-          /workspace|/workspace/*) args+=(--setting-sources user) ;;
-        esac
-        if [[ -n "$TMUX" ]]; then
-          command claude "''${args[@]}" "$@"
-        else
-          CLAUDE_CODE_NO_FLICKER=1 command claude "''${args[@]}" "$@"
-        fi
-      }
-      # cc(): always user-scope config only (never reads any project .claude), max effort.
-      cc() {
-        if [[ -n "$TMUX" ]]; then
-          command claude --effort max --model claude-fable-5 --setting-sources user "$@"
-        else
-          CLAUDE_CODE_NO_FLICKER=1 command claude --effort max --model claude-fable-5 --setting-sources user "$@"
-        fi
-      }
-      
       # fzf-tab: replace zsh's completion menu with an fzf picker.
       # Make sure completion is initialised (compinit) before sourcing the plugin,
       # then load it. $realpath is provided by fzf-tab for previews.
@@ -468,6 +441,9 @@ in
 
   # Lazygit config
   xdg.configFile."lazygit/config.yml".source = ./lazygit/config.yml;
+
+  # Oracle config
+  home.file.".oracle/config.json".source = ./oracle/config.json;
 
 
   # Shared Agent Skills for OMP and Zed

@@ -432,14 +432,6 @@ for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing "alias la='eza -la --icons=auto --git --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
 done
-# Claude Code: always max effort, fullscreen TUI (CLAUDE_CODE_NO_FLICKER=1 == tui:
-# fullscreen, but survives a broken/absent settings.json). claude() uses user-scope
-# config only under /workspace (ignores that repo's .claude); cc() always uses
-# user-scope config only, everywhere.
-for rcfile in ~/.bashrc ~/.zshrc; do
-	append_line_if_missing 'claude() { local a=(--effort max --model claude-fable-5); case "$PWD" in /workspace|/workspace/*) a+=(--setting-sources user);; esac; CLAUDE_CODE_NO_FLICKER=1 command claude "${a[@]}" "$@"; }' "$rcfile"
-	append_line_if_missing 'cc() { CLAUDE_CODE_NO_FLICKER=1 command claude --effort max --model claude-fable-5 --setting-sources user "$@"; }' "$rcfile"
-done
 # fzf-tab (zsh only): load after compinit, replace the completion menu with fzf.
 # Stage a copy with the prebuilt binary module stripped out: its RUNPATH targets
 # glibc 2.42, so on glibc 2.41 hosts it fails to load and fzf-tab nags to rebuild
