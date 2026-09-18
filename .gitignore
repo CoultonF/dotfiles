@@ -20,6 +20,7 @@ omp/agent/*.db-*
 omp/*.db
 omp/*.db-*
 omp/cache/
+omp/agent/cache/
 omp/install-id
 omp/agent/sessions/
 omp/agent/blobs/
