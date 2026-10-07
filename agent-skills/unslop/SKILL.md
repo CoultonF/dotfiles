@@ -1,11 +1,15 @@
 ---
 name: unslop
-description: Cut AI tells from any writing. Must always apply.
+description: Cut AI tells from user-facing prose written by the top-level assistant. Do not load or apply for orchestration or subagent work.
 ---
 
 # Unslop
 
-Edit text to remove AI patterns and add human voice.
+Apply only to user-facing prose written by the top-level assistant. Edit that text to remove AI patterns and add human voice.
+
+Do not load or apply this skill for task delegation prompts, orchestration messages, tool arguments, internal artifacts, or subagent work and reports. Subagents must not load or apply it, even when their reports will inform a user-facing response.
+
+The top-level assistant may apply this skill when turning subagent results into a response to the user.
 
 ## Process
 
