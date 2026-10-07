@@ -2,17 +2,17 @@ disabledProviders:
   - claude-plugins
 modelRoles:
   default: openai-codex/gpt-6-astra:low
-  smol: openai-codex/gpt-5.6-sol:low
-  simple: openai-codex/gpt-5.6-sol:medium
-  balanced: openai-codex/gpt-5.6-sol:high
+  smol: openai-codex/gpt-6-sol:low
+  simple: openai-codex/gpt-6-sol:medium
+  balanced: openai-codex/gpt-6-sol:high
   slow: openai-codex/gpt-6-astra:high
   plan: openai-codex/gpt-6-astra:medium
-  commit: openai-codex/gpt-5.6-luna:high
-  vision: openai-codex/gpt-5.6-luna:high
-  tiny: openai-codex/gpt-5.6-luna:low
+  commit: openai-codex/gpt-6-luna:high
+  vision: openai-codex/gpt-6-luna:high
+  tiny: openai-codex/gpt-6-luna:low
   task: "@balanced"
   scout: "@smol"
-  mechanical: openai-codex/gpt-5.6-luna:high
+  mechanical: openai-codex/gpt-6-luna:high
   review: openai-codex/gpt-6-astra:medium
   security: openai-codex/gpt-6-astra:high
   advisor: openai-codex/gpt-6-astra:medium
