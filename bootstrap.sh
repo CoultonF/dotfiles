@@ -216,20 +216,6 @@ for rcfile in ~/.bashrc ~/.bash_profile ~/.profile; do
 	set_export PI_OAUTH_CALLBACK_HOST '0.0.0.0' "$rcfile"
 done
 
-# Apply Claude Code settings (hooks, default model, default mode)
-if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/claude/hooks.json" ]; then
-	info "Applying Claude Code settings..."
-	mkdir -p ~/.claude
-	CLAUDE_SETTINGS="$HOME/.claude/settings.json"
-	if [ -f "$CLAUDE_SETTINGS" ]; then
-		jq --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" --slurpfile base "$DOTFILES_DIR/claude/settings.json" '. * $base[0] | .hooks = $hooks[0]' "$CLAUDE_SETTINGS" >"${CLAUDE_SETTINGS}.tmp" &&
-			cat "${CLAUDE_SETTINGS}.tmp" >"$CLAUDE_SETTINGS" && rm -f "${CLAUDE_SETTINGS}.tmp"
-	else
-		jq -n --slurpfile hooks "$DOTFILES_DIR/claude/hooks.json" --slurpfile base "$DOTFILES_DIR/claude/settings.json" '$base[0] + {hooks: $hooks[0]}' >"$CLAUDE_SETTINGS"
-	fi
-	success "Claude Code settings applied"
-fi
-
 # Register OMP's MCP servers with Claude Code. User-scope MCP servers live in
 # ~/.claude.json under the top-level "mcpServers" key; ${VAR} references (e.g.
 # in headers) are expanded by Claude Code at load time, so copy them verbatim.
