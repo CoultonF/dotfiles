@@ -150,20 +150,17 @@ startup:
   showSplash: false
   changelogMode: hidden
 proseOnlyThinking: false
-textVerbosity: high
+textVerbosity: medium
 inlineToolDescriptors: "on"
 personality: pragmatic
 bashInterceptor:
-  enabled: true
+  enabled: false
 shellMinimizer:
   enabled: false
 eval:
   js: true
 python:
   kernelMode: session
-grep:
-  contextBefore: 3
-  contextAfter: 5
 plan:
   defaultOnStartup: false
 codexResets:
