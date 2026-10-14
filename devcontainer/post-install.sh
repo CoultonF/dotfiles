@@ -408,6 +408,7 @@ for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing "alias ll='eza -l --icons=auto --git --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias la='eza -la --icons=auto --git --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
+	append_line_if_missing "alias cc='claude --dangerously-skip-permissions'" "$rcfile"
 done
 # fzf-tab (zsh only): load after compinit, replace the completion menu with fzf.
 # Stage a copy with the prebuilt binary module stripped out: its RUNPATH targets

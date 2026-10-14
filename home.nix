@@ -152,6 +152,7 @@ in
       ts = "tmux-sessionizer";
       lg = "lazygit";
       v = "nvim";
+      cc = "claude --dangerously-skip-permissions";
     };
 
     # Environment variables set in .zshenv
