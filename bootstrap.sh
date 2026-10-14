@@ -234,6 +234,14 @@ if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/omp/agent/mcp.json" ]; then
 	success "Claude Code MCP servers synced"
 fi
 
+# Install the personal Claude Code instructions, replacing whatever is there.
+if [ -f "$DOTFILES_DIR/claude/CLAUDE.md" ]; then
+	info "Installing Claude Code CLAUDE.md..."
+	mkdir -p "$HOME/.claude"
+	cp "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+	success "Claude Code CLAUDE.md installed"
+fi
+
 # Set zsh as default shell.
 # Use a system-owned zsh path for login shells. Nix profile paths are generation
 # symlinks and can disappear after profile changes, which leaves new terminals
