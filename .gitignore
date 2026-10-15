@@ -25,6 +25,7 @@ omp/cache/
 omp/agent/cache/
 omp/install-id
 omp/agent/sessions/
+omp/agent/custom-session-files/
 omp/agent/blobs/
 omp/agent/terminal-sessions/
 omp/agent/memories/

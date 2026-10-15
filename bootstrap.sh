@@ -242,6 +242,15 @@ if [ -f "$DOTFILES_DIR/claude/CLAUDE.md" ]; then
 	success "Claude Code CLAUDE.md installed"
 fi
 
+# Install personal Claude Code subagents. Only agents named in dotfiles are
+# replaced; others in ~/.claude/agents are left alone.
+if [ -d "$DOTFILES_DIR/claude/agents" ]; then
+	info "Installing Claude Code agents..."
+	mkdir -p "$HOME/.claude/agents"
+	cp "$DOTFILES_DIR"/claude/agents/*.md "$HOME/.claude/agents/"
+	success "Claude Code agents installed"
+fi
+
 # Set zsh as default shell.
 # Use a system-owned zsh path for login shells. Nix profile paths are generation
 # symlinks and can disappear after profile changes, which leaves new terminals
