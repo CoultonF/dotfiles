@@ -3,6 +3,7 @@ disabledProviders:
 modelRoles:
   default: openai-codex/gpt-6-astra:low
   smol: openai-codex/gpt-6.1-sol:low
+  fast: openai-codex/gpt-6-luna:medium
   simple: openai-codex/gpt-6.1-sol:medium
   balanced: openai-codex/gpt-6.1-sol:high
   slow: openai-codex/gpt-6-astra:high
@@ -17,6 +18,8 @@ modelRoles:
   security: openai-codex/gpt-6-astra:high
   advisor: openai-codex/gpt-6-astra:medium
 modelTags:
+  fast:
+    name: Fast
   simple:
     name: Simple
   balanced:
@@ -24,6 +27,7 @@ modelTags:
 cycleOrder:
   - default
   - smol
+  - fast
   - simple
   - balanced
   - plan
