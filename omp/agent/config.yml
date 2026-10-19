@@ -11,12 +11,16 @@ modelRoles:
   commit: openai-codex/gpt-6-luna:high
   vision: openai-codex/gpt-6-luna:high
   tiny: openai-codex/gpt-6-luna:low
-  task: "@balanced"
-  scout: "@smol"
+  task: openai-codex/gpt-6.1-sol:medium
+  scout: openai-codex/gpt-6-luna:low
   mechanical: openai-codex/gpt-6-luna:high
-  review: openai-codex/gpt-6-astra:medium
+  review: openai-codex/gpt-6.1-sol:high
   security: openai-codex/gpt-6-astra:high
   advisor: openai-codex/gpt-6-astra:medium
+  implementer_lite: openai-codex/gpt-6-luna:medium
+  background_planner: openai-codex/gpt-6-astra:high
+  research: openai-codex/gpt-6.1-sol:high
+  ui_verify: openai-codex/gpt-6.1-sol:medium
 modelTags:
   fast:
     name: Fast
@@ -101,6 +105,10 @@ theme:
 symbolPreset: nerd
 providers:
   kimiApiFormat: openai
+tier:
+  openai: priority
+  subagent: inherit
+  advisor: inherit
 commands:
   enableOpencodeProject: false
   enableOpencodeUser: false
@@ -118,6 +126,10 @@ task:
     task: "@task"
     reviewer: "@review"
     security-reviewer: "@security"
+    implementer-lite: "@implementer_lite"
+    background-planner: "@background_planner"
+    evidence-researcher: "@research"
+    ui-verifier: "@ui_verify"
   agentAdvisor:
     task: "@advisor"
   isolation:

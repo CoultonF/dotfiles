@@ -247,8 +247,23 @@ fi
 if [ -d "$DOTFILES_DIR/claude/agents" ]; then
 	info "Installing Claude Code agents..."
 	mkdir -p "$HOME/.claude/agents"
-	cp "$DOTFILES_DIR"/claude/agents/*.md "$HOME/.claude/agents/"
+	for agent_file in "$DOTFILES_DIR"/claude/agents/*.md; do
+		[ -f "$agent_file" ] || continue
+		cp "$agent_file" "$HOME/.claude/agents/"
+	done
 	success "Claude Code agents installed"
+fi
+
+# Install personal Codex subagents without replacing other Codex configuration
+# or agents whose names are not managed by dotfiles.
+if [ -d "$DOTFILES_DIR/codex/agents" ]; then
+	info "Installing Codex agents..."
+	mkdir -p "$HOME/.codex/agents"
+	for agent_file in "$DOTFILES_DIR"/codex/agents/*.toml; do
+		[ -f "$agent_file" ] || continue
+		cp "$agent_file" "$HOME/.codex/agents/"
+	done
+	success "Codex agents installed"
 fi
 
 # Set zsh as default shell.

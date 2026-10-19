@@ -153,6 +153,7 @@ in
       lg = "lazygit";
       v = "nvim";
       cc = "claude --dangerously-skip-permissions";
+      codex = "codex --dangerously-bypass-approvals-and-sandbox";
     };
 
     # Environment variables set in .zshenv
@@ -442,6 +443,17 @@ in
 
   # Lazygit config
   xdg.configFile."lazygit/config.yml".source = ./lazygit/config.yml;
+
+  xdg.configFile."k9s/views.yaml".text = ''
+    views:
+      v1/nodes:
+        columns:
+          - NAME
+          - 'INSTANCE-TYPE:.metadata.labels.node\.kubernetes\.io/instance-type'
+          - STATUS
+          - ROLE
+          - AGE
+  '';
 
   # Oracle config
   home.file.".oracle/config.json".source = ./oracle/config.json;
