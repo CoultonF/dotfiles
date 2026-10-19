@@ -450,6 +450,9 @@ in
         columns:
           - NAME
           - 'INSTANCE-TYPE:.metadata.labels.node\.kubernetes\.io/instance-type'
+          - 'POOL:.metadata.labels.rcom\.io/pool'
+          - 'COLOUR:.metadata.labels.rcom\.io/slot'
+          - 'AZ:.metadata.labels.topology\.kubernetes\.io/zone'
           - STATUS
           - ROLE
           - AGE
