@@ -11,6 +11,7 @@
 set -euo pipefail
 
 HERDR_BIN="${HERDR_BIN:-$HOME/.local/bin/herdr}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ ! -x "$HERDR_BIN" ]]; then
 	if command -v herdr >/dev/null 2>&1; then
@@ -34,4 +35,4 @@ fi
 exec open -na Ghostty --args \
 	--window-width=200 \
 	--window-height=50 \
-	-e "$HERDR_BIN" "$@"
+	-e /usr/bin/env PATH="$SCRIPT_DIR/herdr-ssh:$PATH" "$HERDR_BIN" "$@"
