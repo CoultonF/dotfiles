@@ -17,7 +17,7 @@
       # Helper to generate attributes for each system
       forAllSystems = nixpkgs.lib.genAttrs systems;
 
-      # Bun pinned to the version OMP requires (>=1.3.14), built native for the host.
+      # Bun pinned to the version OMP requires (>=1.4.4), built native for the host.
       #
       # Why this exists: our local dev box is an OrbStack arm64 VM running an
       # *amd64-personality* container (uname -m = x86_64, system loader is
@@ -29,7 +29,7 @@
       # Nix is the only thing that produces a working arm64 bun here, because it
       # autoPatchelf's the binary onto its own arm64 glibc loader in /nix/store.
       #
-      # nixpkgs-unstable currently lags at bun 1.3.11 (< OMP's 1.3.14 floor), so
+      # nixpkgs-unstable currently lags at bun 1.3.11 (< OMP's 1.4.4 floor), so
       # override just version + src. overrideAttrs reuses nixpkgs' known-good
       # buildInputs/autoPatchelfHook wiring -- only the source archive changes.
       # On x86_64 (AWS EC2 amd64 devpods, which DO have AVX2) we keep plain
@@ -37,10 +37,10 @@
       mkBun = pkgs:
         if pkgs.stdenv.hostPlatform.isLinux && pkgs.stdenv.hostPlatform.isAarch64 then
           pkgs.bun.overrideAttrs (old: rec {
-            version = "1.3.14";
+            version = "1.4.4";
             src = pkgs.fetchurl {
               url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-linux-aarch64.zip";
-              hash = "sha256-on/7Y6gxA3WDbg1vZorhf6jY0YuIw3yCHGUzGXOhmjs=";
+              hash = "sha256-uqa7NvUdblhWHgK76oJQOKnfRU9nPW13bou/hvjHhQ4=";
             };
           })
         else pkgs.bun;
@@ -78,7 +78,7 @@
 
       # Pinned bun, per system. The lightweight (non-Home-Manager) container
       # path in devcontainer/post-install.sh consumes this via `nix build .#bun`
-      # so both setup paths land the same native-arm64 bun >=1.3.14.
+      # so both setup paths land the same native-arm64 bun >=1.4.4.
       packages = forAllSystems (system:
         let bun = mkBun nixpkgs.legacyPackages.${system};
         in {

@@ -139,10 +139,10 @@ nix_system="$(nix eval --impure --raw --expr 'builtins.currentSystem' 2>/dev/nul
 if [ "$nix_system" = "aarch64-linux" ]; then
 	# Native arm64: a curl-installed or raw-prebuilt arm64 bun cannot run here --
 	# the amd64 base image has no /lib/ld-linux-aarch64.so.1. Build the Nix-pinned,
-	# loader-patched bun (>=1.3.14) and point ~/.bun/bin/bun at it. Running the x64
+	# loader-patched bun (>=1.4.4) and point ~/.bun/bin/bun at it. Running the x64
 	# build under emulation instead is what wedged OMP's event loop. No AVX2 on
 	# arm64, so the x64 baseline/modern handling is skipped.
-	echo "Linking Nix-native arm64 bun (>=1.3.14) for OMP..."
+	echo "Linking Nix-native arm64 bun (>=1.4.4) for OMP..."
 	bun_store="$(nix build "$FLAKE_DIR#bun" --no-link --print-out-paths 2>/dev/null | tail -1)"
 	if [ -n "$bun_store" ] && [ -x "$bun_store/bin/bun" ]; then
 		ln -sfn "$bun_store/bin/bun" "$BUN_BIN"

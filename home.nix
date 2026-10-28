@@ -541,7 +541,7 @@ in
 
     if [ "$nix_system" = "aarch64-linux" ]; then
       # Native arm64: point bun at the Nix-built, loader-patched binary
-      # (bunPinned, >=1.3.14). A curl-installed or raw-prebuilt arm64 bun cannot
+      # (bunPinned, >=1.4.4). A curl-installed or raw-prebuilt arm64 bun cannot
       # run here -- the amd64 base image has no /lib/ld-linux-aarch64.so.1; only
       # Nix's autoPatchelf'd binary resolves its interpreter. Running the x64
       # build under emulation instead is what wedged OMP's event loop. arm64 has
