@@ -22,6 +22,7 @@ omp/agent/*.db-*
 omp/*.db
 omp/*.db-*
 omp/cache/
+omp/natives/
 omp/agent/cache/
 omp/install-id
 omp/agent/sessions/
