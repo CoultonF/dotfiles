@@ -209,6 +209,10 @@ info "Applying Home Manager configuration..."
 cd "$DOTFILES_DIR"
 nix run home-manager/master -- switch --flake ".#$SYSTEM" --impure -b backup
 success "Home Manager configuration applied!"
+
+# Home Manager installs Python; share the same preserving merge as containers.
+info "Configuring Codex permission defaults..."
+"$HOME/.nix-profile/bin/python3" "$DOTFILES_DIR/codex/setup-config.py"
 # Home Manager owns ~/.zshenv, which is often a read-only Nix store symlink.
 for rcfile in ~/.bashrc ~/.bash_profile ~/.profile; do
 	set_export PI_CONFIG_DIR '"dotfiles/omp"' "$rcfile"

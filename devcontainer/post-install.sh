@@ -345,6 +345,9 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+echo "Configuring Codex permission defaults..."
+python3 "$DOTFILES_DIR/codex/setup-config.py"
+
 # Deploy native agents before unrelated config copies, replacing only filenames
 # managed by dotfiles and preserving other agents and local configuration.
 if [ -d "$DOTFILES_DIR/claude/agents" ]; then

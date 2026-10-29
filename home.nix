@@ -680,6 +680,11 @@ in
     fi
   '';
 
+  # Merge permission defaults into the writable user config, not a store symlink.
+  home.activation.codexSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD ${pkgs.python312}/bin/python3 ${./codex/setup-config.py}
+  '';
+
   # ============================================================================
   # Note: OrbStack is used for Docker on macOS (installed separately)
   # OrbStack handles its own startup and doesn't need a launchd agent
