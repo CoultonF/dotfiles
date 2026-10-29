@@ -398,6 +398,11 @@ in
     enable = true;
     
     settings = {
+      user.name = "Coulton Fraser";
+      user.email = "22457956+CoultonF@users.noreply.github.com";
+      # Push over HTTPS with the gh login (what `gh auth setup-git` would write,
+      # which can't write here because this file is read-only)
+      credential."https://github.com".helper = "!${pkgs.gh}/bin/gh auth git-credential";
       init.defaultBranch = "main";
       pull.rebase = false;
       push.autoSetupRemote = true;

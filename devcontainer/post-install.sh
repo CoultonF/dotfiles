@@ -433,6 +433,15 @@ for rcfile in ~/.bashrc ~/.zshrc; do
 	append_line_if_missing "alias lt='eza --tree --level=2 --icons=auto --group-directories-first'" "$rcfile"
 	append_line_if_missing "alias cc='claude --dangerously-skip-permissions'" "$rcfile"
 done
+
+# Git identity (mirrors programs.git in home.nix); keep one the container already has
+if [ -z "$(git config --global user.email 2>/dev/null)" ]; then
+	git config --global user.name "Coulton Fraser"
+	git config --global user.email "22457956+CoultonF@users.noreply.github.com"
+fi
+if command -v gh &>/dev/null && [ -z "$(git config --global credential.https://github.com.helper 2>/dev/null)" ]; then
+	gh auth setup-git --hostname github.com || echo "Skipping gh git credential setup"
+fi
 # fzf-tab (zsh only): load after compinit, replace the completion menu with fzf.
 # Stage a copy with the prebuilt binary module stripped out: its RUNPATH targets
 # glibc 2.42, so on glibc 2.41 hosts it fails to load and fzf-tab nags to rebuild
