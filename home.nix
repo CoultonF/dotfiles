@@ -24,41 +24,6 @@ let
     chmod -R u+w $out
     rm -rf $out/share/fzf-tab/modules
   '';
-
-  # Contents of the ~/Applications/Herdr.app launcher built in activation below.
-  # LSUIElement keeps it off the Dock: it only shells out to ghostty-herdr and
-  # exits, so the window you end up looking at belongs to Ghostty itself.
-  # /bin/sh rather than writeShellScript: the bundle only holds a copy of this
-  # text, so a Nix-store bash shebang could outlive the store path it names.
-  herdrLauncherExec = pkgs.writeText "Herdr" ''
-    #!/bin/sh
-    exec "$HOME/.dotfiles/bin/ghostty-herdr" "$@"
-  '';
-
-  herdrLauncherPlist = pkgs.writeText "Herdr-Info.plist" ''
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-      <key>CFBundleName</key>
-      <string>Herdr</string>
-      <key>CFBundleDisplayName</key>
-      <string>Herdr</string>
-      <key>CFBundleIdentifier</key>
-      <string>dev.herdr.ghostty-launcher</string>
-      <key>CFBundleExecutable</key>
-      <string>Herdr</string>
-      <key>CFBundlePackageType</key>
-      <string>APPL</string>
-      <key>CFBundleShortVersionString</key>
-      <string>1.0</string>
-      <key>LSUIElement</key>
-      <true/>
-      <key>NSHighResolutionCapable</key>
-      <true/>
-    </dict>
-    </plist>
-  '';
 in
 {
   # Home Manager configuration
@@ -185,8 +150,6 @@ in
       la = "eza -la --icons=auto --git --group-directories-first";
       lt = "eza --tree --level=2 --icons=auto --group-directories-first";
       ts = "tmux-sessionizer";
-      # Open a second Ghostty window running herdr instead of tmux.
-      hh = "ghostty-herdr";
       lg = "lazygit";
       v = "nvim";
       cc = "claude --dangerously-skip-permissions";
@@ -283,12 +246,9 @@ in
       source ${fzfTabNoModule}/share/fzf-tab/fzf-tab.plugin.zsh
       zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto $realpath'
 
-      # Auto-start tmux with default layout. Skipped inside an IDE terminal, when
-      # already in tmux, and inside herdr: herdr panes run a login shell too, and
-      # herdr is the other multiplexer (ghostty-herdr opens a window on it), so
-      # attaching tmux there would stack one multiplexer inside the other.
+      # Auto-start tmux with default layout (skip if in IDE or already in tmux)
       if [[ "$TERM_PROGRAM" != "vscode" && -z "$INTELLIJ_ENVIRONMENT_READER" && -z "$VSCODE_PID" && -z "$VSCODE_INJECTION" ]]; then
-        if command -v tmux &>/dev/null && [[ -z "$TMUX" && -z "$HERDR_ENV" && -z "$HERDR_PANE_ID" ]]; then
+        if command -v tmux &>/dev/null && [[ -z "$TMUX" ]]; then
           ~/.dotfiles/bin/tmux-startup
         fi
       fi
@@ -719,30 +679,6 @@ in
       echo "WARNING: $bun_bin not found; skipping bun-managed global CLIs"
     fi
   '';
-
-  # ============================================================================
-  # Herdr.app launcher (macOS)
-  # ============================================================================
-  # Ghostty's own windows run a login shell, which auto-attaches tmux. This
-  # bundle runs bin/ghostty-herdr, which opens a Ghostty window whose command is
-  # herdr instead -- so Spotlight, the Dock, or a Shortcuts hotkey can raise a
-  # herdr window alongside the tmux one. Written in activation rather than with
-  # home.file because LaunchServices wants a real bundle with a real executable
-  # bit, not a read-only symlink into the Nix store.
-  home.activation.herdrAppLauncher = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-    lib.optionalString isDarwin ''
-      herdr_app="${homeDirectory}/Applications/Herdr.app"
-      $DRY_RUN_CMD mkdir -p "$herdr_app/Contents/MacOS"
-      $DRY_RUN_CMD install -m 644 ${herdrLauncherPlist} "$herdr_app/Contents/Info.plist"
-      $DRY_RUN_CMD install -m 755 ${herdrLauncherExec} "$herdr_app/Contents/MacOS/Herdr"
-
-      # Make Spotlight / Open With notice a freshly written or changed bundle.
-      lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
-      if [ -x "$lsregister" ]; then
-        $DRY_RUN_CMD "$lsregister" -f "$herdr_app" || true
-      fi
-    ''
-  );
 
   # ============================================================================
   # Note: OrbStack is used for Docker on macOS (installed separately)

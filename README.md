@@ -68,8 +68,7 @@ That's it. Everything is installed and configured.
 │       ├── config/        # Core settings
 │       └── plugins/       # Plugin configurations
 └── bin/
-    ├── tmux-sessionizer   # Project session switcher (Ctrl-g)
-    └── ghostty-herdr      # Open a Ghostty window running herdr instead of tmux
+    └── tmux-sessionizer   # Project session switcher (Ctrl-g)
 ```
 
 ## How It Works
@@ -114,29 +113,6 @@ All installed automatically via `home.nix`:
 - **Terminal**: tmux
 - **Build Tools**: gcc, gnumake
 - **Utilities**: curl, wget, unzip, jq
-
-## Terminal Windows: tmux and herdr
-
-Ghostty can run either multiplexer, one per window:
-
-| Window                          | Opens                                                      |
-| ------------------------------- | ---------------------------------------------------------- |
-| Normal Ghostty window (`Cmd-N`) | Login shell, which auto-attaches the `main` tmux session   |
-| `ghostty-herdr` (alias `hh`)    | A new Ghostty window whose command is `herdr` -- no tmux    |
-| `~/Applications/Herdr.app`      | Same thing from Spotlight, the Dock, or a Shortcuts hotkey |
-
-`bin/ghostty-herdr` uses `open -na Ghostty --args ... -e herdr`: macOS discards
-`--args` when it merely activates a running app, so `-n` starts a fresh Ghostty
-instance that honours `-e`. That instance quits when its last window closes.
-Extra arguments are forwarded to herdr, e.g. `hh --session scratch`.
-
-Because herdr spawns login shells in its panes, the tmux auto-attach in
-`home.nix` is skipped whenever `HERDR_ENV`/`HERDR_PANE_ID` is set -- otherwise
-every herdr pane would attach the same tmux session inside herdr.
-
-`Herdr.app` is a four-line `LSUIElement` bundle that execs `ghostty-herdr`, and
-is written by the `herdrAppLauncher` activation in `home.nix`. To put it on a
-hotkey: Shortcuts.app -> new shortcut -> "Open App" -> Herdr -> assign a key.
 
 ## Keybindings
 
