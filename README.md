@@ -45,7 +45,7 @@ That's it. Everything is installed and configured.
 ├── opencode/
 │   ├── opencode.json      # OpenCode runtime config
 │   └── tui.json           # OpenCode TUI theme + keybinds
-├── agent-skills/          # Shared OMP/Zed Agent Skills
+├── agent-skills/          # Shared OMP/Zed/Claude Code Agent Skills
 ├── pi/
 │   ├── settings.json      # Pi global agent settings
 │   ├── APPEND_SYSTEM.md   # System prompt extension (operator preferences)
@@ -165,7 +165,7 @@ On first run, open `opencode` and use `/connect` to authenticate a provider.
 
 ### Agent Skills
 
-Home Manager links `agent-skills/` to `~/.agents/skills`, the global discovery path shared by OMP and Zed. Zed needs no additional skill-path setting.
+Home Manager links `agent-skills/` to `~/.agents/skills`, the global discovery path shared by OMP and Zed, and links each skill into `~/.claude/skills` for Claude Code. Zed needs no additional skill-path setting.
 
 ### Pi
 

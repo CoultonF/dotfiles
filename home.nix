@@ -472,6 +472,19 @@ in
   home.file.".agents/skills".source =
     config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/.dotfiles/agent-skills";
 
+  # Claude Code gets the same skills, one link per skill so claude.ai's synced/
+  # directory in ~/.claude/skills stays untouched.
+  imports = [
+    {
+      home.file = lib.mapAttrs'
+        (name: _: lib.nameValuePair ".claude/skills/${name}" {
+          source = config.lib.file.mkOutOfStoreSymlink
+            "${homeDirectory}/.dotfiles/agent-skills/${name}";
+        })
+        (lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./agent-skills));
+    }
+  ];
+
 
   # Keep npm global installs out of the immutable Nix store.
   home.file.".npmrc".text = ''
