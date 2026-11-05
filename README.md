@@ -165,7 +165,7 @@ On first run, open `opencode` and use `/connect` to authenticate a provider.
 
 ### Agent Skills
 
-Home Manager links `agent-skills/` to `~/.agents/skills`, the global discovery path shared by OMP and Zed. Use `/coultonf-mode` to enter cstack explicitly; the individual skills remain available by name. Zed needs no additional skill-path setting.
+Home Manager links `agent-skills/` to `~/.agents/skills`, the global discovery path shared by OMP and Zed. Zed needs no additional skill-path setting.
 
 ### Pi
 
