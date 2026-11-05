@@ -1,1 +1,20 @@
-providers: {}
+providers:
+  openai-codex:
+    # Default effort when a model is picked directly (e.g. in T3 Code's model picker).
+    # `thinking` replaces the discovered config wholesale, so keep mode and efforts.
+    modelOverrides:
+      gpt-6-astra:
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: medium
+      gpt-6.1-sol:
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: high
+      gpt-6-luna:
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: xhigh

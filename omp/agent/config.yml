@@ -1,7 +1,7 @@
 disabledProviders:
   - claude-plugins
 modelRoles:
-  default: openai-codex/gpt-6-astra:low
+  default: openai-codex/gpt-6-astra:medium
   smol: openai-codex/gpt-6.1-sol:low
   fast: openai-codex/gpt-6-luna:medium
   simple: openai-codex/gpt-6.1-sol:medium
@@ -52,7 +52,7 @@ display:
   showTokenUsage: true
   shimmer: classic
 showHardwareCursor: true
-defaultThinkingLevel: auto
+defaultThinkingLevel: medium
 retry:
   maxRetries: 3
 autoResume: false
@@ -106,7 +106,6 @@ symbolPreset: nerd
 providers:
   kimiApiFormat: openai
 tier:
-  openai: priority
   subagent: inherit
   advisor: inherit
 commands:

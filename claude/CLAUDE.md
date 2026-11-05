@@ -19,7 +19,6 @@ When starting a task, say in one line where it will run and why.
 
 Use the lightest role that fits the assignment. Supply the objective, owned files or
 interfaces, constraints, acceptance criteria, known evidence, and verification owner.
-Keep existing `tmux-controller` use separate from this coding roster.
 
 | Claude role | Model / effort | Assign when |
 |---|---|---|
