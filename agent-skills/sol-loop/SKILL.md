@@ -6,8 +6,8 @@ description: Use when the user says "sol loop".
 # sol-loop
 
 This is a workflow for making your code changes more correct before (or
-sometimes after) filing a pull request. tl;dr - use OpenAI's GPT Sol to review
-your code in a loop.
+sometimes after) filing a pull request. tl;dr - use OpenAI's GPT Sol in Fast
+mode to review your code in a loop.
 
 Make the most minimal possible changes to appease the Sol reviewers. Be careful
 of scope creep and don't be scared to push back.
@@ -46,16 +46,21 @@ missing or pre-failing checks in the brief.
 ## 2. Start Sol
 
 In T3, call `orchestrator_capabilities`. Pick the latest Sol unless the user
-named a version. Do not hardcode an ID. Record provider, model, and effort
-only if exposed. Use `delegate_task` every round (`role: "review"`,
-`mode: "async"`). Save `taskId`. New `clientRequestId` per round.
+named a version. Do not hardcode an ID. Unless the user asks otherwise,
+explicitly request Fast mode for Sol on every round. In T3, verify that the
+selected model exposes `serviceTier` with `priority`, then set
+`target.options.serviceTier` to `"priority"`; preserve the chosen reasoning effort
+alongside it. Apply this Fast preference only to Sol. Record provider, model,
+effort, and speed only if exposed. Use `delegate_task` every round
+(`role: "review"`, `mode: "async"`). Save `taskId`. New `clientRequestId` per round.
 `childThreadId` is storage, not the next target. Do not use
 `t3_thread_send`, `create_threads`, or `t3_thread_launch` for review.
 
 If T3 tools are not listed, try one direct capability call. Outside T3, use
-a native Sol subagent and keep its ID. In Claude Code, use a custom subagent
-only if it is set up to run Sol. If no route runs Sol, report the blocker. Do
-not substitute a model.
+a native Sol subagent with an explicit Fast setting and keep its ID. In Claude
+Code, use a custom subagent only if it is set up to run Sol in Fast mode. If no
+route can request Sol with the required speed, report the blocker. Do not
+substitute a model or silently run at standard speed.
 
 Do not edit scoped files while review runs. Wait for the notice. Do not
 poll or start a second reviewer. Timeout, error, or no reply is not
