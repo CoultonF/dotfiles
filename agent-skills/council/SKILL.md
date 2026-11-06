@@ -14,12 +14,20 @@ Bring in three delegates to help with the user's request, usually for review
 or feedback. Use one strong model from each of three different providers, at
 high reasoning effort. If the user's instructions name council members, use
 those. Otherwise pick the latest flagship model from each provider, for
-example Claude Opus, GPT Sol, and Gemini Pro.
+example Claude Opus, GPT Sol in Fast mode, and Gemini Pro.
 
 In T3 Code, use `orchestrator_capabilities` to resolve the models, then
 `delegate_task` to start one delegate per model in parallel. Elsewhere, use
 the harness's subagent tools. If you cannot reach three providers, or a named
 member is unavailable, report it instead of substituting.
+
+Unless the user asks otherwise, explicitly request Fast mode for each Sol
+delegate. In T3, verify that the selected model exposes `serviceTier` with
+`priority`, then set `target.options.serviceTier` to `"priority"` alongside the
+high reasoning effort. Apply this Fast preference only to Sol. Outside T3,
+use a route with an explicit Fast setting. If the route cannot request Sol
+with the required speed, report the blocker instead of silently running at
+standard speed.
 
 Give each delegate the request and relevant context. For review or feedback,
 keep their work read-only. Collect their responses and summarize the useful
