@@ -705,6 +705,12 @@ in
     $DRY_RUN_CMD ${pkgs.python312}/bin/python3 ${./codex/setup-config.py}
   '';
 
+  # Seed the T3 Code desktop app's providers (Claude, OMP over ACP). Devpods do
+  # this in `t3-devpod start` instead, since their T3 home is on /workspace.
+  home.activation.t3Defaults = lib.mkIf isDarwin (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    PATH="${pkgs.jq}/bin:$PATH" $DRY_RUN_CMD ${pkgs.bash}/bin/bash ${./bin/t3-defaults} || echo "WARNING: t3-defaults failed"
+  '');
+
   # ============================================================================
   # Note: OrbStack is used for Docker on macOS (installed separately)
   # OrbStack handles its own startup and doesn't need a launchd agent

@@ -80,6 +80,7 @@ start() {
 	fi
 
 	mkdir -p "$STATE_DIR"
+	"$(dirname "${BASH_SOURCE[0]}")/t3-defaults" >>"$LOG_FILE" 2>&1 || true
 	setsid nohup t3 serve --no-browser --port "$LOCAL_PORT" \
 		--auto-bootstrap-project-from-cwd "$workdir" \
 		>>"$LOG_FILE" 2>&1 </dev/null &

@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# t3-defaults: seed T3 Code's provider setup into its settings.json.
+#
+# Adds the Claude and OMP (ACP) providers, and turns Codex off, in
+# $T3CODE_HOME/userdata/settings.json (default ~/.t3). Only keys the file lacks
+# are filled in, so anything changed in T3's settings UI on a node is kept.
+# Run before T3 starts: `t3-devpod start` calls it on devpods and home-manager
+# activation calls it on macOS. A running server won't see the change until it
+# restarts.
+set -euo pipefail
+
+home="${T3CODE_HOME:-$HOME/.t3}"
+settings="$home/userdata/settings.json"
+
+defaults='{
+  "providerInstances": {
+    "claudeAgent": { "driver": "claudeAgent", "enabled": true },
+    "omp": {
+      "driver": "acpRegistry",
+      "displayName": "omp",
+      "enabled": true,
+      "config": {
+        "source": "local",
+        "commandPath": "omp",
+        "commandArgs": ["acp", "--service-tier=priority"]
+      }
+    },
+    "codex": { "driver": "codex", "enabled": false }
+  }
+}'
+
+command -v jq >/dev/null 2>&1 || { echo "t3-defaults: jq not found" >&2; exit 1; }
+
+current='{}'
+if [ -s "$settings" ]; then
+	current="$(cat "$settings")"
+	# Leave a file T3 itself can't parse alone rather than replace it.
+	jq -e 'type == "object"' >/dev/null 2>&1 <<<"$current" || {
+		echo "t3-defaults: $settings is not a JSON object; leaving it unchanged" >&2
+		exit 1
+	}
+fi
+
+# `*` merges objects recursively with the right side winning: existing settings.
+merged="$(jq --argjson d "$defaults" '$d * .' <<<"$current")"
+[ "$(jq -S . <<<"$merged")" = "$(jq -S . <<<"$current")" ] && exit 0
+
+mkdir -p "$(dirname "$settings")"
+tmp="$(mktemp "$settings.XXXXXX")"
+printf '%s\n' "$merged" >"$tmp"
+mv "$tmp" "$settings"
+echo "t3-defaults: added default providers to $settings"

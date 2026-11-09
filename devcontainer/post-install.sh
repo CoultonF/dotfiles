@@ -400,8 +400,8 @@ if [ -d "$DOTFILES_DIR" ]; then
 	mkdir -p ~/.dotfiles/bin
 	cp "$DOTFILES_DIR/bin/tmux-sessionizer" ~/.dotfiles/bin/
 	chmod +x ~/.dotfiles/bin/tmux-sessionizer
-	cp "$DOTFILES_DIR/bin/t3-devpod" ~/.dotfiles/bin/
-	chmod +x ~/.dotfiles/bin/t3-devpod
+	cp "$DOTFILES_DIR/bin/t3-devpod" "$DOTFILES_DIR/bin/t3-defaults" ~/.dotfiles/bin/
+	chmod +x ~/.dotfiles/bin/t3-devpod ~/.dotfiles/bin/t3-defaults
 
 	# Add to PATH
 	append_line_if_missing 'export PATH="$HOME/.dotfiles/bin:$PATH"' ~/.bashrc
