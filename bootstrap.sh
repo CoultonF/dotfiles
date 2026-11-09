@@ -277,6 +277,29 @@ if [ -d "$DOTFILES_DIR/codex/agents" ]; then
 	success "Codex agents installed"
 fi
 
+# macOS: resolve tailnet MagicDNS names. Homebrew's tailscaled adds the tailnet
+# search domain but no /etc/resolver file for the domain itself, so lookups like
+# host.<tailnet>.ts.net fall through to the LAN resolver and fail. The suffix is
+# read from the running tailscaled rather than committed here.
+if [ "$(uname -s)" = "Darwin" ] && command -v tailscale &>/dev/null; then
+	JQ_BIN="$(command -v jq || echo "$HOME/.nix-profile/bin/jq")"
+	TS_SUFFIX="$(tailscale status --json 2>/dev/null | "$JQ_BIN" -r '.MagicDNSSuffix // empty' 2>/dev/null || true)"
+	if [ -n "$TS_SUFFIX" ]; then
+		RESOLVER_FILE="/etc/resolver/$TS_SUFFIX"
+		if ! grep -qxF "nameserver 100.100.100.100" "$RESOLVER_FILE" 2>/dev/null; then
+			info "Adding MagicDNS resolver for $TS_SUFFIX..."
+			if sudo mkdir -p /etc/resolver &&
+				echo "nameserver 100.100.100.100" | sudo tee "$RESOLVER_FILE" >/dev/null; then
+				success "MagicDNS resolver added: $RESOLVER_FILE"
+			else
+				info "Could not write $RESOLVER_FILE; tailnet names may not resolve"
+			fi
+		fi
+	else
+		info "Tailscale not connected; skipping MagicDNS resolver"
+	fi
+fi
+
 # Set zsh as default shell.
 # Use a system-owned zsh path for login shells. Nix profile paths are generation
 # symlinks and can disappear after profile changes, which leaves new terminals
