@@ -103,13 +103,20 @@ if ! command -v nix &>/dev/null; then
 	fi
 fi
 
+# Start nix-daemon fully detached. A plain `sudo nix-daemon &` keeps this script's
+# stdout and stderr open, so a caller reading them (devpod's dotfiles step over SSH)
+# never sees EOF and waits forever after "Bootstrap Complete!".
+start_nix_daemon() {
+	sudo sh -c 'setsid /nix/var/nix/profiles/default/bin/nix-daemon </dev/null >>/var/log/nix-daemon.log 2>&1 &'
+}
+
 # Install Nix only if it's truly not present (not just missing from PATH)
 if ! command -v nix &>/dev/null && [ ! -x "/nix/var/nix/profiles/default/bin/nix" ]; then
 	info "Installing Nix..."
 	if [ "$(uname -s)" = "Linux" ] && ! pidof systemd >/dev/null 2>&1; then
 		curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --no-confirm --init none --extra-conf "sandbox = false"
 		# Start the Nix daemon manually since there's no init system
-		sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+		start_nix_daemon
 		# Wait for daemon to be ready
 		for i in $(seq 1 30); do
 			if nix store ping 2>/dev/null; then break; fi
@@ -151,7 +158,7 @@ fi
 if [ "$(uname -s)" = "Linux" ] && ! pidof systemd >/dev/null 2>&1; then
 	if ! nix store ping 2>/dev/null; then
 		info "Starting Nix daemon..."
-		sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+		start_nix_daemon
 		for i in $(seq 1 30); do
 			if nix store ping 2>/dev/null; then break; fi
 			sleep 1
@@ -187,7 +194,7 @@ if ! getent group nixbld >/dev/null 2>&1; then
 	if [ "$(uname -s)" = "Linux" ] && ! pidof systemd >/dev/null 2>&1; then
 		sudo pkill -f nix-daemon 2>/dev/null || true
 		sleep 1
-		sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+		start_nix_daemon
 		for i in $(seq 1 30); do
 			if nix store ping 2>/dev/null; then break; fi
 			sleep 1
