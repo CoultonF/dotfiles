@@ -350,6 +350,19 @@ else
 	info "System zsh not found; leaving default shell unchanged"
 fi
 
+# In a devpod launched with GH_TOKEN (rcom's launcher passes it from the Mac's
+# Keychain), send GitHub git traffic over HTTPS so the token works without a
+# forwarded SSH agent; programs.git already makes gh the HTTPS credential helper.
+# Without the token, drop the rewrite so SSH remotes use the agent again. This
+# runs on every devpod launch. ~/.gitconfig, because Home Manager's file is read-only.
+if [ "$(uname -s)" = "Linux" ] && [ -d /workspace ]; then
+	if [ -n "${GH_TOKEN:-}" ]; then
+		git config --file "$HOME/.gitconfig" --replace-all url."https://github.com/".insteadOf "git@github.com:"
+	else
+		git config --file "$HOME/.gitconfig" --unset-all url."https://github.com/".insteadOf 2>/dev/null || true
+	fi
+fi
+
 # Start the T3 Code server on the tailnet now; new shells restart it after a
 # devpod restart. No-op on macOS or when tailscale isn't connected.
 if [ "$(uname -s)" = "Linux" ]; then
