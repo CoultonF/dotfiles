@@ -14,7 +14,22 @@
 set -euo pipefail
 
 SERVE_PORT="${T3_DEVPOD_SERVE_PORT:-8443}"
-STATE_DIR="$HOME/.t3/devpod"
+
+# Keep T3's data (auth sessions, threads) on the workspace volume, which survives
+# devpod rebuilds while the container's home does not. With the tailnet identity
+# also kept there, paired phones and desktops stay paired across rebuilds. The
+# directory is hidden from git via the clone's local exclude file, never the repo.
+persistent_home() {
+	[ -n "${T3_DEVPOD_HOME:-}" ] && { echo "$T3_DEVPOD_HOME"; return; }
+	local git_dir
+	git_dir="$(git -C /workspace rev-parse --git-common-dir 2>/dev/null)" || { echo "$HOME/.t3"; return; }
+	case "$git_dir" in /*) ;; *) git_dir="/workspace/$git_dir" ;; esac
+	mkdir -p "$git_dir/info"
+	grep -qxF '/.t3-home/' "$git_dir/info/exclude" 2>/dev/null || echo '/.t3-home/' >>"$git_dir/info/exclude"
+	echo /workspace/.t3-home
+}
+export T3CODE_HOME="${T3CODE_HOME:-$(persistent_home)}"
+STATE_DIR="$T3CODE_HOME/devpod"
 PID_FILE="$STATE_DIR/serve.pid"
 LOG_FILE="$STATE_DIR/serve.log"
 export PATH="$HOME/.bun/bin:$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
@@ -24,7 +39,7 @@ running() {
 	local pid
 	pid="$(cat "$PID_FILE" 2>/dev/null)" || return 1
 	[ -n "$pid" ] && kill -0 "$pid" 2>/dev/null &&
-		tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | grep -q 't3'
+		tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | grep -q 't3.*serve'
 }
 
 tailnet_up() {

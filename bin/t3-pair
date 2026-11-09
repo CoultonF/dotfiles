@@ -6,7 +6,9 @@
 # Runs `t3-devpod pair` in the workspace over DevPod's SSH alias, which starts
 # the workspace's T3 server on the tailnet if needed, then opens the printed
 # t3code:// link so the desktop app asks to confirm the new environment.
-# Pairing is one-time per workspace; a rebuilt workspace needs pairing again.
+# Pairing is one-time per workspace name: T3's data lives on the /workspace
+# volume, so it survives rebuilds. Pair a phone by scanning the QR code that
+# `ssh <ws>.devpod t3-devpod pair` prints.
 set -euo pipefail
 
 if [ $# -ne 1 ]; then
