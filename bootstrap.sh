@@ -350,6 +350,12 @@ else
 	info "System zsh not found; leaving default shell unchanged"
 fi
 
+# Start the T3 Code server on the tailnet now; new shells restart it after a
+# devpod restart. No-op on macOS or when tailscale isn't connected.
+if [ "$(uname -s)" = "Linux" ]; then
+	"$DOTFILES_DIR/bin/t3-devpod" start || info "Skipping T3 Code server start"
+fi
+
 echo ""
 echo "=========================================="
 echo "  Bootstrap Complete!"

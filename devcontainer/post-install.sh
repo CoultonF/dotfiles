@@ -310,6 +310,7 @@ install_bun_global @oh-my-pi/pi-coding-agent omp
 install_bun_global @termdraw/app termdraw
 install_bun_global oxlint oxlint
 install_bun_global oxfmt oxfmt
+install_bun_global t3 t3
 
 CHROMIUM_BIN="$(command -v chromium 2>/dev/null || true)"
 if [ -n "$CHROMIUM_BIN" ]; then
@@ -398,6 +399,8 @@ if [ -d "$DOTFILES_DIR" ]; then
 	mkdir -p ~/.dotfiles/bin
 	cp "$DOTFILES_DIR/bin/tmux-sessionizer" ~/.dotfiles/bin/
 	chmod +x ~/.dotfiles/bin/tmux-sessionizer
+	cp "$DOTFILES_DIR/bin/t3-devpod" ~/.dotfiles/bin/
+	chmod +x ~/.dotfiles/bin/t3-devpod
 
 	# Add to PATH
 	append_line_if_missing 'export PATH="$HOME/.dotfiles/bin:$PATH"' ~/.bashrc
@@ -416,6 +419,12 @@ for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv ~/.zshrc; do
 	append_line_if_missing 'export PUPPETEER_EXECUTABLE_PATH="$HOME/.nix-profile/bin/chromium"' "$rcfile"
 	append_line_if_missing 'export PI_FORCE_IMAGE_PROTOCOL="kitty"' "$rcfile"
 done
+
+# T3 Code server on the tailnet: start now and on every new shell (devcontainers
+# have no systemd, and dotfiles install only runs when the devpod is created).
+append_line_if_missing '( ~/.dotfiles/bin/t3-devpod start >/dev/null 2>&1 & )' ~/.zshrc
+append_line_if_missing '( ~/.dotfiles/bin/t3-devpod start >/dev/null 2>&1 & )' ~/.bashrc
+"$DOTFILES_DIR/bin/t3-devpod" start || echo "Skipping T3 Code server start"
 
 # Setup direnv hook for all shells
 append_line_if_missing 'eval "$(direnv hook bash)"' ~/.bashrc

@@ -246,6 +246,11 @@ in
       source ${fzfTabNoModule}/share/fzf-tab/fzf-tab.plugin.zsh
       zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto $realpath'
 
+      # T3 Code server on the tailnet for devpods; no-op on macOS or without tailscale.
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        ( ~/.dotfiles/bin/t3-devpod start >/dev/null 2>&1 & )
+      fi
+
       # Auto-start tmux with default layout (skip if in IDE or already in tmux)
       if [[ "$TERM_PROGRAM" != "vscode" && -z "$INTELLIJ_ENVIRONMENT_READER" && -z "$VSCODE_PID" && -z "$VSCODE_INJECTION" ]]; then
         if command -v tmux &>/dev/null && [[ -z "$TMUX" ]]; then
@@ -688,6 +693,7 @@ in
       install_bun_global @termdraw/app termdraw
       install_bun_global oxlint oxlint
       install_bun_global oxfmt oxfmt
+      install_bun_global t3 t3
     else
       echo "WARNING: $bun_bin not found; skipping bun-managed global CLIs"
     fi
