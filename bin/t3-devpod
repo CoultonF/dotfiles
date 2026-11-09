@@ -4,7 +4,8 @@
 #   t3-devpod start   Start `t3 serve` behind Tailscale Serve if it isn't running.
 #                     Silent no-op off Linux or without a connected tailscaled,
 #                     so shell startup can call it unconditionally.
-#   t3-devpod pair    Start if needed, then mint a pairing link (prints the
+#   t3-devpod pair [LABEL] [--label LABEL] [--ttl 15m]
+#                     Start if needed, then mint a pairing code and link (prints the
 #                     t3code:// app link). The Mac's `t3-pair` runs this over SSH.
 #   t3-devpod stop    Stop the server.
 #   t3-devpod status  Show whether the server is running and where.
@@ -90,16 +91,32 @@ start)
 	start
 	;;
 pair)
+	shift
+	label="$(hostname)"
+	ttl=15m
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		--label=*) label="${1#*=}" ;;
+		--label) label="${2:?--label needs a value}"; shift ;;
+		--ttl=*) ttl="${1#*=}" ;;
+		--ttl) ttl="${2:?--ttl needs a value}"; shift ;;
+		-*) echo "usage: t3-devpod pair [LABEL] [--label LABEL] [--ttl 15m]" >&2; exit 2 ;;
+		*) label="$1" ;;
+		esac
+		shift
+	done
 	tailnet_up || { echo "t3-devpod: tailscale is not connected on $(hostname)" >&2; exit 1; }
 	start
 	# `t3 pair` fails with NoRunningServerError until the server has written
 	# its runtime file, so retry while a fresh server boots. Its URLs point at
 	# localhost (its --tailscale would re-run Serve without sudo), so rebuild
-	# them from the token and this node's tailnet name.
+	# them from the token and this node's tailnet name. The token is printed on
+	# its own line for clients that ask for a pairing code.
 	for _ in $(seq 1 60); do
-		if out="$(t3 pair --label "${2:-$(hostname)}" 2>&1)"; then
+		if out="$(t3 pair --label "$label" --ttl "$ttl" 2>&1)"; then
 			token="$(printf '%s\n' "$out" | sed -n 's/^Token: *//p' | head -1)"
 			url="https://$(tailnet_name):$SERVE_PORT/pair#token=$token"
+			echo "Token: $token"
 			echo "Pairing URL: $url"
 			echo "App link: t3code://pair?pairingUrl=$(jq -rn --arg u "$url" '$u|@uri')"
 			printf '%s\n' "$out" | grep -E '^Expires' || true
