@@ -117,6 +117,7 @@ in
     wget
     unzip
     jq           # JSON processor
+    qrencode     # QR codes for pairing phones (t3-devpod pair)
     awscli2      # AWS CLI
     direnv       # Per-directory environment variables
     # OPA policy engine (opa). No prebuilt binary in the cache for

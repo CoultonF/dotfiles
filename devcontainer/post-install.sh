@@ -87,6 +87,7 @@ NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure \
 	nixpkgs#pkg-config \
 	nixpkgs#curl \
 	nixpkgs#jq \
+	nixpkgs#qrencode \
 	nixpkgs#unzip \
 	nixpkgs#postgresql \
 	nixpkgs#libpq \

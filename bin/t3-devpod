@@ -9,11 +9,14 @@
 #   t3-devpod stop    Stop the server.
 #   t3-devpod status  Show whether the server is running and where.
 #
-# Tailscale Serve uses HTTPS port $T3_DEVPOD_SERVE_PORT (default 8443), leaving
-# 443 for project services that already claim it.
+# Tailscale Serve publishes HTTPS port $T3_DEVPOD_SERVE_PORT (default 8443) to
+# the local server on $T3_DEVPOD_LOCAL_PORT (default 3773), leaving 443 for
+# project services that already claim it. The tailnet policy must allow
+# that port to this node.
 set -euo pipefail
 
 SERVE_PORT="${T3_DEVPOD_SERVE_PORT:-8443}"
+LOCAL_PORT="${T3_DEVPOD_LOCAL_PORT:-3773}"
 
 # Keep T3's data (auth sessions, threads) on the workspace volume, which survives
 # devpod rebuilds while the container's home does not. With the tailnet identity
@@ -47,11 +50,17 @@ tailnet_up() {
 		tailscale status --json 2>/dev/null | grep -q '"BackendState": *"Running"'
 }
 
-# rcom-style devpods run tailscaled as root without an operator, so the login
-# user can't configure Serve until it is made the operator.
-ensure_serve_permission() {
-	tailscale serve status >/dev/null 2>&1 && return 0
-	sudo -n tailscale set --operator="$USER" >/dev/null 2>&1
+# Publish with Tailscale Serve ourselves rather than through t3's
+# --tailscale-serve, falling back to sudo when tailscaled runs as root. Never set
+# an operator to avoid sudo: that is a saved pref, and a later `tailscale up`
+# that doesn't repeat --operator then refuses to run, breaking tailnet startup.
+publish() {
+	local args=(serve --bg --https="$SERVE_PORT" "http://127.0.0.1:$LOCAL_PORT")
+	tailscale "${args[@]}" >/dev/null 2>&1 || sudo -n tailscale "${args[@]}" >/dev/null 2>&1
+}
+
+tailnet_name() {
+	tailscale status --json | jq -r '.Self.DNSName | rtrimstr(".")'
 }
 
 start() {
@@ -59,8 +68,8 @@ start() {
 	running && return 0
 	command -v t3 >/dev/null 2>&1 || return 0
 	tailnet_up || return 0
-	ensure_serve_permission || {
-		echo "t3-devpod: cannot configure Tailscale Serve (no operator rights, no passwordless sudo)" >&2
+	publish || {
+		echo "t3-devpod: cannot configure Tailscale Serve (needs passwordless sudo)" >&2
 		return 1
 	}
 
@@ -70,8 +79,7 @@ start() {
 	fi
 
 	mkdir -p "$STATE_DIR"
-	setsid nohup t3 serve --no-browser \
-		--tailscale-serve --tailscale-serve-port "$SERVE_PORT" \
+	setsid nohup t3 serve --no-browser --port "$LOCAL_PORT" \
 		--auto-bootstrap-project-from-cwd "$workdir" \
 		>>"$LOG_FILE" 2>&1 </dev/null &
 	echo $! >"$PID_FILE"
@@ -85,10 +93,17 @@ pair)
 	tailnet_up || { echo "t3-devpod: tailscale is not connected on $(hostname)" >&2; exit 1; }
 	start
 	# `t3 pair` fails with NoRunningServerError until the server has written
-	# its runtime file, so retry while a fresh server boots.
+	# its runtime file, so retry while a fresh server boots. Its URLs point at
+	# localhost (its --tailscale would re-run Serve without sudo), so rebuild
+	# them from the token and this node's tailnet name.
 	for _ in $(seq 1 60); do
-		if out="$(t3 pair --tailscale --tailscale-serve-port "$SERVE_PORT" --label "${2:-$(hostname)}" 2>&1)"; then
-			printf '%s\n' "$out"
+		if out="$(t3 pair --label "${2:-$(hostname)}" 2>&1)"; then
+			token="$(printf '%s\n' "$out" | sed -n 's/^Token: *//p' | head -1)"
+			url="https://$(tailnet_name):$SERVE_PORT/pair#token=$token"
+			echo "Pairing URL: $url"
+			echo "App link: t3code://pair?pairingUrl=$(jq -rn --arg u "$url" '$u|@uri')"
+			printf '%s\n' "$out" | grep -E '^Expires' || true
+			if command -v qrencode >/dev/null 2>&1; then qrencode -t ansiutf8 "$url"; fi
 			exit 0
 		fi
 		running || break
@@ -101,6 +116,8 @@ pair)
 stop)
 	if running; then kill "$(cat "$PID_FILE")"; fi
 	rm -f "$PID_FILE"
+	tailscale serve --https="$SERVE_PORT" off >/dev/null 2>&1 ||
+		sudo -n tailscale serve --https="$SERVE_PORT" off >/dev/null 2>&1 || true
 	;;
 status)
 	if running; then
