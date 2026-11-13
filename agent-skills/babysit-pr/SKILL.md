@@ -114,4 +114,27 @@ head. Merge only when the user explicitly requested it;
 otherwise report that the PR is ready. Right before a merge, run `git fetch` and
 check the PR again. Never merge when it is BEHIND or DIRTY, or when base commits
 that landed after the last green run touch this PR's files. Rebase, push, and
-wait for green again.
+wait for green again, unless the exception below applies.
+
+### Admin merge after a rebase
+
+When merging is authorized and a rebase is the only thing keeping checks from
+green, you may merge with `gh pr merge --admin` instead of waiting. All of
+these must hold:
+
+- Every required check passed on the head from before the rebase.
+- The rebase changed nothing in the PR's own diff except resolving it onto the
+  new base. No fixes or other commits came with it.
+- No check has failed on the rebased head. A failure there blocks the merge;
+  fix it as usual.
+- Everything else in the merge gate holds: reviews and bots are done, and
+  GitHub reports no conflicts.
+- A fresh Opus agent at medium effort finds that the base commits the rebase
+  brought in do not significantly overlap the PR's changes. In Claude Code use
+  `Agent` with `model: "opus"` and `effort: "medium"`. Give it the PR diff and
+  the incoming base commits (`git log -p <old-base>..<new-base>`), not your
+  conclusion. Ask whether those commits touch the same code paths, change
+  interfaces the PR uses, or could change the PR's behavior or tests.
+
+If the agent finds significant overlap, or you cannot run one, wait for green.
+Note the admin merge and the agent's finding in your report.
