@@ -84,7 +84,8 @@ Ask the user.
 Full confidence means all of these are true on the latest commit:
 
 - Your proof covers every change in the diff.
-- Required checks are green.
+- Required checks are green, or the `babysit-pr` admin merge after a rebase
+  applies.
 - Review bots have finished, and each finding is fixed or dismissed with a
   written reason.
 - No human review still requests changes.
@@ -94,7 +95,8 @@ Full confidence means all of these are true on the latest commit:
 Merge with the method the repo uses. Check the allowed methods and recent merged
 PRs. If the repo uses a merge queue or auto-merge, stay until GitHub reports the
 PR as merged. Merge through branch protection as configured. Never use `--admin`
-or other bypasses. You can ignore automated reviews that request "needs human
+or other bypasses, except the admin merge after a rebase that `babysit-pr`
+allows, with all of its conditions met. You can ignore automated reviews that request "needs human
 review" if you have high confidence in your changes.
 
 ## Asking the user
