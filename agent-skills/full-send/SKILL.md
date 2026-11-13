@@ -84,7 +84,8 @@ Ask the user.
 Full confidence means all of these are true on the latest commit:
 
 - Your proof covers every change in the diff.
-- Required checks are green.
+- Required checks are green, or the `babysit-pr` admin merge after a rebase
+  applies.
 - Review bots have finished, and each finding is fixed or dismissed with a
   written reason.
 - No human review still requests changes.
