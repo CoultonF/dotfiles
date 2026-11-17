@@ -129,15 +129,14 @@ these must hold:
   fix it as usual.
 - Everything else in the merge gate holds: reviews and bots are done, and
   GitHub reports no conflicts.
-- A fresh Sol agent in Fast mode at medium effort finds that the base commits
-  the rebase brought in do not significantly overlap the PR's changes. In T3
-  Code, resolve the latest Sol with `orchestrator_capabilities` and start it
-  with `delegate_task`, setting `target.options.serviceTier` to `"priority"`
-  alongside medium reasoning effort. Elsewhere, use a native Sol subagent with
-  an explicit Fast setting. Do not substitute another model. Give it the PR
-  diff and the incoming base commits (`git log -p <old-base>..<new-base>`),
-  not your conclusion. Ask whether those commits touch the same code paths,
-  change interfaces the PR uses, or could change the PR's behavior or tests.
+- A fresh Sol agent at medium effort finds that the base commits the rebase
+  brought in do not significantly overlap the PR's changes. In T3 Code,
+  resolve the latest Sol with `orchestrator_capabilities` and start it with
+  `delegate_task` at medium reasoning effort. Elsewhere, use a native Sol
+  subagent. Do not substitute another model. Give it the PR diff and the
+  incoming base commits (`git log -p <old-base>..<new-base>`), not your
+  conclusion. Ask whether those commits touch the same code paths, change
+  interfaces the PR uses, or could change the PR's behavior or tests.
 
 If the agent finds significant overlap, or you cannot run one, wait for green.
 Note the admin merge and the agent's finding in your report.

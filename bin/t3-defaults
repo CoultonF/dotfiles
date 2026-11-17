@@ -22,7 +22,7 @@ defaults='{
       "config": {
         "source": "local",
         "commandPath": "omp",
-        "commandArgs": ["acp", "--service-tier=priority"]
+        "commandArgs": ["acp"]
       }
     },
     "codex": { "driver": "codex", "enabled": false }
