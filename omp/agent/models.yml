@@ -3,12 +3,12 @@ providers:
     # Default effort when a model is picked directly (e.g. in T3 Code's model picker).
     # `thinking` replaces the discovered config wholesale, so keep mode and efforts.
     modelOverrides:
-      gpt-6-astra:
+      gpt-6.2-astra:
         thinking:
           mode: effort
           efforts: [low, medium, high, xhigh, max]
           defaultLevel: medium
-      gpt-6.1-sol:
+      gpt-6.2-sol:
         thinking:
           mode: effort
           efforts: [low, medium, high, xhigh, max]
