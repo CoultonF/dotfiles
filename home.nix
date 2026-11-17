@@ -647,9 +647,22 @@ in
       mkdir -p "$native_dir" && rm -f "$native_path" && cp -f "$leaf_path" "$native_path"
     }
 
+    # `bun add -g` only replaces a bin that already links to its own
+    # ../install/global/node_modules path. Anything else left in ~/.bun/bin (a
+    # dangling link, or one from another install) fails with "EEXIST".
+    clear_foreign_bun_bin() {
+      link="${homeDirectory}/.bun/bin/$1"
+      [ -e "$link" ] || [ -L "$link" ] || return 0
+      case "$(readlink "$link" 2>/dev/null)" in
+        ../install/global/node_modules/*) return 0 ;;
+      esac
+      rm -f "$link"
+    }
+
     install_omp_with_native() {
       set_omp_native_target || return 0
       echo "Installing OMP native addon for $omp_native_platform..."
+      clear_foreign_bun_bin omp
       if "${homeDirectory}/.bun/bin/bun" add -g "$1" @oh-my-pi/pi-natives "@oh-my-pi/pi-natives-$omp_native_platform"; then
         ensure_omp_native_staged || echo "WARNING: Failed to stage OMP native addon"
       else
@@ -664,6 +677,7 @@ in
         install_omp_with_native "$pkg"
       elif [ ! -x "${homeDirectory}/.bun/bin/$bin" ]; then
         echo "Installing $pkg via bun..."
+        clear_foreign_bun_bin "$bin"
         "${homeDirectory}/.bun/bin/bun" add -g "$pkg" || echo "WARNING: Failed to install $pkg"
       fi
     }
@@ -675,9 +689,10 @@ in
         version="$("$tsc" --version 2>/dev/null || true)"
       fi
       case "$version" in
-        "Version: 7."*) return 0 ;;
+        "Version 7."*) return 0 ;;
       esac
       echo "Installing typescript@^7 via bun..."
+      clear_foreign_bun_bin tsc
       "${homeDirectory}/.bun/bin/bun" add -g "typescript@^7" || echo "WARNING: Failed to install typescript@^7"
     }
 
