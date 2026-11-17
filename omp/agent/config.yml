@@ -1,26 +1,26 @@
 disabledProviders:
   - claude-plugins
 modelRoles:
-  default: openai-codex/gpt-6-astra:medium
-  smol: openai-codex/gpt-6.1-sol:low
+  default: openai-codex/gpt-6.2-astra:medium
+  smol: openai-codex/gpt-6.2-sol:low
   fast: openai-codex/gpt-6-luna:medium
-  simple: openai-codex/gpt-6.1-sol:medium
-  balanced: openai-codex/gpt-6.1-sol:high
-  slow: openai-codex/gpt-6-astra:high
-  plan: openai-codex/gpt-6-astra:medium
+  simple: openai-codex/gpt-6.2-sol:medium
+  balanced: openai-codex/gpt-6.2-sol:high
+  slow: openai-codex/gpt-6.2-astra:high
+  plan: openai-codex/gpt-6.2-astra:medium
   commit: openai-codex/gpt-6-luna:high
   vision: openai-codex/gpt-6-luna:high
   tiny: openai-codex/gpt-6-luna:low
-  task: openai-codex/gpt-6.1-sol:medium
+  task: openai-codex/gpt-6.2-sol:medium
   scout: openai-codex/gpt-6-luna:low
   mechanical: openai-codex/gpt-6-luna:high
-  review: openai-codex/gpt-6.1-sol:high
-  security: openai-codex/gpt-6-astra:high
-  advisor: openai-codex/gpt-6-astra:medium
+  review: openai-codex/gpt-6.2-sol:high
+  security: openai-codex/gpt-6.2-astra:high
+  advisor: openai-codex/gpt-6.2-astra:medium
   implementer_lite: openai-codex/gpt-6-luna:medium
-  background_planner: openai-codex/gpt-6-astra:high
-  research: openai-codex/gpt-6.1-sol:high
-  ui_verify: openai-codex/gpt-6.1-sol:medium
+  background_planner: openai-codex/gpt-6.2-astra:high
+  research: openai-codex/gpt-6.2-sol:high
+  ui_verify: openai-codex/gpt-6.2-sol:medium
 modelTags:
   fast:
     name: Fast
