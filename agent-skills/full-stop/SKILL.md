@@ -36,7 +36,10 @@ Fetch the target branch and check the live PR's head, base, checks, reviews,
 and mergeability. Confirm it is open, not a draft, and not set to merge
 without the user. If someone else merged it, report that instead.
 
-- **Ready to merge:** the merge gate passes. Leave the PR open and unmerged.
+- **Ready to merge:** the merge gate passes, or only checks re-running after
+  a rebase remain and `babysit-pr`'s admin merge after a rebase applies. Do
+  not wait for those checks. Leave the PR open and unmerged, and say the user
+  can merge with `--admin`.
 - **Waiting for required approval:** only human approval remains. Confirm
   that this is the actual blocker.
 - **Blocked:** explain what prevents readiness, what you tried, and what is

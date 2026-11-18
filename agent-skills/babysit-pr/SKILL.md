@@ -118,25 +118,24 @@ wait for green again, unless the exception below applies.
 
 ### Admin merge after a rebase
 
-When merging is authorized and a rebase is the only thing keeping checks from
-green, you may merge with `gh pr merge --admin` instead of waiting. All of
-these must hold:
+Do not wait for checks to run again just because you rebased. When merging is
+authorized, every required check passed on the head from before the rebase,
+and the rebase likely had no impact on the PR, merge right away with
+`gh pr merge --admin`. Do not wait for the new head's checks.
 
-- Every required check passed on the head from before the rebase.
-- The rebase changed nothing in the PR's own diff except resolving it onto the
-  new base. No fixes or other commits came with it.
-- No check has failed on the rebased head. A failure there blocks the merge;
+The rebase likely had no impact when all of these hold:
+
+- `git range-diff <old-base>..<old-head> <new-base>..<new-head>` shows the PR's
+  own commits unchanged, apart from context lines. No fixes or other commits
+  came with the rebase, and you resolved no conflicts in the PR's files.
+- The base commits the rebase brought in (`git log --stat <old-base>..<new-base>`)
+  do not touch the PR's files, and a quick look at their diffs shows no change
+  to code, interfaces, schemas, config, or tests the PR depends on.
+- No check has failed on the rebased head so far. A failure blocks the merge;
   fix it as usual.
 - Everything else in the merge gate holds: reviews and bots are done, and
   GitHub reports no conflicts.
-- A fresh Sol agent at medium effort finds that the base commits the rebase
-  brought in do not significantly overlap the PR's changes. In T3 Code,
-  resolve the latest Sol with `orchestrator_capabilities` and start it with
-  `delegate_task` at medium reasoning effort. Elsewhere, use a native Sol
-  subagent. Do not substitute another model. Give it the PR diff and the
-  incoming base commits (`git log -p <old-base>..<new-base>`), not your
-  conclusion. Ask whether those commits touch the same code paths, change
-  interfaces the PR uses, or could change the PR's behavior or tests.
 
-If the agent finds significant overlap, or you cannot run one, wait for green.
-Note the admin merge and the agent's finding in your report.
+Judge this yourself from those diffs; it takes a minute, not a review agent.
+If the incoming commits do overlap the PR, or you are unsure, wait for green.
+Note the admin merge and why the rebase had no impact in your report.

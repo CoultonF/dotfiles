@@ -265,6 +265,14 @@ if [ -d "$DOTFILES_DIR/claude/agents" ]; then
 	success "Claude Code agents installed"
 fi
 
+# Install the personal Codex instructions, replacing whatever is there.
+if [ -f "$DOTFILES_DIR/codex/AGENTS.md" ]; then
+	info "Installing Codex AGENTS.md..."
+	mkdir -p "$HOME/.codex"
+	cp "$DOTFILES_DIR/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
+	success "Codex AGENTS.md installed"
+fi
+
 # Install personal Codex subagents without replacing other Codex configuration
 # or agents whose names are not managed by dotfiles.
 if [ -d "$DOTFILES_DIR/codex/agents" ]; then
