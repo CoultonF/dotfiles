@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # t3-defaults: seed T3 Code's provider setup into its settings.json.
 #
-# Adds the Claude and OMP (ACP) providers, and turns Codex off, in
+# Turns on Linked environments (so this node can be linked from another T3)
+# and adds the Claude and OMP (ACP) providers, and turns Codex off, in
 # $T3CODE_HOME/userdata/settings.json (default ~/.t3). Only keys the file lacks
 # are filled in, so anything changed in T3's settings UI on a node is kept.
 # Run before T3 starts: `t3-devpod start` calls it on devpods and home-manager
@@ -13,6 +14,7 @@ home="${T3CODE_HOME:-$HOME/.t3}"
 settings="$home/userdata/settings.json"
 
 defaults='{
+  "linkedEnvironmentsEnabled": true,
   "providerInstances": {
     "claudeAgent": { "driver": "claudeAgent", "enabled": true },
     "omp": {
