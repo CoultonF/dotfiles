@@ -311,7 +311,25 @@ install_bun_global @oh-my-pi/pi-coding-agent omp
 install_bun_global @termdraw/app termdraw
 install_bun_global oxlint oxlint
 install_bun_global oxfmt oxfmt
-install_bun_global t3 t3
+
+# T3 Code comes from IJACK's fork (github.com/ijack-technologies/code), which
+# publishes a t3 launcher with every release; npm's `t3` lacks the fork's
+# changes. Install by the latest release's exact URL so a rebuild picks up a
+# newer release, and keep npm's t3 when GitHub can't be reached.
+T3_RELEASES="https://github.com/ijack-technologies/code/releases"
+ensure_t3() {
+	local tag installed
+	tag="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "$T3_RELEASES/latest" 2>/dev/null | sed -n 's#.*/releases/tag/##p')"
+	installed="$(jq -r .version "$BUN_INSTALL/install/global/node_modules/t3/package.json" 2>/dev/null || true)"
+	[ -n "$tag" ] && [ "v$installed" = "$tag" ] && return 0
+	if [ -n "$tag" ] && "$BUN_BIN" add -g "$T3_RELEASES/download/$tag/t3.tgz"; then
+		echo "Installed t3 $tag from IJACK's T3 Code fork"
+		return 0
+	fi
+	echo "WARNING: could not install t3 from $T3_RELEASES; using npm's t3"
+	install_bun_global t3 t3
+}
+ensure_t3
 
 CHROMIUM_BIN="$(command -v chromium 2>/dev/null || true)"
 if [ -n "$CHROMIUM_BIN" ]; then

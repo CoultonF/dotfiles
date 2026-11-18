@@ -709,7 +709,26 @@ in
       install_bun_global @termdraw/app termdraw
       install_bun_global oxlint oxlint
       install_bun_global oxfmt oxfmt
+      ${if isDarwin then ''
       install_bun_global t3 t3
+      '' else ''
+      # T3 Code on Linux comes from IJACK's fork (github.com/ijack-technologies/code),
+      # which publishes a t3 launcher and Linux builds with every release; npm's
+      # `t3` lacks the fork's changes. Install by the latest release's exact URL
+      # so each switch picks up a newer release, and keep npm's t3 when GitHub
+      # can't be reached. The fork builds no macOS CLI, so macOS keeps npm's.
+      t3_releases="https://github.com/ijack-technologies/code/releases"
+      t3_tag="$(${pkgs.curl}/bin/curl -fsSLI -o /dev/null -w '%{url_effective}' "$t3_releases/latest" 2>/dev/null | sed -n 's#.*/releases/tag/##p')"
+      t3_installed="$(${pkgs.jq}/bin/jq -r .version "${homeDirectory}/.bun/install/global/node_modules/t3/package.json" 2>/dev/null || true)"
+      if [ -n "$t3_tag" ] && [ "v$t3_installed" = "$t3_tag" ]; then
+        :
+      elif [ -n "$t3_tag" ] && { clear_foreign_bun_bin t3; "$bun_bin" add -g "$t3_releases/download/$t3_tag/t3.tgz"; }; then
+        echo "Installed t3 $t3_tag from IJACK's T3 Code fork"
+      else
+        echo "WARNING: could not install t3 from $t3_releases; using npm's t3"
+        install_bun_global t3 t3
+      fi
+      ''}
     else
       echo "WARNING: $bun_bin not found; skipping bun-managed global CLIs"
     fi
