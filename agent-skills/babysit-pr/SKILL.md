@@ -59,6 +59,7 @@ line wakes you. Without a monitor, run it as one long command. It ends on its
 own.
 
 Start it again after you push, after you handle an exit 1, and after a resume.
+After pushing a rebase, check the admin merge after a rebase below first.
 It remembers what it already reported, so nothing that arrived in between is
 lost. If it says another pid already watches the PR, do not start a second one.
 Kill the old one only if its events do not reach you.
@@ -121,7 +122,11 @@ wait for green again, unless the exception below applies.
 Do not wait for checks to run again just because you rebased. When merging is
 authorized, every required check passed on the head from before the rebase,
 and the rebase likely had no impact on the PR, merge right away with
-`gh pr merge --admin`. Do not wait for the new head's checks.
+`gh pr merge --admin`. Do not wait for the new head's checks. Check this
+right after you push the rebase, before you start or resume a watcher.
+
+`<old-base>` is the merge base of the pre-rebase head and the target branch.
+`<new-base>` is the commit you rebased onto.
 
 The rebase likely had no impact when all of these hold:
 
