@@ -18,6 +18,10 @@ set -euo pipefail
 
 SERVE_PORT="${T3_DEVPOD_SERVE_PORT:-8443}"
 LOCAL_PORT="${T3_DEVPOD_LOCAL_PORT:-3773}"
+SIGNIN_PORT="${T3_DEVPOD_SIGNIN_PORT:-3774}"
+# Tailscale login allowed to sign in without pairing; empty turns Tailscale sign-in off.
+SIGNIN_LOGIN="${T3_DEVPOD_SIGNIN_LOGIN:-}"
+SIGNIN_PATH=/api/auth/tailscale/token
 
 # Keep T3's data (auth sessions, threads) on the workspace volume, which survives
 # devpod rebuilds while the container's home does not. With the tailnet identity
@@ -55,9 +59,15 @@ tailnet_up() {
 # --tailscale-serve, falling back to sudo when tailscaled runs as root. Never set
 # an operator to avoid sudo: that is a saved pref, and a later `tailscale up`
 # that doesn't repeat --operator then refuses to run, breaking tailnet startup.
+serve_route() {
+	tailscale serve --bg "$@" >/dev/null 2>&1 || sudo -n tailscale serve --bg "$@" >/dev/null 2>&1
+}
+
 publish() {
-	local args=(serve --bg --https="$SERVE_PORT" "http://127.0.0.1:$LOCAL_PORT")
-	tailscale "${args[@]}" >/dev/null 2>&1 || sudo -n tailscale "${args[@]}" >/dev/null 2>&1
+	serve_route --https="$SERVE_PORT" "http://127.0.0.1:$LOCAL_PORT" || return 1
+	[ -n "$SIGNIN_LOGIN" ] || return 0
+	# Serve strips the mount prefix, so the target repeats the path for DPoP's URL check.
+	serve_route --https="$SERVE_PORT" --set-path="$SIGNIN_PATH" "http://127.0.0.1:$SIGNIN_PORT$SIGNIN_PATH"
 }
 
 tailnet_name() {
@@ -81,7 +91,12 @@ start() {
 
 	mkdir -p "$STATE_DIR"
 	"$(dirname "${BASH_SOURCE[0]}")/t3-defaults" >>"$LOG_FILE" 2>&1 || true
-	setsid nohup t3 serve --no-browser --port "$LOCAL_PORT" "$workdir" \
+	local signin=()
+	if [ -n "$SIGNIN_LOGIN" ]; then
+		signin=(--tailscale-sign-in --tailscale-sign-in-port "$SIGNIN_PORT"
+			--tailscale-sign-in-login "$SIGNIN_LOGIN" --tailscale-sign-in-origin t3code://app)
+	fi
+	setsid nohup t3 serve --no-browser --host 127.0.0.1 --port "$LOCAL_PORT" "${signin[@]}" "$workdir" \
 		>>"$LOG_FILE" 2>&1 </dev/null &
 	echo $! >"$PID_FILE"
 }
