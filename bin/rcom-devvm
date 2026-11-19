@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $(uname -s) != Linux ]]; then
+    echo 'rcom-devvm requires a Linux workstation' >&2
+    exit 2
+fi
+
+primary=${RCOM_DEVPOD_SOURCE_ROOT:-$HOME/Repos/rcom}
+launcher=${RCOM_DEVVM_LAUNCHER:-$primary}
+export RCOM_DEVPOD_SOURCE_ROOT="$primary"
+root=$(realpath -m "${XDG_STATE_HOME:-$HOME/.local/state}/rcom-devvm")
+
+case "${1:-}" in
+    up) if [ "$#" -eq 2 ]; then exec bash "$launcher/scripts/branch-devpod.sh" --devvm "$2"; fi ;;
+    rm) if [ "$#" -eq 2 ]; then exec bash "$launcher/scripts/branch-devpod.sh" --devvm-remove "$2"; fi ;;
+    ls)
+        if [ "$#" -eq 1 ]; then
+            devvm ls --json | jq -r --arg root "$root/" '
+                .vms[] | select(.folder | startswith($root)) |
+                select(.folder | ltrimstr($root) | test("^rcom-[a-z0-9]+$")) |
+                [.name, .status, .net, .folder] | @tsv'
+            exit
+        fi ;;
+    creds)
+        if [ "$#" -eq 1 ]; then
+            exec python3 "$launcher/scripts/devpod_up.py" --provider devvm --devvm-creds
+        fi ;;
+    ssh)
+        if [ "$#" -eq 2 ] && [[ $2 =~ ^[a-z0-9]+$ ]]; then
+            exec python3 "$launcher/scripts/devpod_up.py" --provider devvm --devvm-ssh \
+                --id "rcom-$2" --workspace "$root/rcom-$2"
+        fi ;;
+esac
+printf 'Usage: %s {up BRANCH|rm SLUG|ls|creds|ssh SLUG}\n' "$0" >&2
+exit 2
