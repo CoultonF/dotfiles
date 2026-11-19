@@ -718,7 +718,9 @@ in
       # so each switch picks up a newer release, and keep npm's t3 when GitHub
       # can't be reached. The fork builds no macOS CLI, so macOS keeps npm's.
       t3_releases="https://github.com/ijack-technologies/code/releases"
-      t3_tag="$(${pkgs.curl}/bin/curl -fsSLI -o /dev/null -w '%{url_effective}' "$t3_releases/latest" 2>/dev/null | sed -n 's#.*/releases/tag/##p')"
+      # Activation runs with pipefail, so a failed lookup (the fork's releases
+      # answer 404 without access) must fall through to npm's t3, not abort.
+      t3_tag="$(${pkgs.curl}/bin/curl -fsSLI -o /dev/null -w '%{url_effective}' "$t3_releases/latest" 2>/dev/null | sed -n 's#.*/releases/tag/##p' || true)"
       t3_installed="$(${pkgs.jq}/bin/jq -r .version "${homeDirectory}/.bun/install/global/node_modules/t3/package.json" 2>/dev/null || true)"
       if [ -n "$t3_tag" ] && [ "v$t3_installed" = "$t3_tag" ]; then
         :
