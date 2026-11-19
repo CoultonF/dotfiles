@@ -166,12 +166,10 @@ Check it with `systemctl --user list-timers rcom-devvm-credentials.timer`.
 When workstation SSO expires, sign in to `ijack-development` on the workstation
 again. The VM never receives a host SSO cache.
 
-These VMs use the `open` network tier for private development database access.
-They can reach host loopback, LAN and other routes available to the workstation.
-Use only with trusted code and agents; do not rely on the VM to shield local
-network services.
-The launcher refuses to start while Tailscale Serve routes T3 Code sign-in
-to the workstation's loopback backend. Isolate or disable that backend first.
+These VMs require devvm's confined `allowlist` tier. The RCOM checkout owns
+the reviewed per-VM proxy policy. Database traffic uses CONNECT to the
+development destinations; Tailscale control and DERP use HTTPS. Do not use
+`devvm network open` or add global allow rules to make a dependency work.
 
 ## Keybindings
 
