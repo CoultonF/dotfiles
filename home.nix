@@ -712,24 +712,47 @@ in
       ${if isDarwin then ''
       install_bun_global t3 t3
       '' else ''
-      # T3 Code on Linux comes from IJACK's fork (github.com/ijack-technologies/code),
-      # which publishes a t3 launcher and Linux builds with every release; npm's
-      # `t3` lacks the fork's changes. Install by the latest release's exact URL
-      # so each switch picks up a newer release, and keep npm's t3 when GitHub
-      # can't be reached. The fork builds no macOS CLI, so macOS keeps npm's.
-      t3_releases="https://github.com/ijack-technologies/code/releases"
-      # Activation runs with pipefail, so a failed lookup (the fork's releases
-      # answer 404 without access) must fall through to npm's t3, not abort.
-      t3_tag="$(${pkgs.curl}/bin/curl -fsSLI -o /dev/null -w '%{url_effective}' "$t3_releases/latest" 2>/dev/null | sed -n 's#.*/releases/tag/##p' || true)"
-      t3_installed="$(${pkgs.jq}/bin/jq -r .version "${homeDirectory}/.bun/install/global/node_modules/t3/package.json" 2>/dev/null || true)"
-      if [ -n "$t3_tag" ] && [ "v$t3_installed" = "$t3_tag" ]; then
+      # T3 Code on Linux comes from IJACK's private fork (ijack-technologies/t3code);
+      # npm's `t3` lacks the fork's changes, Tailscale sign-in among them. Each
+      # release ships a self-contained t3-<version>-linux-<arch>.tar.gz, fetched
+      # with gh's login and checked against the release's SHA256SUMS. Keep npm's t3
+      # when gh can't reach the fork or the build won't run here (an arm64 Nix
+      # system in an amd64 image has no arm64 loader). The fork builds no macOS CLI,
+      # so macOS keeps npm's.
+      t3_repo=ijack-technologies/t3code
+      t3_root="${homeDirectory}/.local/share/t3-fork"
+      t3_link="${homeDirectory}/.bun/bin/t3"
+      case "$nix_system" in
+        x86_64-linux) t3_arch=x64 ;;
+        aarch64-linux) t3_arch=arm64 ;;
+        *) t3_arch="" ;;
+      esac
+      t3_tag="$(${pkgs.gh}/bin/gh release view -R "$t3_repo" --json tagName -q .tagName 2>/dev/null || true)"
+      t3_name="t3-''${t3_tag#v}-linux-$t3_arch"
+      t3_tmp=""
+      use_fork_t3() {
+        "$t3_root/$t3_name/t3" --version >/dev/null 2>&1 || return 1
+        if [ -d "${homeDirectory}/.bun/install/global/node_modules/t3" ]; then
+          "$bun_bin" remove -g t3 >/dev/null 2>&1 || true
+        fi
+        ln -sfn "$t3_root/$t3_name/t3" "$t3_link"
+      }
+      if [ -n "$t3_tag" ] && [ -n "$t3_arch" ] && [ -x "$t3_root/$t3_name/t3" ] && use_fork_t3; then
         :
-      elif [ -n "$t3_tag" ] && { clear_foreign_bun_bin t3; "$bun_bin" add -g "$t3_releases/download/$t3_tag/t3.tgz"; }; then
+      elif [ -n "$t3_tag" ] && [ -n "$t3_arch" ] \
+        && t3_tmp="$(mktemp -d)" \
+        && ${pkgs.gh}/bin/gh release download "$t3_tag" -R "$t3_repo" -D "$t3_tmp" -p "$t3_name.tar.gz" -p SHA256SUMS \
+        && (cd "$t3_tmp" && grep " $t3_name.tar.gz\$" SHA256SUMS | sha256sum -c --quiet -) \
+        && mkdir -p "$t3_root" \
+        && ${pkgs.gzip}/bin/gzip -dc "$t3_tmp/$t3_name.tar.gz" | ${pkgs.gnutar}/bin/tar -x -C "$t3_root" \
+        && use_fork_t3; then
         echo "Installed t3 $t3_tag from IJACK's T3 Code fork"
       else
-        echo "WARNING: could not install t3 from $t3_releases; using npm's t3"
+        echo "WARNING: could not install t3 from $t3_repo; using npm's t3"
+        clear_foreign_bun_bin t3
         install_bun_global t3 t3
       fi
+      [ -z "$t3_tmp" ] || rm -rf "$t3_tmp"
       ''}
     else
       echo "WARNING: $bun_bin not found; skipping bun-managed global CLIs"

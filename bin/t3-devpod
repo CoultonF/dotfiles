@@ -19,8 +19,9 @@ set -euo pipefail
 SERVE_PORT="${T3_DEVPOD_SERVE_PORT:-8443}"
 LOCAL_PORT="${T3_DEVPOD_LOCAL_PORT:-3773}"
 SIGNIN_PORT="${T3_DEVPOD_SIGNIN_PORT:-3774}"
-# Tailscale login allowed to sign in without pairing; empty turns Tailscale sign-in off.
-SIGNIN_LOGIN="${T3_DEVPOD_SIGNIN_LOGIN:-}"
+# Tailscale login allowed to sign in without pairing, which is how tailnet discovery
+# connects; set T3_DEVPOD_SIGNIN_LOGIN empty to turn Tailscale sign-in off.
+SIGNIN_LOGIN="${T3_DEVPOD_SIGNIN_LOGIN-cfraser@myijack.com}"
 SIGNIN_PATH=/api/auth/tailscale/token
 
 # Keep T3's data (auth sessions, threads) on the workspace volume, which survives
