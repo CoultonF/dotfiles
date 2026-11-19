@@ -170,6 +170,8 @@ These VMs use the `open` network tier for private development database access.
 They can reach host loopback, LAN and other routes available to the workstation.
 Use only with trusted code and agents; do not rely on the VM to shield local
 network services.
+The launcher refuses to start while Tailscale Serve routes T3 Code sign-in
+to the workstation's loopback backend. Isolate or disable that backend first.
 
 ## Keybindings
 
