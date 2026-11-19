@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # t3-defaults: seed T3 Code's provider setup into its settings.json.
 #
-# Turns on Linked environments (so this node can be linked from another T3)
-# and adds the Claude and OMP (ACP) providers, and turns Codex off, in
+# Turns on Linked environments (so this node can be linked from another T3),
+# adds the Claude, OMP (ACP) and Codex providers, and favorites the Codex models
+# OMP's modelRoles use in omp/agent/config.yml, in
 # $T3CODE_HOME/userdata/settings.json (default ~/.t3). Only keys the file lacks
 # are filled in, so anything changed in T3's settings UI on a node is kept.
 # Run before T3 starts: `t3-devpod start` calls it on devpods and home-manager
@@ -27,8 +28,13 @@ defaults='{
         "commandArgs": ["acp"]
       }
     },
-    "codex": { "driver": "codex", "enabled": false }
-  }
+    "codex": { "driver": "codex", "enabled": true }
+  },
+  "favorites": [
+    { "provider": "codex", "model": "gpt-6.2-astra" },
+    { "provider": "codex", "model": "gpt-6.2-sol" },
+    { "provider": "codex", "model": "gpt-6-luna" }
+  ]
 }'
 
 command -v jq >/dev/null 2>&1 || { echo "t3-defaults: jq not found" >&2; exit 1; }
@@ -51,4 +57,4 @@ mkdir -p "$(dirname "$settings")"
 tmp="$(mktemp "$settings.XXXXXX")"
 printf '%s\n' "$merged" >"$tmp"
 mv "$tmp" "$settings"
-echo "t3-defaults: added default providers to $settings"
+echo "t3-defaults: added default providers and favorites to $settings"
