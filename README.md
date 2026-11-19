@@ -116,8 +116,10 @@ All installed automatically via `home.nix`:
 
 ## RCOM branch VMs (Linux)
 
-Install [devvm](https://devvm.dev/docs/getting-started/install/), Lima 2.0+,
-AWS CLI v2, GitHub CLI and company Tailscale. On Ubuntu, an administrator prepares
+Install [devvm](https://devvm.dev/docs/getting-started/install/) 0.1.0, the
+release whose built-in egress rules RCOM's devvm policy was reviewed against
+(`curl -fsSL https://github.com/devvmhq/devvm/releases/download/v0.1.0/install.sh | bash -s -- --version 0.1.0`),
+Lima 2.0+, AWS CLI v2, GitHub CLI and company Tailscale. On Ubuntu, an administrator prepares
 QEMU, KVM access, and disk space for VM images:
 
 ```bash
