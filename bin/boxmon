@@ -47,29 +47,33 @@ pane_cmd() {
 name="boxmon${host:+-$host}"
 name="${name//./_}"
 
-# btop needs 80 columns. Put ctop beside it when there is room for both (ctop
-# gets up to 40%), otherwise stack ctop under it, leaving btop its 24 rows at 40.
-split_args() {
-	local w=$1 right=$(($1 * 40 / 100))
+# btop needs 80x24. Put ctop beside it when there is room for both (ctop gets
+# up to 40% of the width), otherwise stack ctop under it in the rows left over.
+split() {
+	local win=$1 w h right below
+	read -r w h < <(tmux display -p -t "$win" '#{window_width} #{window_height}')
+	right=$((w * 40 / 100))
 	((w - right - 1 < 80)) && right=$((w - 81))
+	below=$((h - 25))
+	((below < 8)) && below=8
 	if ((right >= 40)); then
-		echo "-h -l $right"
+		tmux split-window -h -l "$right" -t "$win" "$(pane_cmd ctop)"
 	else
-		echo "-v -l 35%"
+		tmux split-window -v -l "$below" -t "$win" "$(pane_cmd ctop)"
 	fi
+	tmux select-pane -t "$win.{top-left}"
 }
 
 if [[ -n "${TMUX:-}" ]]; then
-	# shellcheck disable=SC2046 # split_args is meant to word-split into flags
-	tmux new-window -n "$name" "$(pane_cmd btop)" \; \
-		split-window $(split_args "$(tmux display -p '#{window_width}')") "$(pane_cmd ctop)" \; \
-		select-pane -t '{top-left}'
+	split "$(tmux new-window -P -F '#{window_id}' -n "$name" "$(pane_cmd btop)")"
 else
 	# "=" makes tmux match the session name exactly, not as a prefix.
 	tmux has-session -t "=$name" 2>/dev/null && exec tmux attach -t "=$name"
-	tmux new-session -d -s "$name" -n "$name" -x "$(tput cols)" -y "$(tput lines)" "$(pane_cmd btop)"
-	# shellcheck disable=SC2046 # split_args is meant to word-split into flags
-	tmux split-window $(split_args "$(tput cols)") -t "=$name:$name" "$(pane_cmd ctop)"
-	tmux select-pane -t "=$name:$name.{top-left}"
+	# Size the detached window as it will be once attached: the terminal minus
+	# the status bar, so the split above is not rescaled on attach.
+	status=$(tmux start-server \; show -gv status)
+	case "$status" in on) status=1 ;; off) status=0 ;; esac
+	split "$(tmux new-session -d -P -F '#{window_id}' -s "$name" -n "$name" \
+		-x "$(tput cols)" -y "$(($(tput lines) - status))" "$(pane_cmd btop)")"
 	exec tmux attach -t "=$name"
 fi
