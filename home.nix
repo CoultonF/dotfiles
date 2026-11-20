@@ -703,6 +703,15 @@ in
       ensure_typescript7
       install_bun_global vscode-langservers-extracted vscode-json-language-server
       install_bun_global @steipete/oracle oracle
+      # A standalone Codex in ~/.local/bin (Codex's own installer puts one there)
+      # shadows bun's on PATHs that list ~/.local/bin first, as T3 and bash do, and
+      # ships without the codex-code-mode-host beside it, so Codex fails with "code
+      # mode host missing". bun's package carries the host; drop the stray binary.
+      stray_codex="${homeDirectory}/.local/bin/codex"
+      if [ -f "$stray_codex" ] && [ ! -L "$stray_codex" ] && [ ! -e "${homeDirectory}/.local/bin/codex-code-mode-host" ]; then
+        echo "Removing standalone Codex at $stray_codex; bun's Codex replaces it"
+        rm -f "$stray_codex"
+      fi
       install_bun_global @openai/codex codex
       install_bun_global @earendil-works/pi-coding-agent pi
       install_bun_global @oh-my-pi/pi-coding-agent omp
