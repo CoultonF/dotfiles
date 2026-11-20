@@ -802,6 +802,26 @@ in
     fi
   '';
 
+  # Antigravity CLI (agy): Google ships it only as a native binary through its
+  # installer, which puts it in ~/.local/bin and exits when it's already there;
+  # agy then updates itself. The installer ends by running `agy install`, which
+  # appends PATH lines to shell profiles. Home Manager owns those and already
+  # puts ~/.local/bin on PATH, so pass --skip-path --skip-aliases to that step.
+  home.activation.antigravityCli = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -x "${homeDirectory}/.local/bin/agy" ]; then
+      echo "Installing Antigravity CLI (agy)..."
+      agy_tmp="$(mktemp -d)"
+      if ${pkgs.curl}/bin/curl -fsSL https://antigravity.google/cli/install.sh -o "$agy_tmp/install.sh"; then
+        ${pkgs.gnused}/bin/sed -i 's/"$BINARY_PATH" install /"$BINARY_PATH" install --skip-path --skip-aliases /' "$agy_tmp/install.sh"
+        PATH="${lib.makeBinPath [ pkgs.curl pkgs.coreutils pkgs.gnused pkgs.gnugrep pkgs.gnutar pkgs.gzip ]}:$PATH" \
+          ${pkgs.bash}/bin/bash "$agy_tmp/install.sh" || echo "WARNING: Failed to install Antigravity CLI"
+      else
+        echo "WARNING: Could not download the Antigravity CLI installer"
+      fi
+      rm -rf "$agy_tmp"
+    fi
+  '';
+
   # Merge permission defaults into the writable user config, not a store symlink.
   home.activation.codexSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD ${pkgs.python312}/bin/python3 ${./codex/setup-config.py}

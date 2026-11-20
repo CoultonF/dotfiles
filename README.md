@@ -30,6 +30,7 @@ That's it. Everything is installed and configured.
 | **OpenCode**     | Terminal AI coding agent with Catppuccin Macchiato and Space leader |
 | **Claude Code**  | Anthropic's terminal coding agent                                   |
 | **Pi**           | Coding agent CLI installed with Bun and managed global settings     |
+| **Antigravity**  | Google's `agy` coding agent CLI, from its native installer          |
 | **Terraform**    | Declarative infrastructure provisioning                             |
 | **Zsh**          | Shell with autosuggestions, syntax highlighting, starship prompt    |
 

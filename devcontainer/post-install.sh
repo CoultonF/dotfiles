@@ -320,6 +320,23 @@ install_bun_global @termdraw/app termdraw
 install_bun_global oxlint oxlint
 install_bun_global oxfmt oxfmt
 
+# Antigravity CLI (agy) ships only through Google's installer, which puts the
+# binary in ~/.local/bin, exits when it's already there, and lets agy update
+# itself. Its last step, `agy install`, appends PATH lines to shell profiles.
+# Put ~/.local/bin on PATH here instead and pass --skip-path --skip-aliases.
+append_line_if_missing 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc
+if [ ! -x "$HOME/.local/bin/agy" ]; then
+	echo "Installing Antigravity CLI (agy)..."
+	agy_tmp="$(mktemp -d)"
+	if curl -fsSL https://antigravity.google/cli/install.sh -o "$agy_tmp/install.sh"; then
+		sed -i 's/"$BINARY_PATH" install /"$BINARY_PATH" install --skip-path --skip-aliases /' "$agy_tmp/install.sh"
+		bash "$agy_tmp/install.sh" || echo "WARNING: Failed to install Antigravity CLI"
+	else
+		echo "WARNING: Could not download the Antigravity CLI installer"
+	fi
+	rm -rf "$agy_tmp"
+fi
+
 # T3 Code comes from IJACK's fork (github.com/ijack-technologies/code), which
 # publishes a t3 launcher with every release; npm's `t3` lacks the fork's
 # changes. Install by the latest release's exact URL so a rebuild picks up a
