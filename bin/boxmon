@@ -47,14 +47,29 @@ pane_cmd() {
 name="boxmon${host:+-$host}"
 name="${name//./_}"
 
+# btop needs 80 columns. Put ctop beside it when there is room for both (ctop
+# gets up to 40%), otherwise stack ctop under it, leaving btop its 24 rows at 40.
+split_args() {
+	local w=$1 right=$(($1 * 40 / 100))
+	((w - right - 1 < 80)) && right=$((w - 81))
+	if ((right >= 40)); then
+		echo "-h -l $right"
+	else
+		echo "-v -l 35%"
+	fi
+}
+
 if [[ -n "${TMUX:-}" ]]; then
-	tmux new-window -n "$name" "$(pane_cmd btop)"
-	tmux split-window -h -l 40% "$(pane_cmd ctop)"
-	tmux select-pane -t '{left}'
+	# shellcheck disable=SC2046 # split_args is meant to word-split into flags
+	tmux new-window -n "$name" "$(pane_cmd btop)" \; \
+		split-window $(split_args "$(tmux display -p '#{window_width}')") "$(pane_cmd ctop)" \; \
+		select-pane -t '{top-left}'
 else
-	tmux has-session -t "$name" 2>/dev/null && exec tmux attach -t "$name"
-	tmux new-session -d -s "$name" -n "$name" "$(pane_cmd btop)"
-	tmux split-window -h -l 40% -t "$name:$name" "$(pane_cmd ctop)"
-	tmux select-pane -t "$name:$name.{left}"
-	exec tmux attach -t "$name"
+	# "=" makes tmux match the session name exactly, not as a prefix.
+	tmux has-session -t "=$name" 2>/dev/null && exec tmux attach -t "=$name"
+	tmux new-session -d -s "$name" -n "$name" -x "$(tput cols)" -y "$(tput lines)" "$(pane_cmd btop)"
+	# shellcheck disable=SC2046 # split_args is meant to word-split into flags
+	tmux split-window $(split_args "$(tput cols)") -t "=$name:$name" "$(pane_cmd ctop)"
+	tmux select-pane -t "=$name:$name.{top-left}"
+	exec tmux attach -t "=$name"
 fi
