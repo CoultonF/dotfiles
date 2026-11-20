@@ -112,7 +112,7 @@ All installed automatically via `home.nix`:
 - **LSP Servers**: TypeScript, HTML/CSS/JSON, Pyright, Ruff, Lua
 - **Terminal**: tmux
 - **Build Tools**: gcc, gnumake
-- **Utilities**: curl, wget, unzip, jq
+- **Utilities**: curl, wget, unzip, jq, btop (resource monitor)
 
 ## RCOM branch VMs (Linux)
 

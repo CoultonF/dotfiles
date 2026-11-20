@@ -76,6 +76,7 @@ NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure \
 	nixpkgs#atuin \
 	nixpkgs#zsh-fzf-tab \
 	nixpkgs#lazygit \
+	nixpkgs#btop \
 	nixpkgs#git \
 	nixpkgs#delta \
 	nixpkgs#nodejs_22 \
@@ -501,7 +502,7 @@ append_line_if_missing "zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --co
 echo ""
 echo "Verifying installations..."
 
-for cmd in nvim tmux lazygit rg fd fzf eza bat zoxide atuin opencode pi ruff; do
+for cmd in nvim tmux lazygit btop rg fd fzf eza bat zoxide atuin opencode pi ruff; do
 	if command -v "$cmd" &>/dev/null; then
 		echo "  $cmd: $(command -v $cmd)"
 	else
@@ -543,6 +544,7 @@ check_command() {
 
 check_command nvim
 check_command lazygit
+check_command btop
 check_command rg
 check_command fd
 check_command fzf

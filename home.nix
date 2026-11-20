@@ -418,6 +418,18 @@ in
   # bat - syntax-highlighted cat/pager (acts like cat when piped)
   programs.bat.enable = true;
 
+  # btop - resource monitor. The TTY theme draws with the terminal's own ANSI
+  # palette, so it follows Ghostty's Catppuccin Latte/Mocha light/dark switch.
+  programs.btop = {
+    enable = true;
+    settings = {
+      color_theme = "TTY";
+      theme_background = false;
+      vim_keys = true;
+      update_ms = 1000;
+    };
+  };
+
   # zoxide - frecency-based directory jumping (`z <dir>`, `zi` for interactive)
   programs.zoxide = {
     enable = true;
