@@ -392,6 +392,7 @@ DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "Configuring Codex permission defaults..."
 python3 "$DOTFILES_DIR/codex/setup-config.py"
+python3 "$DOTFILES_DIR/bin/sync-mcp"
 
 # Deploy native agents before unrelated config copies, replacing only filenames
 # managed by dotfiles and preserving other agents and local configuration.
@@ -452,13 +453,15 @@ if [ -d "$DOTFILES_DIR" ]; then
 	echo "Configs copied"
 fi
 
-# Disable Claude Code fallbacks in OpenCode
+printf -v omp_agent_export 'export PI_CODING_AGENT_DIR=%q' "$DOTFILES_DIR/omp/agent"
+
+# Configure agent tools for new shells.
 for rcfile in ~/.bashrc ~/.bash_profile ~/.profile ~/.zshenv ~/.zshrc; do
 	append_line_if_missing 'export OPENCODE_DISABLE_CLAUDE_CODE=1' "$rcfile"
 	append_line_if_missing 'export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1' "$rcfile"
 	append_line_if_missing 'export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1' "$rcfile"
 	append_line_if_missing 'export PI_CONFIG_DIR="dotfiles/omp"' "$rcfile"
-	append_line_if_missing 'export PI_CODING_AGENT_DIR="$HOME/$PI_CONFIG_DIR/agent"' "$rcfile"
+	append_line_if_missing "$omp_agent_export" "$rcfile"
 	append_line_if_missing 'export PI_OAUTH_CALLBACK_HOST=0.0.0.0' "$rcfile"
 	append_line_if_missing 'export PUPPETEER_EXECUTABLE_PATH="$HOME/.nix-profile/bin/chromium"' "$rcfile"
 	append_line_if_missing 'export PI_FORCE_IMAGE_PROTOCOL="kitty"' "$rcfile"

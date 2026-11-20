@@ -1,0 +1,297 @@
+#!/usr/bin/env python3
+"""Install the shared MCP server definitions into the CLI config files."""
+
+import io
+import json
+import os
+from pathlib import Path
+import re
+import stat
+import sys
+import tempfile
+import tomllib
+
+
+DOTFILES = Path(__file__).resolve().parents[1]
+SOURCE = DOTFILES / "omp/agent/mcp.json"
+VARIABLE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+BEARER = re.compile(r"Bearer " + VARIABLE.pattern)
+BARE_KEY = re.compile(r"[A-Za-z0-9_-]+")
+
+
+def warn(message):
+    print(f"sync-mcp: {message}", file=sys.stderr)
+
+
+def read_config(path):
+    try:
+        return path.read_bytes().decode("utf-8"), stat.S_IMODE(path.stat().st_mode)
+    except FileNotFoundError:
+        return "", None
+
+
+def write_config(path, source, mode, updated, *, private=False):
+    desired_mode = 0o600 if private or mode is None else mode
+    if updated == source and mode == desired_mode:
+        return
+
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as output:
+            temporary = Path(output.name)
+            output.write(updated.encode("utf-8"))
+            os.fchmod(output.fileno(), desired_mode)
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def load_object(source):
+    data = json.loads(source)
+    if not isinstance(data, dict):
+        raise ValueError("expected a JSON object")
+    return data
+
+
+def stdio_settings(server):
+    return {key: server[key] for key in ("command", "args", "env") if key in server}
+
+
+def agy_entry(name, server, previous):
+    transport = server.get("type", "stdio")
+    if transport == "http":
+        entry = {"serverUrl": server["url"], "headers": server.get("headers", {})}
+    elif transport == "stdio":
+        entry = stdio_settings(server)
+    else:
+        warn(f"agy: skipping {name!r}, unsupported transport")
+        return None
+
+    missing = set()
+
+    def substitute(match):
+        variable = match[1]
+        value = os.environ.get(variable)
+        if not value:
+            missing.add(variable)
+            return match[0]
+        return value
+
+    def expand(value):
+        if isinstance(value, str):
+            return VARIABLE.sub(substitute, value)
+        if isinstance(value, list):
+            return [expand(item) for item in value]
+        if isinstance(value, dict):
+            return {key: expand(item) for key, item in value.items()}
+        return value
+
+    entry = expand(entry)
+    if missing:
+        warn(f"agy: skipping {name!r}, unset or empty: {', '.join(sorted(missing))}")
+        return None
+
+    entry["disabled"] = (
+        previous.get("disabled", False) if isinstance(previous, dict) else False
+    )
+    return entry
+
+
+def sync_json(path, servers, *, agy=False):
+    path = path.resolve()
+    if agy and path.is_relative_to(DOTFILES):
+        raise ValueError("agy configuration must be outside the dotfiles checkout")
+    source, mode = read_config(path)
+    config = load_object(source) if mode is not None else {}
+    existing = config.get("mcpServers")
+    if existing is None:
+        existing = {}
+    if not isinstance(existing, dict):
+        raise ValueError("expected an mcpServers object")
+
+    merged = existing.copy()
+    for name, server in servers.items():
+        entry = agy_entry(name, server, existing.get(name)) if agy else server
+        if entry is not None:
+            merged[name] = entry
+    if merged == config.get("mcpServers"):
+        updated = source
+    else:
+        config["mcpServers"] = merged
+        updated = json.dumps(config, indent=2) + "\n"
+    write_config(path, source, mode, updated, private=agy)
+
+
+def codex_entry(name, server):
+    transport = server.get("type", "stdio")
+    if transport == "http":
+        entry = {"url": server["url"]}
+        literal_headers = {}
+        env_headers = {}
+        for header, value in server.get("headers", {}).items():
+            bearer = (
+                BEARER.fullmatch(value) if header.lower() == "authorization" else None
+            )
+            variable = VARIABLE.fullmatch(value)
+            if bearer:
+                entry["bearer_token_env_var"] = bearer[1]
+            elif variable:
+                env_headers[header] = variable[1]
+            elif VARIABLE.search(value):
+                warn(
+                    f"Codex: skipping {name!r}, header {header!r} mixes text and variables"
+                )
+                return None
+            else:
+                literal_headers[header] = value
+        if literal_headers:
+            entry["http_headers"] = literal_headers
+        if env_headers:
+            entry["env_http_headers"] = env_headers
+        return entry
+
+    if transport == "stdio":
+        entry = stdio_settings(server)
+        literal_env = {}
+        env_vars = []
+        for key, value in entry.pop("env", {}).items():
+            variable = VARIABLE.fullmatch(value)
+            if variable:
+                if key != variable[1]:
+                    warn(
+                        f"Codex: {name!r} passes {variable[1]} through without renaming it to {key}"
+                    )
+                if variable[1] not in env_vars:
+                    env_vars.append(variable[1])
+            elif VARIABLE.search(value):
+                warn(
+                    f"Codex: skipping {name!r}, env setting {key!r} mixes text and variables"
+                )
+                return None
+            else:
+                literal_env[key] = value
+        if literal_env:
+            entry["env"] = literal_env
+        if env_vars:
+            entry["env_vars"] = env_vars
+        return entry
+
+    warn(f"Codex: skipping {name!r}, unsupported transport")
+    return None
+
+
+def without_codex_tables(source, names):
+    retained = []
+    lines = iter(io.StringIO(source))
+    remove_table = False
+    for line in lines:
+        stripped = line.lstrip()
+        if not stripped or stripped.startswith("#"):
+            retained.append(line)
+            continue
+
+        # Consume entire assignments before looking for another table header.
+        # Header-like lines can occur inside multiline strings and arrays.
+        statement = line
+        while True:
+            try:
+                parsed = tomllib.loads(statement)
+                break
+            except tomllib.TOMLDecodeError:
+                statement += next(lines)
+
+        if stripped.startswith("["):
+            servers = parsed.get("mcp_servers")
+            remove_table = isinstance(servers, dict) and not names.isdisjoint(servers)
+        if not remove_table:
+            retained.append(statement)
+    return "".join(retained)
+
+
+def toml_string(value):
+    # JSON's string escapes also work in TOML, which additionally bans DEL.
+    return json.dumps(value, ensure_ascii=False).replace("\x7f", r"\u007f")
+
+
+def toml_value(value):
+    if isinstance(value, dict):
+        assignments = (
+            f"{toml_string(key)} = {toml_string(item)}" for key, item in value.items()
+        )
+        return "{ " + ", ".join(assignments) + " }"
+    if isinstance(value, list):
+        return "[" + ", ".join(map(toml_string, value)) + "]"
+    return toml_string(value)
+
+
+def sync_codex(path, servers):
+    path = path.resolve()
+    source, mode = read_config(path)
+    tomllib.loads(source)
+    entries = {
+        name: entry
+        for name, server in servers.items()
+        if (entry := codex_entry(name, server)) is not None
+    }
+    if not entries:
+        return
+    updated = without_codex_tables(source, entries.keys())
+    if updated and not updated.endswith("\n"):
+        updated += "\n"
+    tables = []
+    for name, entry in entries.items():
+        key = name if BARE_KEY.fullmatch(name) else toml_string(name)
+        tables.append(f"[mcp_servers.{key}]\n")
+        tables.extend(
+            f"{setting} = {toml_value(value)}\n" for setting, value in entry.items()
+        )
+    updated += "".join(tables)
+    tomllib.loads(updated)
+    write_config(path, source, mode, updated)
+
+
+def main():
+    try:
+        servers = load_object(SOURCE.read_text(encoding="utf-8"))["mcpServers"]
+        if not isinstance(servers, dict) or not all(
+            isinstance(server, dict) for server in servers.values()
+        ):
+            raise ValueError("expected an mcpServers object containing server objects")
+    except (OSError, ValueError, KeyError) as error:
+        warn(f"could not read the shared MCP config ({type(error).__name__})")
+        return 1
+
+    home = Path.home()
+    codex_home = Path(os.environ.get("CODEX_HOME") or home / ".codex")
+    targets = (
+        ("Claude Code", lambda: sync_json(home / ".claude.json", servers)),
+        ("Codex", lambda: sync_codex(codex_home / "config.toml", servers)),
+        (
+            "agy",
+            lambda: sync_json(
+                home / ".gemini/config/mcp_config.json", servers, agy=True
+            ),
+        ),
+    )
+    failed = False
+    for name, sync in targets:
+        try:
+            sync()
+        except (
+            OSError,
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            RuntimeError,
+        ) as error:
+            # Config parse errors can contain unredacted file contents.
+            warn(f"{name}: could not sync MCP configuration ({type(error).__name__})")
+            failed = True
+    return int(failed)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

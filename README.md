@@ -258,14 +258,26 @@ Pi is installed from `@earendil-works/pi-coding-agent` using Bun. The dotfiles r
 On first run, open `pi` and use `/login` to authenticate a provider.
 
 OMP uses `PI_CONFIG_DIR="dotfiles/omp"` and
-`PI_CODING_AGENT_DIR="$HOME/dotfiles/omp/agent"`. Keep the checkout at
-`~/dotfiles` for both local installs and devcontainers. The bootstrap creates
+`PI_CODING_AGENT_DIR="$HOME/dotfiles/omp/agent"` with the standard bootstrap.
+Keep that checkout at `~/dotfiles`. The lightweight devcontainer installer
+points `PI_CODING_AGENT_DIR` at the checkout it runs from. The bootstrap creates
 `~/.dotfiles` as a symlink for shell scripts and shared skills.
 Run `~/dotfiles/install.sh` to apply changes, then restart OMP from a new
 terminal or run `exec zsh` first.
 The installer cannot change the environment of an already-running shell.
 Use `omp config path` to check the active agent directory and
 `omp config get theme.dark` to check a loaded setting.
+
+#### Shared MCP servers
+
+Edit `omp/agent/mcp.json` to change the shared MCP servers. OMP reads it directly.
+Both installers run `bin/sync-mcp` to update Claude Code's `~/.claude.json`,
+Codex's `${CODEX_HOME:-$HOME/.codex}/config.toml`, and the Antigravity CLI's
+`~/.gemini/config/mcp_config.json`.
+
+Export `POSTHOG_PERSONAL_API_KEY` in your environment. Claude Code and Codex
+resolve it at runtime. The Antigravity CLI stores the expanded key in its
+mode-`0600` config file. Rerun `bin/sync-mcp` with the new key after it changes.
 
 #### OMP keybindings
 

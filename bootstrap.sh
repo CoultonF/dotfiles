@@ -232,23 +232,8 @@ for rcfile in ~/.bashrc ~/.bash_profile ~/.profile; do
 	set_export PI_OAUTH_CALLBACK_HOST '0.0.0.0' "$rcfile"
 done
 
-# Register OMP's MCP servers with Claude Code. User-scope MCP servers live in
-# ~/.claude.json under the top-level "mcpServers" key; ${VAR} references (e.g.
-# in headers) are expanded by Claude Code at load time, so copy them verbatim.
-# Merge so servers added outside dotfiles survive; same-named servers are
-# replaced wholesale so keys removed from omp/agent/mcp.json don't linger.
-if command -v jq &>/dev/null && [ -f "$DOTFILES_DIR/omp/agent/mcp.json" ]; then
-	info "Syncing OMP MCP servers into Claude Code user scope..."
-	CLAUDE_JSON="$HOME/.claude.json"
-	if [ -f "$CLAUDE_JSON" ]; then
-		jq --slurpfile omp "$DOTFILES_DIR/omp/agent/mcp.json" '.mcpServers = ((.mcpServers // {}) + $omp[0].mcpServers)' "$CLAUDE_JSON" >"${CLAUDE_JSON}.tmp" &&
-			cat "${CLAUDE_JSON}.tmp" >"$CLAUDE_JSON" && rm -f "${CLAUDE_JSON}.tmp"
-	else
-		jq -n --slurpfile omp "$DOTFILES_DIR/omp/agent/mcp.json" '{mcpServers: $omp[0].mcpServers}' >"$CLAUDE_JSON"
-		chmod 600 "$CLAUDE_JSON"
-	fi
-	success "Claude Code MCP servers synced"
-fi
+info "Syncing shared MCP servers..."
+"$HOME/.nix-profile/bin/python3" "$DOTFILES_DIR/bin/sync-mcp"
 
 # Install the personal Claude Code instructions, replacing whatever is there.
 if [ -f "$DOTFILES_DIR/claude/CLAUDE.md" ]; then
