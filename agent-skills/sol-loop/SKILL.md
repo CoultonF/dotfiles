@@ -49,9 +49,12 @@ missing or pre-failing checks in the brief.
 
 In T3, call `orchestrator_capabilities`. Pick the latest Sol and the latest
 Gemini Neon (Antigravity provider) unless the user named versions. Do not
-hardcode an ID. Record provider, model, and effort only if exposed. Each
-round, start both with `delegate_task` (`role: "review"`, `mode: "async"`)
-and the same brief. Save each `taskId`. New `clientRequestId` per reviewer
+hardcode an ID. Run both at `xhigh` effort: set each model's effort option
+in `target.options` (Sol: `reasoningEffort`, Neon: `thought_level`; use the
+names `orchestrator_capabilities` lists). If a model does not offer `xhigh`,
+tell the user and use its highest level below it. Record provider, model,
+and effort only if exposed. Each round, start both with `delegate_task`
+(`role: "review"`, `mode: "async"`) and the same brief. Save each `taskId`. New `clientRequestId` per reviewer
 per round. `childThreadId` is storage, not the next target. Do not use
 `t3_thread_send`, `create_threads`, or `t3_thread_launch` for review.
 
