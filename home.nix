@@ -469,6 +469,29 @@ in
           - AGE
   '';
 
+  # Linux workstation only. The timer never starts a VM or logs in to SSO.
+  home.file.".local/bin/rcom-devvm" = lib.mkIf (!isDarwin) {
+    source = ./bin/rcom-devvm;
+  };
+  systemd.user.services.rcom-devvm-credentials = lib.mkIf (!isDarwin) {
+    Unit.Description = "Refresh development AWS credentials in running RCOM VMs";
+    Service = {
+      Type = "oneshot";
+      Environment = "PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin";
+      EnvironmentFile = "-%E/rcom-devvm/host.env";
+      ExecCondition = "${pkgs.bash}/bin/bash -c 'command -v devvm >/dev/null'";
+      ExecStart = "${pkgs.bash}/bin/bash ${./bin/rcom-devvm} creds";
+    };
+  };
+  systemd.user.timers.rcom-devvm-credentials = lib.mkIf (!isDarwin) {
+    Unit.Description = "Keep running RCOM devvm AWS sessions current";
+    Timer = {
+      OnStartupSec = "2min";
+      OnUnitActiveSec = "5min";
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
+
   # Oracle config
   home.file.".oracle/config.json".source = ./oracle/config.json;
 

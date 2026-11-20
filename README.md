@@ -114,6 +114,65 @@ All installed automatically via `home.nix`:
 - **Build Tools**: gcc, gnumake
 - **Utilities**: curl, wget, unzip, jq
 
+## RCOM branch VMs (Linux)
+
+Install [devvm](https://devvm.dev/docs/getting-started/install/) 0.1.0, the
+release whose built-in egress rules RCOM's devvm policy was reviewed against
+(`curl -fsSL https://github.com/devvmhq/devvm/releases/download/v0.1.0/install.sh | bash -s -- --version 0.1.0`),
+Lima 2.0+, AWS CLI v2, GitHub CLI and company Tailscale. On Ubuntu, an administrator prepares
+QEMU, KVM access, and disk space for VM images:
+
+```bash
+sudo apt install qemu-system-x86 qemu-utils ovmf
+sudo usermod -aG kvm "$USER"
+# Log out and back in to activate group membership; mount the VM data disk first.
+findmnt -T "${XDG_DATA_HOME:-$HOME/.local/share}/devvm"
+devvm doctor
+sudo tailscale set --accept-routes
+```
+
+Use the existing RCOM primary checkout with its development AWS setup, company
+enrollment key and development HTTPS CA. Trust its **public** CA on the workstation. Sign
+in to AWS development and GitHub on the workstation, not in the VM:
+
+```bash
+aws sso login --profile ijack-development
+gh auth setup-git
+gh auth token --hostname github.com | devvm secret set github --stdin
+devvm agent import claude codex
+```
+
+Prefer a repository-scoped GitHub token. If an agent's existing login cannot be
+imported, run `devvm agent login claude` or `devvm agent login codex` from the
+branch's workstation seed directory and complete the interactive login. Agents
+run in the VM, not in the Compose container.
+
+```bash
+rcom-devvm up feature/my-branch
+rcom-devvm ls
+rcom-devvm ssh my
+rcom-devvm creds
+rcom-devvm rm my
+```
+
+The default RCOM checkout is `~/Repos/rcom`. Set `RCOM_DEVPOD_SOURCE_ROOT` to
+select a different primary and `RCOM_DEVVM_LAUNCHER` to run the launcher from a
+different checkout, for example to test a branch before it lands in the primary.
+For the user timer, put the same overrides in `~/.config/rcom-devvm/host.env`
+as `NAME=/absolute/path` lines. Keep credentials out of that file.
+
+The Linux Home Manager installation enables `rcom-devvm-credentials.timer`.
+Check it with `systemctl --user list-timers rcom-devvm-credentials.timer`.
+`systemctl --user start rcom-devvm-credentials.service` runs the refresh once;
+`journalctl --user -u rcom-devvm-credentials.service` shows expiry or a failure.
+When workstation SSO expires, sign in to `ijack-development` on the workstation
+again. The VM never receives a host SSO cache.
+
+These VMs require devvm's confined `allowlist` tier. The RCOM checkout owns
+the reviewed per-VM proxy policy. Database traffic uses CONNECT to the
+development destinations; Tailscale control and DERP use HTTPS. Do not use
+`devvm network open` or add global allow rules to make a dependency work.
+
 ## Keybindings
 
 ### tmux
