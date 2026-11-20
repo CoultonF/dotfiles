@@ -41,3 +41,7 @@ omp/agent/last-changelog-version
 omp/gpu_cache.json
 omp/puppeteer/
 omp/remote-host/*
+
+# OMP runtime state
+omp/agent/codex-client-version.json
+omp/browser-profiles/
