@@ -392,7 +392,8 @@ DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "Configuring Codex permission defaults..."
 python3 "$DOTFILES_DIR/codex/setup-config.py"
-python3 "$DOTFILES_DIR/bin/sync-mcp"
+python3 "$DOTFILES_DIR/bin/sync-mcp" ||
+	echo "WARNING: MCP sync incomplete; fix the warning above and rerun bin/sync-mcp"
 
 # Deploy native agents before unrelated config copies, replacing only filenames
 # managed by dotfiles and preserving other agents and local configuration.

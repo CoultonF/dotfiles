@@ -104,7 +104,8 @@ def sync_json(path, servers, *, agy=False):
     if agy and path.is_relative_to(DOTFILES):
         raise ValueError("agy configuration must be outside the dotfiles checkout")
     source, mode = read_config(path)
-    config = load_object(source) if mode is not None else {}
+    # agy creates mcp_config.json as an empty file before any server is added.
+    config = load_object(source) if source.strip() else {}
     existing = config.get("mcpServers")
     if existing is None:
         existing = {}

@@ -233,7 +233,8 @@ for rcfile in ~/.bashrc ~/.bash_profile ~/.profile; do
 done
 
 info "Syncing shared MCP servers..."
-"$HOME/.nix-profile/bin/python3" "$DOTFILES_DIR/bin/sync-mcp"
+"$HOME/.nix-profile/bin/python3" "$DOTFILES_DIR/bin/sync-mcp" ||
+	info "MCP sync incomplete; fix the warning above and rerun bin/sync-mcp"
 
 # Install the personal Claude Code instructions, replacing whatever is there.
 if [ -f "$DOTFILES_DIR/claude/CLAUDE.md" ]; then
