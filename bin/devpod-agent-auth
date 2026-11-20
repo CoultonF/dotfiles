@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# Copy this workstation's Codex, Claude Code and OMP sign-ins into a DevPod, so a new
+# workspace starts signed in. Runs on the workstation; nothing is written here.
+#
+#   devpod-agent-auth WORKSPACE_ID [DEVPOD_CONTEXT] [--force]
+#
+# Copied (each only when the workstation has it):
+#   ~/.codex/auth.json                      -> same path in the DevPod
+#   ~/.claude/.credentials.json             -> same path; ~/.claude.json gets oauthAccount
+#                                              and hasCompletedOnboarding
+#   OMP auth_credentials rows (agent.db)    -> the DevPod's $PI_CODING_AGENT_DIR/agent.db
+#
+# A tool the DevPod is already signed in to is left alone unless --force, so a login
+# made inside the DevPod is never replaced by an older workstation one.
+set -euo pipefail
+
+usage() { echo "Usage: $0 WORKSPACE_ID [DEVPOD_CONTEXT] [--force]" >&2; exit 2; }
+
+force=0
+args=()
+for arg in "$@"; do
+	case "$arg" in
+	--force) force=1 ;;
+	-*) usage ;;
+	*) args+=("$arg") ;;
+	esac
+done
+[ "${#args[@]}" -ge 1 ] && [ "${#args[@]}" -le 2 ] || usage
+workspace="${args[0]}"
+context="${args[1]:-default}"
+
+# The workstation's OMP database: follow PI_CODING_AGENT_DIR as OMP does.
+omp_db="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}/agent.db"
+[ -f "$omp_db" ] || omp_db="$HOME/.omp/agent/agent.db"
+
+payload="$(FORCE="$force" OMP_DB="$omp_db" python3 - <<'PY'
+import base64, json, os, sqlite3
+from pathlib import Path
+
+home = Path.home()
+out = {"force": os.environ["FORCE"] == "1", "files": {}, "claude_json": None, "omp": None}
+
+for rel in (".codex/auth.json", ".claude/.credentials.json"):
+    path = home / rel
+    if path.is_file():
+        out["files"][rel] = path.read_text()
+
+try:
+    claude = json.loads((home / ".claude.json").read_text())
+    if claude.get("oauthAccount"):
+        out["claude_json"] = {k: claude[k] for k in ("oauthAccount", "hasCompletedOnboarding") if k in claude}
+except (OSError, ValueError):
+    pass
+
+db = Path(os.environ["OMP_DB"])
+if db.is_file():
+    src = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        version = src.execute("select version from auth_schema_version").fetchone()
+        rows = src.execute(
+            "select provider, credential_type, data, identity_key from auth_credentials "
+            "where disabled_cause is null"
+        ).fetchall()
+        # A whole copy seeds a DevPod that has never run OMP.
+        snapshot = sqlite3.connect(":memory:")
+        src.backup(snapshot)
+        out["omp"] = {
+            "version": version[0] if version else None,
+            "rows": [list(r) for r in rows],
+            "snapshot": base64.b64encode(snapshot.serialize()).decode(),
+        }
+    except sqlite3.Error:
+        pass
+    finally:
+        src.close()
+
+print(json.dumps(out))
+PY
+)"
+
+# Runs inside the DevPod with the payload on stdin.
+read -r -d '' receiver <<'PY' || true
+import base64, json, os, sqlite3, sys, tempfile
+from pathlib import Path
+
+p = json.load(sys.stdin)
+home = Path.home()
+force = p["force"]
+
+def say(msg):
+    print(f"agent-auth: {msg}")
+
+def write_private(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    with os.fdopen(fd, "wb") as f:
+        f.write(data if isinstance(data, bytes) else data.encode())
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
+
+for rel, text in p["files"].items():
+    path = home / rel
+    if path.exists() and path.stat().st_size and not force:
+        say(f"kept existing ~/{rel}")
+        continue
+    write_private(path, text)
+    say(f"copied ~/{rel}")
+
+if p["claude_json"]:
+    path = home / ".claude.json"
+    try:
+        current = json.loads(path.read_text())
+    except (OSError, ValueError):
+        current = {}
+    if force or not current.get("oauthAccount"):
+        current.update(p["claude_json"])
+        write_private(path, json.dumps(current, indent=2))
+        say("set Claude account in ~/.claude.json")
+
+omp = p["omp"]
+if omp:
+    agent_dir = Path(os.environ.get("PI_CODING_AGENT_DIR") or home / "dotfiles/omp/agent")
+    db = agent_dir / "agent.db"
+    if not db.exists():
+        write_private(db, base64.b64decode(omp["snapshot"]))
+        say(f"seeded {db} from the workstation")
+    else:
+        con = sqlite3.connect(db, timeout=30)
+        try:
+            version = con.execute("select version from auth_schema_version").fetchone()
+            if not version or version[0] != omp["version"]:
+                say(f"skipped OMP: auth schema {version and version[0]} here, {omp['version']} on the workstation")
+            else:
+                with con:
+                    for provider, ctype, data, identity in omp["rows"]:
+                        have = con.execute(
+                            "select id from auth_credentials where provider = ? and disabled_cause is null",
+                            (provider,),
+                        ).fetchall()
+                        if have and not force:
+                            say(f"kept existing OMP {provider}")
+                            continue
+                        con.execute("delete from auth_credentials where provider = ?", (provider,))
+                        con.execute(
+                            "insert into auth_credentials (provider, credential_type, data, identity_key) "
+                            "values (?, ?, ?, ?)",
+                            (provider, ctype, data, identity),
+                        )
+                        say(f"copied OMP {provider}")
+        finally:
+            con.close()
+print("AGENT_AUTH_OK")
+PY
+
+encoded="$(printf '%s' "$receiver" | base64 -w0)"
+# DevPod sometimes reports a lost exit status after a clean run, so trust the marker.
+output="$(printf '%s' "$payload" | devpod --context "$context" ssh "$workspace" --user vscode \
+	--agent-forwarding=false --start-services=false \
+	--command "python3 -c \"\$(echo $encoded | base64 -d)\"" 2>&1)" || true
+grep '^agent-auth: ' <<<"$output" || true
+if ! grep -qx 'AGENT_AUTH_OK' <<<"$output"; then
+	echo "Could not copy agent sign-ins into $workspace:" >&2
+	grep -v '^agent-auth: ' <<<"$output" | tail -5 >&2
+	exit 1
+fi

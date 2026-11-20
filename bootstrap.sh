@@ -71,6 +71,11 @@ fi
 if [ "$DOTFILES_DIR" != "$HOME/.dotfiles" ] && [ ! -e "$HOME/.dotfiles" ]; then
 	ln -s "$DOTFILES_DIR" "$HOME/.dotfiles"
 fi
+# rcom's DevPod launcher runs this after each launch: copy agent sign-ins into the workspace.
+if [ ! -e "$HOME/.config/rcom/devpod-ready" ]; then
+	mkdir -p "$HOME/.config/rcom"
+	ln -s "$HOME/.dotfiles/bin/devpod-agent-auth" "$HOME/.config/rcom/devpod-ready"
+fi
 
 echo ""
 echo "=========================================="
