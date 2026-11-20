@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# boxmon: watch a machine and its containers side by side
+#
+# Usage: boxmon [host]
+#        No host: this machine. With a host: that machine over SSH.
+#
+# Opens a tmux window with two panes:
+#   left  - btop: the machine's CPU, memory, disks, network and processes
+#   right - ctop: CPU and memory for each Docker container
+#
+# Tools run on the watched machine. If one is not installed there, it falls
+# back to `nix run nixpkgs#<tool>` when nix is available.
+
+set -euo pipefail
+
+host="${1:-}"
+
+# Command run on the watched machine for one tool. Non-interactive SSH shells
+# often skip the profile that puts nix on PATH, so add it here. ctop needs the
+# Docker socket; a session started before the user joined the docker group
+# lacks it, so `sg docker` picks the group up without a new login.
+# shellcheck disable=SC2016 # expanded by the watched machine's shell, not here
+tool_cmd() {
+	printf '%s\n' 'PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"' \
+		"tool=$1" \
+		'if command -v "$tool" >/dev/null 2>&1; then run="$tool"
+elif command -v nix >/dev/null 2>&1; then run="nix run nixpkgs#$tool"
+else echo "boxmon: $tool is not installed on $(hostname) and nix is unavailable" >&2; exit 127
+fi
+if [ "$tool" = ctop ] && [ -S /var/run/docker.sock ] && [ ! -w /var/run/docker.sock ] && id -nG "$(id -un)" | grep -qw docker; then
+	exec sg docker -c "$run"
+fi
+exec $run'
+}
+
+# POSIX single-quote a string, so any shell (tmux's zsh, a remote login shell) reads it back verbatim.
+sq() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
+
+pane_cmd() {
+	local cmd
+	cmd="sh -c $(sq "$(tool_cmd "$1")")"
+	[[ -n "$host" ]] && cmd="ssh -t $(sq "$host") $(sq "$cmd")"
+	# Keep the pane open to show why a tool exited. Plain echo/read: tmux runs this with the user's shell.
+	printf '%s; echo "[%s exited, press Enter to close]"; read -r _' "$cmd" "$1"
+}
+
+name="boxmon${host:+-$host}"
+name="${name//./_}"
+
+if [[ -n "${TMUX:-}" ]]; then
+	tmux new-window -n "$name" "$(pane_cmd btop)"
+	tmux split-window -h -l 40% "$(pane_cmd ctop)"
+	tmux select-pane -t '{left}'
+else
+	tmux has-session -t "$name" 2>/dev/null && exec tmux attach -t "$name"
+	tmux new-session -d -s "$name" -n "$name" "$(pane_cmd btop)"
+	tmux split-window -h -l 40% -t "$name:$name" "$(pane_cmd ctop)"
+	tmux select-pane -t "$name:$name.{left}"
+	exec tmux attach -t "$name"
+fi

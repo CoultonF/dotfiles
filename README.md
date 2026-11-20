@@ -68,6 +68,7 @@ That's it. Everything is installed and configured.
 │       ├── config/        # Core settings
 │       └── plugins/       # Plugin configurations
 └── bin/
+    ├── boxmon             # Machine + container monitor (btop + ctop)
     └── tmux-sessionizer   # Project session switcher (Ctrl-g)
 ```
 
@@ -113,6 +114,14 @@ All installed automatically via `home.nix`:
 - **Terminal**: tmux
 - **Build Tools**: gcc, gnumake
 - **Utilities**: curl, wget, unzip, jq, btop (resource monitor)
+
+## Monitoring machines
+
+`boxmon [host]` opens a tmux window with btop (CPU, memory, disks, network,
+processes) on the left and ctop (CPU and memory per Docker container) on the
+right. With no host it watches this machine; with an SSH host, such as
+`boxmon boxx`, it runs both tools on that machine. A tool missing on the watched
+machine falls back to `nix run nixpkgs#<tool>`.
 
 ## RCOM branch VMs (Linux)
 
