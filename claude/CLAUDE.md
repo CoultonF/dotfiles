@@ -24,11 +24,25 @@ interfaces, constraints, acceptance criteria, known evidence, and verification o
 |---|---|---|
 | `quick-scout` | haiku / low | A narrow factual question needs paths, callers, and a short trace, not a redesign. |
 | `implementer-lite` | haiku / medium | The local change is decided or follows an established pattern. |
-| `implementer` | sonnet / medium | One coherent behavior change needs implementation within agreed files and interfaces. |
+| `implementer` | GPT Sol 6.2 / high | One coherent behavior change needs implementation within agreed files and interfaces. |
 | `reviewer` | opus / high | A supplied diff needs independent, evidence-backed defect review. |
 | `background-planner` | opus / high | A change needs a recommendation, ordered edits, affected callers, and acceptance checks. |
 | `evidence-researcher` | sonnet / high | One decision needs dated, versioned sources and contradictions resolved. |
 | `ui-verifier` | sonnet / medium | An existing preview needs actual browser interaction and visual/console evidence. |
+
+### Implementation
+
+- **Implement with GPT Sol 6.2 on high.** In T3, start implementers with
+  `delegate_task` on the Codex provider, model `gpt-6.2-sol`,
+  `reasoningEffort: high`, and the `implementer` brief above. Elsewhere, use a
+  native route that runs Sol 6.2. If none does, report it rather than falling
+  back to the Sonnet `implementer` agent.
+- **Parallelize implementation as much as possible.** Split the work into
+  independent pieces that own disjoint files or interfaces, and start one Sol
+  implementer per piece at once. Run a piece only after the pieces it depends on
+  land. Never give two concurrent implementers the same file. When pieces share a
+  checkout, give each its own worktree (`isolation: "worktree"`). The parent
+  defines the interfaces up front, integrates the results, and owns verification.
 
 Codex uses the same saved role names. Dispatch there with the exact saved
 `agent_type`; `agent_name` is only a lowercase underscore instance nickname, such as
