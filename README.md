@@ -279,6 +279,10 @@ Export `POSTHOG_PERSONAL_API_KEY` in your environment. Claude Code and Codex
 resolve it at runtime. The Antigravity CLI stores the expanded key in its
 mode-`0600` config file. Rerun `bin/sync-mcp` with the new key after it changes.
 
+In a devpod, put keys the T3 server's agents need in `$T3CODE_HOME/keys.env`
+(`/workspace/.t3-home/keys.env`, mode `0600`, `KEY=value` lines). `t3-devpod start`
+loads it, so it survives rebuilds; run `t3-devpod restart` after editing it.
+
 #### OMP keybindings
 
 | Key                 | Action                                         |

@@ -8,6 +8,7 @@
 #                     Start if needed, then mint a pairing code and link (prints the
 #                     t3code:// app link). The Mac's `t3-pair` runs this over SSH.
 #   t3-devpod stop    Stop the server.
+#   t3-devpod restart Stop, then start (reloads $T3CODE_HOME/keys.env).
 #   t3-devpod status  Show whether the server is running and where.
 #
 # Tailscale Serve publishes HTTPS port $T3_DEVPOD_SERVE_PORT (default 8443) to
@@ -91,6 +92,15 @@ start() {
 	fi
 
 	mkdir -p "$STATE_DIR"
+	# Agents inherit the server's environment, so load API keys they need (e.g.
+	# POSTHOG_PERSONAL_API_KEY for MCP) from $T3CODE_HOME/keys.env. That file sits
+	# beside T3's data, outside git, and survives devpod rebuilds.
+	if [ -f "$T3CODE_HOME/keys.env" ]; then
+		set -a
+		# shellcheck disable=SC1091
+		. "$T3CODE_HOME/keys.env"
+		set +a
+	fi
 	"$(dirname "${BASH_SOURCE[0]}")/t3-defaults" >>"$LOG_FILE" 2>&1 || true
 	local signin=()
 	if [ -n "$SIGNIN_LOGIN" ]; then
@@ -147,10 +157,19 @@ pair)
 	exit 1
 	;;
 stop)
-	if running; then kill "$(cat "$PID_FILE")"; fi
+	if running; then
+		pid="$(cat "$PID_FILE")"
+		kill "$pid"
+		# Wait for the port to free up so a following start can bind it.
+		for _ in $(seq 1 30); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
+	fi
 	rm -f "$PID_FILE"
 	tailscale serve --https="$SERVE_PORT" off >/dev/null 2>&1 ||
 		sudo -n tailscale serve --https="$SERVE_PORT" off >/dev/null 2>&1 || true
+	;;
+restart)
+	"${BASH_SOURCE[0]}" stop
+	start
 	;;
 status)
 	if running; then
@@ -161,7 +180,7 @@ status)
 	fi
 	;;
 *)
-	echo "usage: t3-devpod [start|pair|stop|status]" >&2
+	echo "usage: t3-devpod [start|pair|stop|restart|status]" >&2
 	exit 2
 	;;
 esac
