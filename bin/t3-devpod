@@ -101,6 +101,19 @@ start() {
 		. "$T3CODE_HOME/keys.env"
 		set +a
 	fi
+	# rcom's devcontainer loads its development secret into the environment, including
+	# the FCM key for direct phone alerts. The T3 server reads that key from a file.
+	local push_key="$T3CODE_HOME/push/fcm-service-account.json"
+	if [ -z "${T3CODE_PUSH_FCM_SERVICE_ACCOUNT_FILE:-}" ] && [ -n "${T3CODE_PUSH_FCM_SERVICE_ACCOUNT_JSON:-}" ]; then
+		install -d -m 700 "${push_key%/*}"
+		# Replace atomically: two shells can start T3 at once, and the server reads the key once.
+		local push_tmp
+		push_tmp="$(mktemp "$push_key.XXXXXX")"
+		printf '%s' "$T3CODE_PUSH_FCM_SERVICE_ACCOUNT_JSON" >"$push_tmp"
+		mv -f "$push_tmp" "$push_key"
+		export T3CODE_PUSH_FCM_SERVICE_ACCOUNT_FILE="$push_key"
+		export T3CODE_PUSH_FCM_PACKAGES="${T3CODE_PUSH_FCM_PACKAGES:-com.myijack.t3code}"
+	fi
 	"$(dirname "${BASH_SOURCE[0]}")/t3-defaults" >>"$LOG_FILE" 2>&1 || true
 	local signin=()
 	if [ -n "$SIGNIN_LOGIN" ]; then
