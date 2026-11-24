@@ -11,7 +11,8 @@
   it is free.
 - **When the root is busy and more parallel work needs the development servers**, start a
   branch devcontainer on the host machine `boxx` and run that session there (for rcom,
-  `bash scripts/branch-devpod.sh BRANCH`, without `--aws`). Don't launch AWS devpods.
+  `bash scripts/branch-devpod.sh BRANCH` from the primary checkout `~/Repos/rcom`, without
+  `--aws`). Don't launch AWS devpods.
 
 When starting a task, say in one line where it will run and why.
 
