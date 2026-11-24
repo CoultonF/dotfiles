@@ -108,6 +108,8 @@ NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure \
 	nixpkgs#opencode \
 	nixpkgs#claude-code \
 	nixpkgs#terraform \
+	nixpkgs#kubectl \
+	nixpkgs#k9s \
 	nixpkgs#bun \
 	nixpkgs#chromium \
 	nixpkgs#bubblewrap

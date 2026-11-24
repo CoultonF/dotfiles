@@ -68,6 +68,10 @@ in
     # Infrastructure as Code
     terraform
 
+    # Kubernetes
+    kubectl
+    k9s
+
     # LSP Servers
     # Note: TypeScript 7 native LSP, basedpyright, and vscode-langservers-extracted
     # are installed via bun. See home.activation.bunGlobalPackages below.
