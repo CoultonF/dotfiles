@@ -2,13 +2,12 @@
 # t3-defaults: seed T3 Code's provider setup into its settings.json.
 #
 # Turns on Linked environments (so this node can be linked from another T3),
-# adds the Claude, OMP (ACP) and Codex providers, and favorites the Codex models
+# adds the Claude, Antigravity (agy) and Codex providers, and favorites the Codex models
 # OMP's modelRoles use in omp/agent/config.yml, in
 # $T3CODE_HOME/userdata/settings.json (default ~/.t3). Only keys the file lacks
-# are filled in, so anything changed in T3's settings UI on a node is kept.
+# are filled in, and the old OMP provider is removed.
 # Run before T3 starts: `t3-devpod start` calls it on devpods and home-manager
-# activation calls it on macOS. A running server won't see the change until it
-# restarts.
+# activation calls it on macOS.
 set -euo pipefail
 
 home="${T3CODE_HOME:-$HOME/.t3}"
@@ -18,16 +17,7 @@ defaults='{
   "linkedEnvironmentsEnabled": true,
   "providerInstances": {
     "claudeAgent": { "driver": "claudeAgent", "enabled": true },
-    "omp": {
-      "driver": "acpRegistry",
-      "displayName": "omp",
-      "enabled": true,
-      "config": {
-        "source": "local",
-        "commandPath": "omp",
-        "commandArgs": ["acp"]
-      }
-    },
+    "antigravity": { "driver": "antigravity", "displayName": "Antigravity", "enabled": true },
     "codex": { "driver": "codex", "enabled": true }
   },
   "favorites": [
@@ -38,6 +28,14 @@ defaults='{
 }'
 
 command -v jq >/dev/null 2>&1 || { echo "t3-defaults: jq not found" >&2; exit 1; }
+
+# Use the native launchers when installed. Their updaters keep these paths stable.
+if [ -x "$HOME/.local/bin/claude" ]; then
+	defaults="$(jq '.providerInstances.claudeAgent.config.binaryPath = "~/.local/bin/claude"' <<<"$defaults")"
+fi
+if [ -x "$HOME/.local/bin/agy" ]; then
+	defaults="$(jq '.providerInstances.antigravity.config.binaryPath = "~/.local/bin/agy"' <<<"$defaults")"
+fi
 
 current='{}'
 if [ -s "$settings" ]; then
@@ -50,11 +48,11 @@ if [ -s "$settings" ]; then
 fi
 
 # `*` merges objects recursively with the right side winning: existing settings.
-merged="$(jq --argjson d "$defaults" '$d * .' <<<"$current")"
+merged="$(jq --argjson d "$defaults" '$d * . | del(.providerInstances.omp)' <<<"$current")"
 [ "$(jq -S . <<<"$merged")" = "$(jq -S . <<<"$current")" ] && exit 0
 
 mkdir -p "$(dirname "$settings")"
 tmp="$(mktemp "$settings.XXXXXX")"
 printf '%s\n' "$merged" >"$tmp"
 mv "$tmp" "$settings"
-echo "t3-defaults: added default providers and favorites to $settings"
+echo "t3-defaults: updated providers and favorites in $settings"

@@ -106,7 +106,6 @@ NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure \
 	nixpkgs#direnv \
 	nixpkgs#open-policy-agent \
 	nixpkgs#opencode \
-	nixpkgs#claude-code \
 	nixpkgs#terraform \
 	nixpkgs#kubectl \
 	nixpkgs#k9s \
@@ -321,6 +320,14 @@ install_bun_global @oh-my-pi/pi-coding-agent omp
 install_bun_global @termdraw/app termdraw
 install_bun_global oxlint oxlint
 install_bun_global oxfmt oxfmt
+
+if [ ! -x "$HOME/.local/bin/claude" ]; then
+	echo "Installing Claude Code..."
+	(
+		set -o pipefail
+		curl -fsSL https://claude.ai/install.sh | bash
+	) || echo "WARNING: Failed to install Claude Code"
+fi
 
 # Antigravity CLI (agy) ships only through Google's installer, which puts the
 # binary in ~/.local/bin, exits when it's already there, and lets agy update

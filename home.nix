@@ -41,7 +41,6 @@ in
     # Editor
     neovim
     opencode
-    claude-code
 
     # Search & Navigation
     ripgrep      # Fast grep (rg)
@@ -806,6 +805,18 @@ in
     fi
   '';
 
+  # Use Anthropic's native Claude Code so it can update independently of nixpkgs.
+  home.activation.claudeCli = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -x "${homeDirectory}/.local/bin/claude" ]; then
+      echo "Installing Claude Code..."
+      (
+        set -o pipefail
+        $DRY_RUN_CMD ${pkgs.curl}/bin/curl -fsSL https://claude.ai/install.sh |
+          $DRY_RUN_CMD ${pkgs.bash}/bin/bash
+      ) || echo "WARNING: Failed to install Claude Code"
+    fi
+  '';
+
   # Antigravity CLI (agy): Google ships it only as a native binary through its
   # installer, which puts it in ~/.local/bin and exits when it's already there;
   # agy then updates itself. The installer ends by running `agy install`, which
@@ -831,9 +842,9 @@ in
     $DRY_RUN_CMD ${pkgs.python312}/bin/python3 ${./codex/setup-config.py}
   '';
 
-  # Seed the T3 Code desktop app's providers (Claude, OMP over ACP). Devpods do
+  # Seed the T3 Code desktop app's providers. Devpods do
   # this in `t3-devpod start` instead, since their T3 home is on /workspace.
-  home.activation.t3Defaults = lib.mkIf isDarwin (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.t3Defaults = lib.mkIf isDarwin (lib.hm.dag.entryAfter [ "claudeCli" "antigravityCli" ] ''
     PATH="${pkgs.jq}/bin:$PATH" $DRY_RUN_CMD ${pkgs.bash}/bin/bash ${./bin/t3-defaults} || echo "WARNING: t3-defaults failed"
   '');
 
